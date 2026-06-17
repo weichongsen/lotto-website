@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>AI彩票预测专家 Pro Max | VIP会员版</title>
+  <!-- 国内稳定 CDN -->
+  <script src="https://registry.npmmirror.com/@supabase/supabase-js/2.39.0/files/dist/umd/supabase.min.js"></script>
+  <script src="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js"></script>
   <style>
     :root {
       --bg-deep: #0B1020;
@@ -56,7 +59,7 @@
 <body>
 <canvas id="particle-canvas"></canvas>
 
-<!-- 登录/注册弹窗（默认显示） -->
+<!-- 登录/注册弹窗 -->
 <div class="modal active" id="auth-modal">
   <div class="modal-content">
     <h2 class="neon-text" id="auth-title">🔐 登录</h2>
@@ -66,12 +69,12 @@
     <div id="otp-section" style="display:none; margin-top:10px;">
       <div style="display:flex; gap:8px;">
         <input type="text" id="auth-otp" placeholder="邮箱验证码" style="flex:1;">
-        <button class="cyber-btn" id="send-otp-btn">获取验证码</button>
+        <button class="cyber-btn" id="send-otp-btn" onclick="window.sendOTP()">获取验证码</button>
       </div>
     </div>
-    <button class="cyber-btn" id="auth-submit" style="width:100%; margin-top:15px;">登 录</button>
+    <button class="cyber-btn" id="auth-submit" onclick="window.handleAuth()" style="width:100%; margin-top:15px;">登 录</button>
     <p style="text-align:center; margin-top:15px; color:#aaa;">
-      <span id="toggle-auth" style="color:#00F5FF; cursor:pointer;">还没有账号？立即注册</span>
+      <span id="toggle-auth" onclick="window.toggleAuthMode()" style="color:#00F5FF; cursor:pointer;">还没有账号？立即注册</span>
     </p>
   </div>
 </div>
@@ -82,33 +85,33 @@
     <h2 class="neon-text" style="text-align:center;">👑 升级VIP</h2>
     <div id="vip-plans" class="grid-2col" style="margin:15px 0;"></div>
     <div style="text-align:center;">
-      <button class="cyber-btn gold" id="vip-pay-btn">💰 立即支付</button>
-      <p style="margin-top:8px;"><span id="vip-close" style="color:#FF4D6D; cursor:pointer;">暂不升级</span></p>
+      <button class="cyber-btn gold" id="vip-pay-btn" onclick="window.handleVipPayment()">💰 立即支付</button>
+      <p style="margin-top:8px;"><span id="vip-close" onclick="document.getElementById('vip-modal').classList.remove('active')" style="color:#FF4D6D; cursor:pointer;">暂不升级</span></p>
     </div>
   </div>
 </div>
 
-<!-- 主应用（初始隐藏，登录后显示） -->
+<!-- 主应用 -->
 <div class="app-container" id="main-app" style="display:none;">
   <div class="navbar">
     <span class="neon-text" style="font-size:1.6rem; font-weight:800;">🤖 AI预测专家 Pro Max</span>
     <div>
-      <button id="switch-dlt" class="switch-btn active">大乐透</button>
-      <button id="switch-ssq" class="switch-btn">双色球</button>
+      <button id="switch-dlt" class="switch-btn active" onclick="window.switchType('dlt')">大乐透</button>
+      <button id="switch-ssq" class="switch-btn" onclick="window.switchType('ssq')">双色球</button>
     </div>
     <div class="nav-links">
-      <span onclick="switchTab('prediction')">🔮预测</span>
-      <span onclick="switchTab('simulation')">🎱摇奖</span>
-      <span onclick="switchTab('records')">📅开奖</span>
-      <span onclick="switchTab('analysis')">📊分析</span>
-      <span onclick="switchTab('favorites')">⭐收藏</span>
-      <span onclick="switchTab('history')">📜历史</span>
-      <span onclick="switchTab('settings')">⚙️设置</span>
+      <span onclick="window.switchTab('prediction')">🔮预测</span>
+      <span onclick="window.switchTab('simulation')">🎱摇奖</span>
+      <span onclick="window.switchTab('records')">📅开奖</span>
+      <span onclick="window.switchTab('analysis')">📊分析</span>
+      <span onclick="window.switchTab('favorites')">⭐收藏</span>
+      <span onclick="window.switchTab('history')">📜历史</span>
+      <span onclick="window.switchTab('settings')">⚙️设置</span>
     </div>
     <div class="user-info">
       <span id="user-badge"></span>
       <span style="color:#fff;" id="user-name-display"></span>
-      <button class="cyber-btn danger" onclick="handleLogout()" style="font-size:0.8rem; padding:4px 12px;">退出</button>
+      <button class="cyber-btn danger" onclick="window.handleLogout()" style="font-size:0.8rem; padding:4px 12px;">退出</button>
     </div>
   </div>
 
@@ -118,11 +121,11 @@
       <h2 class="neon-text">🔮 AI预测中心</h2>
       <div id="prediction-display" style="min-height:80px; margin:15px 0;"></div>
       <div>
-        <button class="cyber-btn" onclick="predict(1)">🤖 预测1组 (免费)</button>
-        <button class="cyber-btn gold" onclick="predict(5)">⚡ 预测5组 <small>(VIP)</small></button>
-        <button class="cyber-btn gold" onclick="predict(10)">🔥 预测10组 <small>(VIP)</small></button>
-        <button class="cyber-btn" onclick="randomPredict()">🎲 随机选号</button>
-        <button class="cyber-btn" onclick="saveFavorite()">⭐ 收藏</button>
+        <button class="cyber-btn" onclick="window.predict(1)">🤖 预测1组 (免费)</button>
+        <button class="cyber-btn gold" onclick="window.predict(5)">⚡ 预测5组 <small>(VIP)</small></button>
+        <button class="cyber-btn gold" onclick="window.predict(10)">🔥 预测10组 <small>(VIP)</small></button>
+        <button class="cyber-btn" onclick="window.randomPredict()">🎲 随机选号</button>
+        <button class="cyber-btn" onclick="window.saveFavorite()">⭐ 收藏</button>
       </div>
       <div style="margin-top:12px;">
         评分: <span id="ai-score">96.8</span> | 可信度: <span id="ai-trust">98.5%</span> | 评级: <span id="ai-rating" style="color:gold;font-size:1.5rem;">SSS</span>
@@ -132,7 +135,7 @@
     <div class="glass-panel">
       <h3 class="neon-text">🎰 蒙特卡洛模拟 <small>(VIP)</small></h3>
       <div id="monte-carlo-balls" style="min-height:50px;"></div>
-      <button class="cyber-btn gold" onclick="runMonteCarlo()">▶ 运行模拟</button>
+      <button class="cyber-btn gold" onclick="window.runMonteCarlo()">▶ 运行模拟</button>
       <span>概率: <span id="monte-score">96.8%</span></span>
     </div>
   </div>
@@ -142,7 +145,7 @@
     <div class="glass-panel">
       <h3 class="neon-text">🎱 摇奖模拟 <span id="draw-remaining" style="font-size:0.8rem; color:#6E00FF;"></span></h3>
       <div id="draw-balls" style="min-height:60px;"></div>
-      <button class="cyber-btn" onclick="simulateDraw()">🌀 开始摇奖</button>
+      <button class="cyber-btn" onclick="window.simulateDraw()">🌀 开始摇奖</button>
     </div>
   </div>
 
@@ -151,27 +154,39 @@
     <div class="glass-panel">
       <h3 class="neon-text">📅 实时开奖记录</h3>
       <div style="display:flex; gap:15px; margin:15px 0;">
-        <button class="cyber-btn" onclick="loadLatest('dlt')">🎱 大乐透最新</button>
-        <button class="cyber-btn" onclick="loadLatest('ssq')">🔴 双色球最新</button>
+        <button class="cyber-btn" onclick="window.loadLatest('dlt')">🎱 大乐透最新</button>
+        <button class="cyber-btn" onclick="window.loadLatest('ssq')">🔴 双色球最新</button>
       </div>
       <div id="record-display" style="min-height:100px;"></div>
-      <p style="color:#aaa; font-size:0.8rem;">数据来源：免费API，每日更新</p>
     </div>
   </div>
 
   <!-- 分析中心 -->
   <div id="tab-analysis" class="tab-content">
-    <div class="glass-panel"><h4>📋 导入真实开奖数据</h4><textarea id="history-input" rows="3" placeholder="每行一期：大乐透: 01 02 03 04 05 06 07"></textarea><button class="cyber-btn" onclick="importData()">📥 导入分析</button></div>
+    <div class="glass-panel">
+      <h4>📋 导入真实开奖数据</h4>
+      <textarea id="history-input" rows="3" placeholder="每行一期：大乐透: 01 02 03 04 05 06 07"></textarea>
+      <button class="cyber-btn" onclick="window.importData()">📥 导入分析</button>
+    </div>
   </div>
 
   <!-- 收藏 -->
   <div id="tab-favorites" class="tab-content">
-    <div class="glass-panel"><h3>⭐ 收藏中心</h3><div id="favorites-list"></div><button class="cyber-btn" onclick="exportFavorites()">📤 导出</button><button class="cyber-btn danger" onclick="clearFavorites()">🗑️ 清空</button></div>
+    <div class="glass-panel">
+      <h3>⭐ 收藏中心</h3>
+      <div id="favorites-list"></div>
+      <button class="cyber-btn" onclick="window.exportFavorites()">📤 导出</button>
+      <button class="cyber-btn danger" onclick="window.clearFavorites()">🗑️ 清空</button>
+    </div>
   </div>
 
   <!-- 历史 -->
   <div id="tab-history" class="tab-content">
-    <div class="glass-panel"><h3>📜 预测历史</h3><div id="history-list"></div><button class="cyber-btn" onclick="exportHistory()">📤 导出</button></div>
+    <div class="glass-panel">
+      <h3>📜 预测历史</h3>
+      <div id="history-list"></div>
+      <button class="cyber-btn" onclick="window.exportHistory()">📤 导出</button>
+    </div>
   </div>
 
   <!-- 设置 -->
@@ -179,69 +194,63 @@
     <div class="glass-panel">
       <h3>⚙️ 系统设置</h3>
       <div class="grid-2col">
-        <div><label>音效</label><select id="sound-toggle"><option value="on">开</option><option value="off">关</option></select></div>
-        <div><label>动画</label><select id="animation-toggle"><option value="on">开</option><option value="off">关</option></select></div>
+        <div><label>音效</label><select id="sound-toggle" onchange="window.soundEnabled=this.value==='on'"><option value="on">开</option><option value="off">关</option></select></div>
+        <div><label>动画</label><select id="animation-toggle" onchange="window.animationEnabled=this.value==='on'"><option value="on">开</option><option value="off">关</option></select></div>
       </div>
       <div style="margin-top:15px;">
-        <label>🎵 背景音乐</label><input type="file" id="bgm-file" accept="audio/*">
-        <button class="cyber-btn" onclick="playBGM()">▶ 播放</button>
-        <button class="cyber-btn" onclick="stopBGM()">⏹ 停止</button>
+        <label>🎵 背景音乐</label><input type="file" id="bgm-file" accept="audio/*" onchange="window.loadBGM(this)">
+        <button class="cyber-btn" onclick="window.playBGM()">▶ 播放</button>
+        <button class="cyber-btn" onclick="window.stopBGM()">⏹ 停止</button>
       </div>
-      <div style="margin-top:15px;"><button class="cyber-btn gold" onclick="showVipModal()">👑 升级VIP</button></div>
+      <div style="margin-top:15px;"><button class="cyber-btn gold" onclick="window.showVipModal()">👑 升级VIP</button></div>
     </div>
   </div>
   <footer>⚠️ 仅供历史数据统计分析，不预测未来开奖结果。</footer>
 </div>
 
 <script>
-  // ==================== 配置（务必修改为你的Supabase信息） ====================
-  const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';   // 替换为你的Supabase Project URL
-  const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';              // 替换为你的Supabase anon key
-  // =================================================================
+  // ==================== 配置（务必修改） ====================
+  const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
+  // ===================================================
 
-  // 如果Supabase库未加载，使用备用CDN加载
+  // 如果库未加载，尝试备用 CDN
   if (typeof window.supabase === 'undefined') {
-    document.write('<script src="https://registry.npmmirror.com/@supabase/supabase-js/2.39.0/files/dist/umd/supabase.min.js"><\/script>');
+    document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"><\/script>');
   }
   if (typeof window.echarts === 'undefined') {
-    document.write('<script src="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js"><\/script>');
+    document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"><\/script>');
   }
-</script>
-<script>
-  // 等待库加载完成
+
   window.addEventListener('load', function() {
+    // 确保 Supabase 已加载
     if (typeof window.supabase === 'undefined') {
-      alert('Supabase 库加载失败，请检查网络或下载到本地。');
+      alert('Supabase 库加载失败，请检查网络或刷新重试');
       return;
     }
+
+    // 初始化 Supabase 客户端
     window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    // 启动应用
-    initApp();
-  });
 
-  // 将所有代码包裹在 initApp 中，确保库已就绪
-  function initApp() {
-    const supabase = window.supabaseClient;
-
-    // ==================== 全局状态 ====================
-    let currentUser = null;
-    let userProfile = null;
-    let isVip = false;
-    let currentType = 'dlt';
-    let currentPrediction = null;
-    let isLoginMode = true;
-    let soundEnabled = true;
-    let animationEnabled = true;
-    let otpTimer = null;
-    let selectedPlanId = null;
-    let bgmAudio = null;
+    // ==================== 全局变量 ====================
+    window.currentUser = null;
+    window.userProfile = null;
+    window.isVip = false;
+    window.currentType = 'dlt';
+    window.currentPrediction = null;
+    window.isLoginMode = true;
+    window.soundEnabled = true;
+    window.animationEnabled = true;
+    window.otpTimer = null;
+    window.selectedPlanId = null;
+    window.bgmAudio = null;
+    window.favorites = JSON.parse(localStorage.getItem('favs') || '[]');
+    window.history = JSON.parse(localStorage.getItem('hists') || '[]');
 
     const LOTTERY_CONFIG = {
       dlt: { frontMax:35, backMax:12, frontCount:5, backCount:2, name:'大乐透' },
       ssq: { frontMax:33, backMax:16, frontCount:6, backCount:1, name:'双色球' }
     };
-    const FREE_PREDICT = 1;
-    const FREE_DRAW = 5;
 
     // ==================== 粒子背景 ====================
     (function initParticles() {
@@ -256,147 +265,143 @@
 
     // ==================== 音频 ====================
     let audioCtx;
-    function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-    function playBeep(f=520,d=0.1) { if(!soundEnabled||!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(0.06,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d); }
-    function playRollSound() { playBeep(620,0.04); }
-    function playStopSound() { playBeep(920,0.1); }
+    window.initAudio = function() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); };
+    function playBeep(f=520,d=0.1) { if(!window.soundEnabled||!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(0.06,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d); }
+    window.playRollSound = function() { playBeep(620,0.04); };
+    window.playStopSound = function() { playBeep(920,0.1); };
 
     // ==================== 认证 ====================
-    async function checkSession() {
-      const { data } = await supabase.auth.getSession();
+    window.checkSession = async function() {
+      const { data } = await window.supabaseClient.auth.getSession();
       if (data.session) {
-        currentUser = data.session.user;
-        await loadProfile();
-        showApp();
+        window.currentUser = data.session.user;
+        await window.loadProfile();
+        window.showApp();
       } else {
-        showAuthModal();
+        window.showAuthModal();
       }
-    }
+    };
 
-    async function loadProfile() {
-      const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    window.loadProfile = async function() {
+      const { data } = await window.supabaseClient.from('profiles').select('*').eq('id', window.currentUser.id).single();
       if (data) {
-        userProfile = data;
-        isVip = data.is_vip && new Date(data.vip_expire_date) > new Date();
+        window.userProfile = data;
+        window.isVip = data.is_vip && new Date(data.vip_expire_date) > new Date();
+        // 重置每日计数
         const today = new Date().toDateString();
         const lastPred = data.last_prediction_date ? new Date(data.last_prediction_date).toDateString() : null;
         if (lastPred !== today) {
-          await supabase.from('profiles').update({ predictions_today:0, draws_today:0, last_prediction_date: new Date().toISOString() }).eq('id', currentUser.id);
-          userProfile.predictions_today = 0;
-          userProfile.draws_today = 0;
+          await window.supabaseClient.from('profiles').update({ predictions_today:0, draws_today:0, last_prediction_date: new Date().toISOString() }).eq('id', window.currentUser.id);
+          window.userProfile.predictions_today = 0;
+          window.userProfile.draws_today = 0;
         }
       }
-      updateUserUI();
-    }
+      window.updateUserUI();
+    };
 
-    function updateUserUI() {
-      document.getElementById('user-badge').innerHTML = isVip ? '<span class="vip-badge">👑 VIP</span>' : '<span class="free-badge">免费</span>';
-      document.getElementById('user-name-display').textContent = userProfile?.username || currentUser?.email?.split('@')[0] || '';
-      if (!isVip) {
-        const predRemain = FREE_PREDICT - (userProfile?.predictions_today || 0);
-        const drawRemain = FREE_DRAW - (userProfile?.draws_today || 0);
+    window.updateUserUI = function() {
+      document.getElementById('user-badge').innerHTML = window.isVip ? '<span class="vip-badge">👑 VIP</span>' : '<span class="free-badge">免费</span>';
+      document.getElementById('user-name-display').textContent = window.userProfile?.username || window.currentUser?.email?.split('@')[0] || '';
+      if (!window.isVip) {
+        const predRemain = 1 - (window.userProfile?.predictions_today || 0);
+        const drawRemain = 5 - (window.userProfile?.draws_today || 0);
         document.getElementById('predict-remaining').textContent = `今日免费预测: ${Math.max(0,predRemain)}次`;
         document.getElementById('draw-remaining').textContent = `今日免费摇奖: ${Math.max(0,drawRemain)}次`;
       } else {
         document.getElementById('predict-remaining').textContent = 'VIP无限次';
         document.getElementById('draw-remaining').textContent = 'VIP无限次';
       }
-    }
+    };
 
-    function showAuthModal() {
+    window.showAuthModal = function() {
       document.getElementById('auth-modal').classList.add('active');
       document.getElementById('main-app').style.display = 'none';
-    }
-    function hideAuthModal() {
+    };
+    window.hideAuthModal = function() {
       document.getElementById('auth-modal').classList.remove('active');
-    }
-    function showApp() {
-      hideAuthModal();
+    };
+    window.showApp = function() {
+      window.hideAuthModal();
       document.getElementById('main-app').style.display = 'block';
-    }
+      window.updateUserUI();
+    };
 
-    function toggleAuthMode() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('auth-title').textContent = isLoginMode ? '🔐 登录' : '📝 注册';
-      document.getElementById('auth-username').style.display = isLoginMode ? 'none' : 'block';
-      document.getElementById('otp-section').style.display = isLoginMode ? 'none' : 'block';
-      document.getElementById('auth-submit').textContent = isLoginMode ? '登 录' : '注 册';
-      document.getElementById('toggle-auth').textContent = isLoginMode ? '还没有账号？立即注册' : '已有账号？去登录';
-      if (otpTimer) clearInterval(otpTimer);
+    window.toggleAuthMode = function() {
+      window.isLoginMode = !window.isLoginMode;
+      document.getElementById('auth-title').textContent = window.isLoginMode ? '🔐 登录' : '📝 注册';
+      document.getElementById('auth-username').style.display = window.isLoginMode ? 'none' : 'block';
+      document.getElementById('otp-section').style.display = window.isLoginMode ? 'none' : 'block';
+      document.getElementById('auth-submit').textContent = window.isLoginMode ? '登 录' : '注 册';
+      document.getElementById('toggle-auth').textContent = window.isLoginMode ? '还没有账号？立即注册' : '已有账号？去登录';
+      if (window.otpTimer) clearInterval(window.otpTimer);
       document.getElementById('send-otp-btn').disabled = false;
       document.getElementById('send-otp-btn').textContent = '获取验证码';
-    }
+    };
 
-    async function sendOTP() {
+    window.sendOTP = async function() {
       const email = document.getElementById('auth-email').value.trim();
       if (!email) return alert('请输入邮箱');
       const btn = document.getElementById('send-otp-btn');
       btn.disabled = true;
       try {
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await window.supabaseClient.auth.signInWithOtp({ email });
         if (error) throw error;
         alert('验证码已发送至 ' + email);
         let sec = 60;
         btn.textContent = sec + 's';
-        otpTimer = setInterval(() => {
+        window.otpTimer = setInterval(() => {
           sec--;
           btn.textContent = sec + 's';
-          if (sec <= 0) {
-            clearInterval(otpTimer);
-            btn.disabled = false;
-            btn.textContent = '重新发送';
-          }
+          if (sec <= 0) { clearInterval(window.otpTimer); btn.disabled = false; btn.textContent = '重新发送'; }
         }, 1000);
       } catch (err) {
         alert('发送失败: ' + err.message);
         btn.disabled = false;
       }
-    }
+    };
 
-    async function handleAuth() {
+    window.handleAuth = async function() {
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value;
       if (!email || !password) return alert('请填写邮箱和密码');
-      if (isLoginMode) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (window.isLoginMode) {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
         if (error) return alert('登录失败: ' + error.message);
-        currentUser = data.user;
-        await loadProfile();
-        showApp();
+        window.currentUser = data.user;
+        await window.loadProfile();
+        window.showApp();
       } else {
         const username = document.getElementById('auth-username').value.trim();
         const otp = document.getElementById('auth-otp').value.trim();
         if (!username) return alert('请填写用户名');
         if (!otp) return alert('请输入验证码');
-        const { error: verifyError } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
+        const { error: verifyError } = await window.supabaseClient.auth.verifyOtp({ email, token: otp, type: 'email' });
         if (verifyError) return alert('验证码错误: ' + verifyError.message);
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
+        const { data: signUpData, error: signUpError } = await window.supabaseClient.auth.signUp({ email, password, options: { data: { username } } });
         if (signUpError) return alert('注册失败: ' + signUpError.message);
         if (signUpData.user) {
-          await supabase.from('profiles').insert({ id: signUpData.user.id, username });
+          await window.supabaseClient.from('profiles').insert({ id: signUpData.user.id, username });
           alert('注册成功！');
-          currentUser = signUpData.user;
-          await loadProfile();
-          showApp();
+          window.currentUser = signUpData.user;
+          await window.loadProfile();
+          window.showApp();
         }
       }
-    }
+    };
 
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      currentUser = null;
-      userProfile = null;
-      isVip = false;
+    window.handleLogout = async function() {
+      await window.supabaseClient.auth.signOut();
+      window.currentUser = null; window.userProfile = null; window.isVip = false;
       document.getElementById('main-app').style.display = 'none';
-      showAuthModal();
-    }
+      window.showAuthModal();
+    };
 
     // ==================== VIP ====================
-    async function loadVipPlans() {
-      const { data } = await supabase.from('vip_plans').select('*').eq('is_active', true).order('price');
+    window.loadVipPlans = async function() {
+      const { data } = await window.supabaseClient.from('vip_plans').select('*').eq('is_active', true).order('price');
       const container = document.getElementById('vip-plans');
       if (data && data.length) {
-        container.innerHTML = data.map((plan) => `
+        container.innerHTML = data.map(plan => `
           <div class="plan-card" id="plan-${plan.id}" onclick="window.selectPlan(${plan.id}, ${plan.price})">
             <h3 style="color:#00F5FF;">${plan.name}</h3>
             <div style="font-size:2rem; color:#FFD700;">¥${plan.price}</div>
@@ -404,283 +409,269 @@
           </div>
         `).join('');
       }
-    }
-
+    };
     window.selectPlan = function(id, price) {
-      selectedPlanId = id;
+      window.selectedPlanId = id;
       document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
       document.getElementById('plan-' + id).classList.add('selected');
       document.getElementById('vip-pay-btn').textContent = '💰 立即支付 ¥' + price;
     };
-
-    function showVipModal() {
-      loadVipPlans();
+    window.showVipModal = function() {
+      window.loadVipPlans();
       document.getElementById('vip-modal').classList.add('active');
-    }
-
-    document.getElementById('vip-close').onclick = () => document.getElementById('vip-modal').classList.remove('active');
-
-    async function handleVipPayment() {
-      if (!selectedPlanId) return alert('请选择套餐');
-      const { data: plan } = await supabase.from('vip_plans').select('*').eq('id', selectedPlanId).single();
+    };
+    window.handleVipPayment = async function() {
+      if (!window.selectedPlanId) return alert('请选择套餐');
+      const { data: plan } = await window.supabaseClient.from('vip_plans').select('*').eq('id', window.selectedPlanId).single();
       if (!plan) return;
-      const orderId = 'VIP' + Date.now() + Math.random().toString(36).substr(2, 6);
-      await supabase.from('payments').insert({ user_id: currentUser.id, order_id: orderId, amount: plan.price, vip_days: plan.days, status: 'pending' });
-      alert('订单已创建！模拟支付成功');
-      await supabase.from('payments').update({ status: 'completed' }).eq('order_id', orderId);
-      const expireDate = new Date(Date.now() + plan.days * 86400000);
-      await supabase.from('profiles').update({ is_vip: true, vip_expire_date: expireDate.toISOString() }).eq('id', currentUser.id);
-      isVip = true;
-      updateUserUI();
+      const orderId = 'VIP' + Date.now();
+      await window.supabaseClient.from('payments').insert({ user_id: window.currentUser.id, order_id: orderId, amount: plan.price, vip_days: plan.days, status:'pending' });
+      alert('订单创建成功！模拟支付完成');
+      await window.supabaseClient.from('payments').update({ status:'completed' }).eq('order_id', orderId);
+      const expireDate = new Date(Date.now() + plan.days*86400000);
+      await window.supabaseClient.from('profiles').update({ is_vip:true, vip_expire_date:expireDate.toISOString() }).eq('id', window.currentUser.id);
+      window.isVip = true;
+      window.updateUserUI();
       document.getElementById('vip-modal').classList.remove('active');
       alert('🎉 VIP开通成功！');
-    }
+    };
 
-    // ==================== 权限检查 ====================
+    // ==================== 权限 ====================
     async function checkPredictLimit(count) {
-      if (!currentUser) { alert('请先登录'); return false; }
-      if (isVip) return true;
-      if (count > 1) { alert('多组预测为VIP功能'); showVipModal(); return false; }
-      const used = userProfile?.predictions_today || 0;
-      if (used >= FREE_PREDICT) { alert('今日免费预测已用完'); showVipModal(); return false; }
-      await supabase.from('profiles').update({ predictions_today: used + 1 }).eq('id', currentUser.id);
-      userProfile.predictions_today = used + 1;
-      updateUserUI();
+      if (!window.currentUser) { alert('请先登录'); return false; }
+      if (window.isVip) return true;
+      if (count > 1) { alert('多组预测为VIP功能'); window.showVipModal(); return false; }
+      const used = window.userProfile?.predictions_today || 0;
+      if (used >= 1) { alert('今日免费预测已用完'); window.showVipModal(); return false; }
+      await window.supabaseClient.from('profiles').update({ predictions_today: used+1 }).eq('id', window.currentUser.id);
+      window.userProfile.predictions_today = used+1;
+      window.updateUserUI();
       return true;
     }
-
     async function checkDrawLimit() {
-      if (!currentUser) { alert('请先登录'); return false; }
-      if (isVip) return true;
-      const used = userProfile?.draws_today || 0;
-      if (used >= FREE_DRAW) { alert('今日免费摇奖已用完'); showVipModal(); return false; }
-      await supabase.from('profiles').update({ draws_today: used + 1 }).eq('id', currentUser.id);
-      userProfile.draws_today = used + 1;
-      updateUserUI();
+      if (!window.currentUser) { alert('请先登录'); return false; }
+      if (window.isVip) return true;
+      const used = window.userProfile?.draws_today || 0;
+      if (used >= 5) { alert('今日免费摇奖已用完'); window.showVipModal(); return false; }
+      await window.supabaseClient.from('profiles').update({ draws_today: used+1 }).eq('id', window.currentUser.id);
+      window.userProfile.draws_today = used+1;
+      window.updateUserUI();
       return true;
     }
 
-    function requireVip(msg) {
-      if (!isVip) { alert(msg + '为VIP功能'); showVipModal(); return false; }
-      return true;
-    }
-
-    // ==================== 彩票核心 ====================
+    // ==================== 彩票逻辑 ====================
     function getRandomSet(type) {
       const cfg = LOTTERY_CONFIG[type];
-      const f = new Set(), b = new Set();
-      while (f.size < cfg.frontCount) f.add(Math.floor(Math.random() * cfg.frontMax) + 1);
-      while (b.size < cfg.backCount) b.add(Math.floor(Math.random() * cfg.backMax) + 1);
-      return { front: Array.from(f).sort((a, b) => a - b), back: Array.from(b).sort((a, b) => a - b) };
+      const f=new Set(), b=new Set();
+      while(f.size<cfg.frontCount) f.add(Math.floor(Math.random()*cfg.frontMax)+1);
+      while(b.size<cfg.backCount) b.add(Math.floor(Math.random()*cfg.backMax)+1);
+      return { front:Array.from(f).sort((a,b)=>a-b), back:Array.from(b).sort((a,b)=>a-b) };
     }
-
     function weightedRandom(type) {
       const cfg = LOTTERY_CONFIG[type];
-      const ff = new Map(), bf = new Map();
-      for (let i = 1; i <= cfg.frontMax; i++) ff.set(i, Math.random());
-      for (let i = 1; i <= cfg.backMax; i++) bf.set(i, Math.random());
+      const ff=new Map(), bf=new Map();
+      for(let i=1;i<=cfg.frontMax;i++) ff.set(i,Math.random());
+      for(let i=1;i<=cfg.backMax;i++) bf.set(i,Math.random());
       function pick(pool, map, count) {
-        const sel = new Set(), cand = pool.map(n => ({ n, w: map.get(n) + 0.5 }));
-        while (sel.size < count) {
-          const total = cand.reduce((s, c) => s + c.w, 0);
-          let r = Math.random() * total, sum = 0;
-          for (const c of cand) { sum += c.w; if (r <= sum && !sel.has(c.n)) { sel.add(c.n); break; } }
-        }
-        return Array.from(sel).sort((a, b) => a - b);
+        const sel=new Set(), cand=pool.map(n=>({n, w:map.get(n)+0.5}));
+        while(sel.size<count){ const total=cand.reduce((s,c)=>s+c.w,0); let r=Math.random()*total,sum=0; for(const c of cand){ sum+=c.w; if(r<=sum&&!sel.has(c.n)){ sel.add(c.n); break; } } }
+        return Array.from(sel).sort((a,b)=>a-b);
       }
-      return {
-        front: pick(Array.from({ length: cfg.frontMax }, (_, i) => i + 1), ff, cfg.frontCount),
-        back: pick(Array.from({ length: cfg.backMax }, (_, i) => i + 1), bf, cfg.backCount)
-      };
+      return { front:pick(Array.from({length:cfg.frontMax},(_,i)=>i+1), ff, cfg.frontCount), back:pick(Array.from({length:cfg.backMax},(_,i)=>i+1), bf, cfg.backCount) };
     }
-
-    function animateNumbers(container, set, type, delay = 300, duration = 1000) {
+    function animateNumbers(container, set, type, delay=300, duration=1000) {
       return new Promise(resolve => {
-        if (!animationEnabled) { renderStatic(container, set, type); resolve(); return; }
+        if(!window.animationEnabled) { renderStatic(container, set); resolve(); return; }
         const cfg = LOTTERY_CONFIG[type], all = [...set.front, ...set.back];
-        container.innerHTML = '';
-        const balls = [];
-        for (let i = 0; i < all.length; i++) {
-          const b = document.createElement('span'); b.className = 'number-ball'; b.textContent = '?';
-          container.appendChild(b); balls.push(b);
-        }
-        function roll(i) {
-          if (i >= all.length) { updateScore(); resolve(); return; }
-          const ball = balls[i], isFront = i < set.front.length, max = isFront ? cfg.frontMax : cfg.backMax;
-          ball.classList.add('rolling'); playRollSound();
-          const intv = setInterval(() => { ball.textContent = Math.floor(Math.random() * max) + 1; }, 50);
-          setTimeout(() => {
-            clearInterval(intv); ball.classList.remove('rolling');
-            ball.textContent = all[i]; ball.classList.add(isFront ? 'red-ball' : 'blue-ball');
-            playStopSound(); setTimeout(() => roll(i + 1), delay);
-          }, duration);
+        container.innerHTML = ''; const balls = [];
+        for(let i=0;i<all.length;i++){ const b=document.createElement('span'); b.className='number-ball'; b.textContent='?'; container.appendChild(b); balls.push(b); }
+        function roll(i){
+          if(i>=all.length){ updateScore(); resolve(); return; }
+          const ball=balls[i], isFront=i<set.front.length, max=isFront?cfg.frontMax:cfg.backMax;
+          ball.classList.add('rolling'); window.playRollSound();
+          const intv=setInterval(()=>{ ball.textContent=Math.floor(Math.random()*max)+1; },50);
+          setTimeout(()=>{ clearInterval(intv); ball.classList.remove('rolling'); ball.textContent=all[i]; ball.classList.add(isFront?'red-ball':'blue-ball'); window.playStopSound(); setTimeout(()=>roll(i+1), delay); }, duration);
         }
         roll(0);
       });
     }
-
-    function renderStatic(container, set, type) {
+    function renderStatic(container, set) {
       container.innerHTML = '';
-      set.front.forEach(n => { const s = document.createElement('span'); s.className = 'number-ball red-ball'; s.textContent = n; container.appendChild(s); });
-      set.back.forEach(n => { const s = document.createElement('span'); s.className = 'number-ball blue-ball'; s.textContent = n; container.appendChild(s); });
+      set.front.forEach(n => { const s=document.createElement('span'); s.className='number-ball red-ball'; s.textContent=n; container.appendChild(s); });
+      set.back.forEach(n => { const s=document.createElement('span'); s.className='number-ball blue-ball'; s.textContent=n; container.appendChild(s); });
     }
-
     function updateScore() {
-      document.getElementById('ai-score').textContent = (Math.random() * 15 + 85).toFixed(1);
-      document.getElementById('ai-trust').textContent = (Math.random() * 5 + 95).toFixed(1) + '%';
-      document.getElementById('ai-rating').textContent = ['SSS', 'SS', 'S', 'A'][Math.floor(Math.random() * 4)];
+      document.getElementById('ai-score').textContent = (Math.random()*15+85).toFixed(1);
+      document.getElementById('ai-trust').textContent = (Math.random()*5+95).toFixed(1)+'%';
+      document.getElementById('ai-rating').textContent = ['SSS','SS','S','A'][Math.floor(Math.random()*4)];
     }
 
     // ==================== 预测/摇奖 ====================
-    async function predict(count) {
+    window.predict = async function(count) {
       if (!await checkPredictLimit(count)) return;
-      initAudio();
+      window.initAudio();
       const container = document.getElementById('prediction-display');
-      const sets = Array.from({ length: count }, () => weightedRandom(currentType));
+      const sets = Array.from({length:count}, () => weightedRandom(window.currentType));
       if (count === 1) {
-        currentPrediction = sets[0];
-        await animateNumbers(container, sets[0], currentType);
-        saveHistory(sets[0]);
+        window.currentPrediction = sets[0];
+        await animateNumbers(container, sets[0], window.currentType);
+        window.saveHistory(sets[0]);
       } else {
         container.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-          const div = document.createElement('div'); div.style.margin = '5px 0';
-          div.innerHTML = `<strong>组${i + 1}:</strong> `;
-          const span = document.createElement('span'); div.appendChild(span);
-          container.appendChild(div);
-          await animateNumbers(span, sets[i], currentType, 200, 800);
-          await new Promise(r => setTimeout(r, 300));
+        for(let i=0;i<count;i++){
+          const div=document.createElement('div'); div.style.margin='5px 0'; div.innerHTML=`<strong>组${i+1}:</strong> `;
+          const span=document.createElement('span'); div.appendChild(span); container.appendChild(div);
+          await animateNumbers(span, sets[i], window.currentType, 200, 800);
+          await new Promise(r=>setTimeout(r,300));
         }
       }
       updateScore();
-    }
-
-    async function randomPredict() {
-      if (!await checkPredictLimit(1)) return;
-      initAudio();
-      currentPrediction = getRandomSet(currentType);
-      await animateNumbers(document.getElementById('prediction-display'), currentPrediction, currentType);
-    }
-
-    async function runMonteCarlo() {
-      if (!requireVip('蒙特卡洛模拟')) return;
-      initAudio();
-      const set = weightedRandom(currentType);
-      await animateNumbers(document.getElementById('monte-carlo-balls'), set, currentType);
-      document.getElementById('monte-score').textContent = (Math.random() * 18 + 82).toFixed(1) + '%';
-    }
-
-    async function simulateDraw() {
-      if (!await checkDrawLimit()) return;
-      initAudio();
-      await animateNumbers(document.getElementById('draw-balls'), getRandomSet(currentType), currentType, 400, 1200);
-    }
-
-    // ==================== 开奖记录 ====================
-    async function loadLatest(type) {
-      const apiUrl = `https://api.52mss.cn/lottery/${type}/latest`;
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('网络错误');
-        const data = await response.json();
-        if (data.code === 200 && data.data) {
-          displayRecord(data.data, type);
-        } else {
-          document.getElementById('record-display').innerHTML = '<p style="color:#FF4D6D;">获取数据失败，请稍后再试</p>';
-        }
-      } catch (error) {
-        document.getElementById('record-display').innerHTML = '<p style="color:#FF4D6D;">获取数据失败，请稍后再试</p>';
-      }
-    }
-
-    function displayRecord(record, type) {
-      const container = document.getElementById('record-display');
-      const frontNums = record.front || record.red || [];
-      const backNums = record.back || record.blue || [];
-      const issue = record.issue || record.expect || '';
-      const date = record.date || record.time || '';
-      container.innerHTML = `<div style="background:rgba(0,245,255,0.1); padding:15px; border-radius:12px; margin-top:10px;">
-        <h4 style="color:#00F5FF;">${type === 'dlt' ? '大乐透' : '双色球'} 第${issue}期</h4>
-        <p style="color:#aaa;">开奖日期：${date}</p>
-        <div style="margin:10px 0;">
-          ${frontNums.map(n => `<span class="number-ball red-ball">${String(n).padStart(2, '0')}</span>`).join('')}
-          ${backNums.map(n => `<span class="number-ball blue-ball">${String(n).padStart(2, '0')}</span>`).join('')}
-        </div>
-      </div>`;
-    }
-
-    // ==================== 收藏/历史（本地存储） ====================
-    let favorites = JSON.parse(localStorage.getItem('favs') || '[]');
-    let history = JSON.parse(localStorage.getItem('hists') || '[]');
-
-    function saveFavorite() {
-      if (!currentPrediction) return alert('请先生成预测');
-      favorites.unshift({ type: currentType, ...currentPrediction, time: new Date().toLocaleString() });
-      if (favorites.length > 50) favorites.pop();
-      localStorage.setItem('favs', JSON.stringify(favorites));
-      renderFavorites();
-    }
-
-    function saveHistory(set) {
-      history.unshift({ type: currentType, front: set.front, back: set.back, time: new Date().toLocaleString() });
-      if (history.length > 100) history.pop();
-      localStorage.setItem('hists', JSON.stringify(history));
-    }
-
-    function renderFavorites() {
-      const c = document.getElementById('favorites-list');
-      c.innerHTML = favorites.length ? favorites.map((f, i) => `<div class="favorite-item"><span>${f.type === 'dlt' ? '大乐透' : '双色球'} | ${f.time}</span><span>${f.front.join(' ')} + ${f.back.join(' ')}</span><button class="cyber-btn" onclick="window.removeFav(${i})">删除</button></div>`).join('') : '<p>暂无收藏</p>';
-    }
-
-    function renderHistory() {
-      const c = document.getElementById('history-list');
-      c.innerHTML = history.length ? history.map(h => `<div class="history-item"><span>${h.type === 'dlt' ? '大乐透' : '双色球'} | ${h.time}</span><span>${h.front.join(' ')} + ${h.back.join(' ')}</span></div>`).join('') : '<p>暂无历史</p>';
-    }
-
-    window.removeFav = function(i) {
-      favorites.splice(i, 1);
-      localStorage.setItem('favs', JSON.stringify(favorites));
-      renderFavorites();
     };
 
-    function clearFavorites() { favorites = []; localStorage.removeItem('favs'); renderFavorites(); }
-    function exportFavorites() { exportCSV(favorites, '收藏'); }
-    function exportHistory() { exportCSV(history, '历史'); }
-    function exportCSV(data, name) {
-      let csv = '\uFEFF类型,前区,后区,时间\n';
-      data.forEach(d => { csv += `${d.type},${d.front.join('-')},${d.back.join('-')},${d.time}\n`; });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv])); a.download = name + '.csv'; a.click();
-    }
+    window.randomPredict = async function() {
+      if (!await checkPredictLimit(1)) return;
+      window.initAudio();
+      window.currentPrediction = getRandomSet(window.currentType);
+      await animateNumbers(document.getElementById('prediction-display'), window.currentPrediction, window.currentType);
+    };
 
-    function importData() { alert('导入成功（模拟）'); }
+    window.runMonteCarlo = async function() {
+      if (!window.isVip) { alert('蒙特卡洛模拟为VIP功能'); window.showVipModal(); return; }
+      window.initAudio();
+      const set = weightedRandom(window.currentType);
+      await animateNumbers(document.getElementById('monte-carlo-balls'), set, window.currentType);
+      document.getElementById('monte-score').textContent = (Math.random()*18+82).toFixed(1)+'%';
+    };
+
+    window.simulateDraw = async function() {
+      if (!await checkDrawLimit()) return;
+      window.initAudio();
+      await animateNumbers(document.getElementById('draw-balls'), getRandomSet(window.currentType), window.currentType, 400, 1200);
+    };
+
+    // ==================== 开奖记录 ====================
+    window.loadLatest = async function(type) {
+      const apiUrl = `https://api.52mss.cn/lottery/${type}/latest`;
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('网络错误');
+        const data = await res.json();
+        if (data.code===200 && data.data) {
+          window.displayRecord(data.data, type);
+        } else {
+          document.getElementById('record-display').innerHTML = '<p style="color:#FF4D6D;">获取数据失败</p>';
+        }
+      } catch(e) {
+        document.getElementById('record-display').innerHTML = '<p style="color:#FF4D6D;">获取数据失败</p>';
+      }
+    };
+    window.displayRecord = function(record, type) {
+      const frontNums = record.front || record.red || [];
+      const backNums = record.back || record.blue || [];
+      document.getElementById('record-display').innerHTML = `
+        <div style="background:rgba(0,245,255,0.1); padding:15px; border-radius:12px; margin-top:10px;">
+          <h4 style="color:#00F5FF;">${type==='dlt'?'大乐透':'双色球'} 第${record.issue||record.expect}期</h4>
+          <p style="color:#aaa;">${record.date||record.time}</p>
+          <div>${frontNums.map(n=>`<span class="number-ball red-ball">${String(n).padStart(2,'0')}</span>`).join('')} ${backNums.map(n=>`<span class="number-ball blue-ball">${String(n).padStart(2,'0')}</span>`).join('')}</div>
+        </div>`;
+    };
+
+    // ==================== 收藏/历史 ====================
+    window.saveFavorite = function() {
+      if (!window.currentPrediction) return alert('请先生成预测');
+      window.favorites.unshift({ type:window.currentType, ...window.currentPrediction, time:new Date().toLocaleString() });
+      if (window.favorites.length>50) window.favorites.pop();
+      localStorage.setItem('favs', JSON.stringify(window.favorites));
+      window.renderFavorites();
+    };
+    window.saveHistory = function(set) {
+      window.history.unshift({ type:window.currentType, front:set.front, back:set.back, time:new Date().toLocaleString() });
+      if (window.history.length>100) window.history.pop();
+      localStorage.setItem('hists', JSON.stringify(window.history));
+    };
+    window.renderFavorites = function() {
+      const c = document.getElementById('favorites-list');
+      c.innerHTML = window.favorites.length ? window.favorites.map((f,i)=>`<div class="favorite-item"><span>${f.type==='dlt'?'大乐透':'双色球'} | ${f.time}</span><span>${f.front.join(' ')} + ${f.back.join(' ')}</span><button class="cyber-btn" onclick="window.removeFav(${i})">删除</button></div>`).join('') : '<p>暂无收藏</p>';
+    };
+    window.renderHistory = function() {
+      const c = document.getElementById('history-list');
+      c.innerHTML = window.history.length ? window.history.map(h=>`<div class="history-item"><span>${h.type==='dlt'?'大乐透':'双色球'} | ${h.time}</span><span>${h.front.join(' ')} + ${h.back.join(' ')}</span></div>`).join('') : '<p>暂无历史</p>';
+    };
+    window.removeFav = function(i) { window.favorites.splice(i,1); localStorage.setItem('favs',JSON.stringify(window.favorites)); window.renderFavorites(); };
+    window.clearFavorites = function() { window.favorites=[]; localStorage.removeItem('favs'); window.renderFavorites(); };
+    window.exportFavorites = function() { window.exportCSV(window.favorites, '收藏'); };
+    window.exportHistory = function() { window.exportCSV(window.history, '历史'); };
+    window.exportCSV = function(data, name) {
+      let csv = '\uFEFF类型,前区,后区,时间\n';
+      data.forEach(d=>{ csv += `${d.type},${d.front.join('-')},${d.back.join('-')},${d.time}\n`; });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv])); a.download = name+'.csv'; a.click();
+    };
+
+    window.importData = function() { alert('导入成功（模拟）'); };
 
     // ==================== 标签切换 ====================
     window.switchTab = function(name) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab-' + name)?.classList.add('active');
-      if (name === 'favorites') renderFavorites();
-      if (name === 'history') renderHistory();
-      if (name === 'records') loadLatest('dlt');
+      document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+      document.getElementById('tab-'+name)?.classList.add('active');
+      if (name==='favorites') window.renderFavorites();
+      if (name==='history') window.renderHistory();
+      if (name==='records') window.loadLatest('dlt');
     };
 
-    // ==================== 设置 ====================
-    document.getElementById('sound-toggle').onchange = e => soundEnabled = e.target.value === 'on';
-    document.getElementById('animation-toggle').onchange = e => animationEnabled = e.target.value === 'on';
-    document.getElementById('bgm-file').onchange = e => { if (e.target.files[0]) { if (bgmAudio) bgmAudio.pause(); bgmAudio = new Audio(URL.createObjectURL(e.target.files[0])); bgmAudio.loop = true; } };
-    window.playBGM = function() { if (bgmAudio) bgmAudio.play(); };
-    window.stopBGM = function() { if (bgmAudio) bgmAudio.pause(); };
+    // 彩种切换
+    window.switchType = function(type) {
+      window.currentType = type;
+      document.getElementById('switch-dlt').classList.toggle('active', type==='dlt');
+      document.getElementById('switch-ssq').classList.toggle('active', type==='ssq');
+    };
 
-    document.getElementById('switch-dlt').onclick = () => { currentType = 'dlt'; document.getElementById('switch-dlt').classList.add('active'); document.getElementById('switch-ssq').classList.remove('active'); };
-    document.getElementById('switch-ssq').onclick = () => { currentType = 'ssq'; document.getElementById('switch-ssq').classList.add('active'); document.getElementById('switch-dlt').classList.remove('active'); };
+    // 背景音乐
+    window.loadBGM = function(input) {
+      if (input.files[0]) {
+        if (window.bgmAudio) window.bgmAudio.pause();
+        window.bgmAudio = new Audio(URL.createObjectURL(input.files[0]));
+        window.bgmAudio.loop = true;
+      }
+    };
+    window.playBGM = function() { if (window.bgmAudio) window.bgmAudio.play(); };
+    window.stopBGM = function() { if (window.bgmAudio) window.bgmAudio.pause(); };
 
-    document.getElementById('auth-submit').onclick = handleAuth;
-    document.getElementById('toggle-auth').onclick = toggleAuthMode;
-    document.getElementById('send-otp-btn').onclick = sendOTP;
-    document.getElementById('vip-pay-btn').onclick = handleVipPayment;
-
-    // 启动认证检查
-    checkSession();
-  }
+    // 启动
+    window.checkSession();
+  });
 </script>
+
+<!--
+  ==================== 建表 SQL（Supabase SQL Editor 执行） ====================
+  CREATE TABLE profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+    username TEXT UNIQUE NOT NULL,
+    is_vip BOOLEAN DEFAULT FALSE,
+    vip_expire_date TIMESTAMPTZ,
+    predictions_today INT DEFAULT 0,
+    draws_today INT DEFAULT 0,
+    last_prediction_date DATE DEFAULT CURRENT_DATE
+  );
+  CREATE TABLE payments (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+    order_id TEXT UNIQUE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    status TEXT DEFAULT 'pending',
+    vip_days INT DEFAULT 30,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  CREATE TABLE vip_plans (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    days INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    features JSONB,
+    is_active BOOLEAN DEFAULT TRUE
+  );
+  INSERT INTO vip_plans (name, days, price) VALUES
+    ('月度VIP',30,29.90),('季度VIP',90,69.90),('年度VIP',365,199.90);
+  -- 关闭邮箱确认 Authentication -> Settings -> Enable email confirmations 关闭
+-->
 </body>
 </html>
