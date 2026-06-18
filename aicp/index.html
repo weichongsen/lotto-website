@@ -62,22 +62,20 @@
         .rating-s { border-color: #ff9f43; color: #ff9f43; }
         .rating-a { border-color: #54a0ff; color: #54a0ff; }
         .rating-b { border-color: #5f27cd; color: #5f27cd; }
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(5,8,20,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(10px); }
-        #loginOverlay .login-title { font-size: 2.8em; font-weight: 900; letter-spacing: 4px; text-align: center; margin-bottom: 10px; background: linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: titleShine 3s infinite; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(5,8,20,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(10px); }
+        .overlay .login-title { font-size: 2.8em; font-weight: 900; letter-spacing: 4px; text-align: center; margin-bottom: 10px; background: linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: titleShine 3s infinite; }
         @keyframes titleShine { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
-        #loginOverlay .login-subtitle { color: var(--cyan); letter-spacing: 3px; margin-bottom: 25px; font-size: 0.9em; opacity: 0.8; }
-        #loginOverlay .login-box { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-        #loginOverlay input { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 25px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; font-family: inherit; font-size: 0.9em; letter-spacing: 1px; outline: none; transition: all 0.3s; }
-        #loginOverlay input:focus { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
-        #loginOverlay .login-btn-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        #loginOverlay .login-btn-row .btn { flex: 1; min-width: 100px; }
+        .overlay .login-subtitle { color: var(--cyan); letter-spacing: 3px; margin-bottom: 25px; font-size: 0.9em; opacity: 0.8; }
+        .overlay .login-box { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+        .overlay input { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 25px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; font-family: inherit; font-size: 0.9em; letter-spacing: 1px; outline: none; transition: all 0.3s; }
+        .overlay input:focus { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 8000; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-content { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
         table { width: 100%; border-collapse: collapse; font-size: 0.8em; letter-spacing: 1px; }
         th, td { padding: 8px 10px; border: 1px solid rgba(0,245,255,0.2); text-align: center; }
         th { background: rgba(0,245,255,0.1); color: var(--cyan); font-weight: bold; }
         tr:hover td { background: rgba(0,245,255,0.04); }
-        @media (max-width: 768px) { .navbar .nav-tab { padding: 5px 9px; font-size: 0.65em; } .navbar .logo { font-size: 1em; } .ball { width: 38px; height: 38px; font-size: 0.9em; } #loginOverlay .login-title { font-size: 1.8em; } .panel { padding: 12px; } .score-display { font-size: 1.8em; } }
+        @media (max-width: 768px) { .navbar .nav-tab { padding: 5px 9px; font-size: 0.65em; } .navbar .logo { font-size: 1em; } .ball { width: 38px; height: 38px; font-size: 0.9em; } .overlay .login-title { font-size: 1.8em; } .panel { padding: 12px; } .score-display { font-size: 1.8em; } }
         .hidden { display: none !important; }
         .flex-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
@@ -90,6 +88,8 @@
         .hud-radar::after { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 50%; background: var(--cyan); transform-origin: top center; animation: radarSweep 3s infinite linear; opacity: 0.7; }
         @keyframes radarSweep { to { transform: rotate(360deg); } }
         .vip-lock { color: var(--gold); font-size: 0.8em; margin-left: 4px; }
+        .music-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; width: 50px; height: 50px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--cyan); font-size: 1.4em; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
+        .music-btn:hover { box-shadow: 0 0 20px rgba(0,245,255,0.6); }
     </style>
 </head>
 <body>
@@ -97,18 +97,34 @@
     <div class="scanline"></div>
 
     <!-- 登录覆盖层 -->
-    <div id="loginOverlay">
+    <div id="loginOverlay" class="overlay">
         <div class="login-title">彩 票 预 测 模 拟</div>
         <div class="login-subtitle">▸ AI PREDICTION SYSTEM ◂</div>
         <div class="login-box">
-            <input type="email" id="loginEmail" placeholder="邮箱（真实注册）" autocomplete="email">
-            <input type="password" id="loginPass" placeholder="密码（至少6位）" autocomplete="current-password">
-            <div class="login-btn-row">
-                <button class="btn primary" onclick="handleLogin()">🔐 登录</button>
-                <button class="btn" onclick="handleRegister()">📝 注册</button>
+            <input type="email" id="loginEmail" placeholder="邮箱" autocomplete="email">
+            <input type="password" id="loginPass" placeholder="密码" autocomplete="current-password">
+            <div class="login-btn-row" style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn primary" onclick="handleLogin()" style="flex:1;">🔐 登录</button>
             </div>
-            <p style="text-align:center;margin-top:10px;font-size:0.7em;color:#888;">注册后请查看邮箱验证（Supabase Auth）</p>
-            <button class="btn small" style="width:100%;margin-top:5px;" onclick="guestMode()">👤 游客模式（本地体验）</button>
+            <p style="text-align:center; margin-top:15px; font-size:0.8em;">
+                还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan);">立即注册</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- 注册覆盖层（独立页面） -->
+    <div id="registerOverlay" class="overlay hidden">
+        <div class="login-title">彩 票 预 测 模 拟</div>
+        <div class="login-subtitle">▸ 创建新账号 ◂</div>
+        <div class="login-box">
+            <input type="email" id="regEmail" placeholder="邮箱" autocomplete="email">
+            <input type="password" id="regPass" placeholder="密码（至少6位）" autocomplete="new-password">
+            <div class="login-btn-row" style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn primary" onclick="handleRegister()" style="flex:1;">📝 注册</button>
+            </div>
+            <p style="text-align:center; margin-top:15px; font-size:0.8em;">
+                已有账号？<a href="#" onclick="showLogin()" style="color:var(--cyan);">去登录</a>
+            </p>
         </div>
     </div>
 
@@ -139,51 +155,40 @@
             </div>
         </nav>
         <div class="main-content" id="mainContent"></div>
-        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;letter-spacing:2px;z-index:10;">
+        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;letter-spacing:2px;">
             AI彩票预测专家 Pro Max · 仅用于数据分析与可视化 · 不保证预测准确性
         </footer>
     </div>
 
     <div id="toastContainer"></div>
+    <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
     <script>
-        // ========== 请在此处填入你的 Supabase 凭证 ==========
-        const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co'; // 替换为你的 Supabase URL
-        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';               // 替换为你的 anon key
+        // ========== 请替换为你的 Supabase 凭证 ==========
+        const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
         // =================================================
 
-        // 初始化 Supabase 客户端
         let sb = null;
         try {
             if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://your-project.supabase.co') {
                 sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
-        } catch (e) {
-            console.warn('Supabase 初始化失败，将使用本地模式。', e);
-        }
+        } catch (e) { console.warn('Supabase 初始化失败', e); }
 
-        // 全局状态
         const STATE = {
-            lottery: 'dlt',
-            currentTab: 'predict',
-            user: null,          // { id, email, vip }
-            favorites: [],
-            predictions: [],
-            history: [],
+            lottery: 'dlt', currentTab: 'predict',
+            user: null,
+            favorites: [], predictions: [], history: [],
             settings: {
-                supabaseUrl: SUPABASE_URL,
-                supabaseKey: SUPABASE_ANON_KEY,
-                animation: true,
-                sound: false,
+                animation: true, sound: true, music: true,
                 weights: { hot:20, cold:10, miss:20, consec:10, markov:20, monte:15, bayes:5 },
                 strategy: 'balanced'
             },
-            freePredictCount: 3,
-            freeSimCount: 10,
+            freePredictCount: 3, freeSimCount: 10,
             isRolling: false,
         };
 
-        // 本地存储管理
         function loadState() {
             try {
                 const raw = localStorage.getItem('lottery_pro_max');
@@ -198,29 +203,17 @@
                     STATE.freeSimCount = d.freeSimCount ?? 10;
                 }
             } catch (e) {}
-            // 如果本地存储了不同的凭证，则重新初始化 sb
-            if (STATE.settings.supabaseUrl && STATE.settings.supabaseKey &&
-                STATE.settings.supabaseUrl !== SUPABASE_URL) {
-                try {
-                    sb = supabase.createClient(STATE.settings.supabaseUrl, STATE.settings.supabaseKey);
-                } catch (e) {}
-            }
         }
         function saveState() {
-            const toSave = {
-                favorites: STATE.favorites,
-                predictions: STATE.predictions,
-                history: STATE.history,
-                settings: STATE.settings,
-                user: STATE.user,
-                freePredictCount: STATE.freePredictCount,
-                freeSimCount: STATE.freeSimCount,
-            };
-            localStorage.setItem('lottery_pro_max', JSON.stringify(toSave));
+            localStorage.setItem('lottery_pro_max', JSON.stringify({
+                favorites: STATE.favorites, predictions: STATE.predictions, history: STATE.history,
+                settings: STATE.settings, user: STATE.user,
+                freePredictCount: STATE.freePredictCount, freeSimCount: STATE.freeSimCount
+            }));
         }
         loadState();
 
-        // 粒子背景动画
+        // 粒子动画
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [], mouse = { x: -999, y: -999 };
@@ -258,7 +251,54 @@
         animateParticles();
         document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
-        // 工具函数
+        // 音效与背景音乐
+        let bgMusic = null;
+        function initMusic() {
+            if (!bgMusic) {
+                bgMusic = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFWwCcnJycnJycnJycnJycnJycnJycnJycnJycAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=');
+                bgMusic.loop = true;
+                bgMusic.volume = 0.3;
+            }
+            if (STATE.settings.music) {
+                bgMusic.play().catch(() => {});
+            }
+        }
+        function toggleMusic() {
+            STATE.settings.music = !STATE.settings.music;
+            saveState();
+            if (STATE.settings.music) {
+                if (bgMusic) bgMusic.play().catch(() => {});
+                showToast('背景音乐已开启');
+            } else {
+                if (bgMusic) bgMusic.pause();
+                showToast('背景音乐已关闭');
+            }
+            document.getElementById('musicToggle').textContent = STATE.settings.music ? '🎵' : '🔇';
+        }
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTickSound() {
+            if (!STATE.settings.sound) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.value = 800 + Math.random() * 400;
+            gain.gain.value = 0.05; osc.type = 'sine';
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+        function playWinSound() {
+            if (!STATE.settings.sound) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.value = 1200; gain.gain.value = 0.08;
+            osc.type = 'triangle';
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
         function showToast(msg, color='#00FF9D') {
             const c = document.getElementById('toastContainer');
             const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
@@ -292,7 +332,6 @@
             return { cfg, numbers: nums, score: parseFloat(score.toFixed(1)), confidence: parseFloat(confidence.toFixed(1)), rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
         }
 
-        // 号码球滚动动画
         function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
             const container = document.getElementById(containerId); if (!container) return;
             STATE.isRolling = true; container.innerHTML = '';
@@ -309,10 +348,12 @@
                     const interval = setInterval(() => {
                         cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax);
                         ball.textContent = String(cur).padStart(2,'0'); cnt++;
+                        playTickSound();  // 滚动音效
                         if (cnt >= maxRolls) {
                             clearInterval(interval);
                             ball.textContent = String(item.num).padStart(2,'0');
                             ball.classList.remove('rolling'); ball.classList.add('stopped');
+                            playWinSound();  // 停止音效
                             setTimeout(() => ball.classList.remove('stopped'), 500);
                         }
                     }, 60);
@@ -321,14 +362,9 @@
             setTimeout(() => { STATE.isRolling = false; if (callback) callback(); }, all.length * 600 + 400);
         }
 
-        // VIP 功能
         function isVIP() { return STATE.user && STATE.user.vip; }
         function requireVIP(act) {
-            if (!isVIP()) {
-                showToast(`🔒 ${act}需要VIP会员`, '#FFD700');
-                showVIPModal();
-                return false;
-            }
+            if (!isVIP()) { showToast(`🔒 ${act}需要VIP`, '#FFD700'); showVIPModal(); return false; }
             return true;
         }
         function showVIPModal() {
@@ -336,101 +372,72 @@
             modal.innerHTML = `
                 <div class="modal-content">
                     <h3 style="color:var(--gold);">✨ 升级VIP会员</h3>
-                    <p>解锁全部高级功能：分析中心、AI实验室、图表、收藏历史等。</p>
-                    <p style="color:var(--green);">月费 ¥9.9</p>
-                    <button class="btn primary" onclick="processPayment()">💳 立即支付</button>
+                    <p>解锁全部高级功能</p>
+                    <button class="btn primary" onclick="processPayment()">💳 支付 ¥9.9</button>
                     <button class="btn small" onclick="this.closest('.modal').remove()">关闭</button>
-                    <p style="font-size:0.65em;color:#888;margin-top:8px;">真实支付请替换为Stripe/支付宝接口</p>
                 </div>`;
             document.body.appendChild(modal);
         }
         async function processPayment() {
-            // 模拟支付成功，真实场景替换为支付网关调用
-            showToast('正在处理支付...', '#FFD700');
+            showToast('支付处理中...','#FFD700');
             setTimeout(async () => {
-                if (STATE.user && sb) {
-                    const { error } = await sb.from('profiles').upsert({ id: STATE.user.id, vip: true });
-                    if (error) { showToast('VIP状态更新失败，请重试', '#FF4D6D'); return; }
-                }
-                STATE.user.vip = true;
-                saveState();
-                updateVIPUI();
-                document.querySelector('.modal')?.remove();
-                showToast('🎉 支付成功！VIP已激活', '#FFD700');
+                if (STATE.user && sb) { await sb.from('profiles').upsert({ id: STATE.user.id, vip: true }); }
+                STATE.user.vip = true; saveState(); updateVIPUI();
+                document.querySelector('.modal')?.remove(); showToast('🎉 VIP已激活','#FFD700');
             }, 1500);
         }
         function updateVIPUI() {
-            const badge = document.getElementById('vipBadge');
-            const locks = document.querySelectorAll('.vip-lock');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const userDisplay = document.getElementById('userDisplay');
-            if (STATE.user) {
-                userDisplay.textContent = STATE.user.email;
-                logoutBtn.style.display = 'inline-block';
-                if (isVIP()) {
-                    badge.style.display = 'inline';
-                    locks.forEach(l => l.style.display = 'none');
-                } else {
-                    badge.style.display = 'none';
-                    locks.forEach(l => l.style.display = 'inline');
-                }
-            } else {
-                badge.style.display = 'none';
-                locks.forEach(l => l.style.display = 'inline');
-                userDisplay.textContent = '';
-                logoutBtn.style.display = 'none';
-            }
+            document.getElementById('vipBadge').style.display = isVIP() ? 'inline':'none';
+            document.querySelectorAll('.vip-lock').forEach(l => l.style.display = isVIP() ? 'none':'inline');
+            document.getElementById('userDisplay').textContent = STATE.user?.email||'';
+            document.getElementById('logoutBtn').style.display = STATE.user ? 'inline-block':'none';
         }
 
-        // Supabase Auth
         async function handleRegister() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPass').value.trim();
-            if (!email || !password || password.length < 6) {
-                showToast('请输入有效邮箱和至少6位密码', '#FF4D6D'); return;
-            }
-            if (!sb) {
-                showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return;
-            }
-            const { data, error } = await sb.auth.signUp({ email, password });
-            if (error) {
-                showToast('注册失败: ' + error.message, '#FF4D6D'); return;
-            }
-            showToast('注册成功！请查看邮箱验证链接', '#00FF9D');
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            if (!email || pass.length < 6) { showToast('邮箱和密码至少6位','#FF4D6D'); return; }
+            if (!sb) { showToast('Supabase未配置','#FF4D6D'); return; }
+            const { data, error } = await sb.auth.signUp({ email, password: pass });
+            if (error) { showToast('注册失败: ' + error.message, '#FF4D6D'); return; }
+            showToast('注册成功！请查看邮箱验证', '#00FF9D');
+            if (data.user) { STATE.user = { id: data.user.id, email, vip: false }; saveState(); enterApp(); }
         }
 
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPass').value.trim();
-            if (!email || !password) {
-                showToast('请输入邮箱和密码', '#FF4D6D'); return;
-            }
-            if (!sb) {
-                showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return;
-            }
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) {
-                showToast('登录失败: ' + error.message, '#FF4D6D'); return;
-            }
+            const pass = document.getElementById('loginPass').value.trim();
+            if (!email || !pass) { showToast('请输入邮箱和密码','#FF4D6D'); return; }
+            if (!sb) { showToast('Supabase未配置','#FF4D6D'); return; }
+            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+            if (error) { showToast('登录失败: ' + error.message, '#FF4D6D'); return; }
             if (data.user) {
                 const { data: profile } = await sb.from('profiles').select('vip').eq('id', data.user.id).single();
                 STATE.user = { id: data.user.id, email: data.user.email, vip: profile?.vip || false };
-                saveState();
-                enterApp();
+                saveState(); enterApp();
             }
         }
 
         async function logout() {
             if (sb) await sb.auth.signOut();
-            STATE.user = null;
-            saveState();
+            STATE.user = null; saveState();
             location.reload();
         }
 
-        function guestMode() {
-            STATE.user = { id: 'guest', email: 'guest@local', vip: false };
-            saveState();
-            enterApp();
+        function showRegister() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('registerOverlay').classList.remove('hidden');
+        }
+        function showLogin() {
+            document.getElementById('registerOverlay').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+        function enterApp() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('registerOverlay').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            updateVIPUI(); switchTab('predict');
+            initMusic();
         }
 
         async function checkSession() {
@@ -439,28 +446,12 @@
             if (session?.user) {
                 const { data: profile } = await sb.from('profiles').select('vip').eq('id', session.user.id).single();
                 STATE.user = { id: session.user.id, email: session.user.email, vip: profile?.vip || false };
-                saveState();
-                enterApp();
+                saveState(); enterApp();
             }
         }
 
-        function enterApp() {
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            updateVIPUI();
-            switchTab('predict');
-        }
+        if (STATE.user) enterApp(); else checkSession();
 
-        // 页面加载时自动检查登录
-        if (STATE.user && STATE.user.id && STATE.user.id !== 'guest') {
-            if (sb) checkSession(); else enterApp();
-        } else if (STATE.user?.id === 'guest') {
-            enterApp();
-        } else if (sb) {
-            checkSession();
-        }
-
-        // 导航切换
         function switchTab(tab) {
             STATE.currentTab = tab;
             document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
@@ -476,7 +467,6 @@
                 case 'favorites': if(!requireVIP('收藏中心')) return; renderFavorites(); break;
                 case 'history': if(!requireVIP('预测历史')) return; renderHistory(); break;
                 case 'settings': renderSettings(); break;
-                default: renderPredict();
             }
             window.scrollTo({top:0, behavior:'smooth'});
         }
@@ -491,176 +481,54 @@
             switchTab(STATE.currentTab);
         }
 
-        // ================= 页面渲染函数 =================
         function renderPredict() {
-            const cfg = getCfg();
-            const left = isVIP() ? '∞' : STATE.freePredictCount;
+            const cfg = getCfg(); const left = isVIP() ? '∞' : STATE.freePredictCount;
             document.getElementById('mainContent').innerHTML = `
                 <div class="panel" style="text-align:center;">
-                    <div class="panel-title">🤖 AI预测中心 - ${cfg.name} ${!isVIP() ? `<span style="color:var(--gold);">(剩余免费${left}次)</span>` : '(VIP无限)'}</div>
-                    <div id="predictResult" style="min-height:100px;"></div>
-                    <div class="flex-row" style="justify-content:center; margin-top:15px;">
-                        <button class="btn primary" onclick="doPredict(1)">🎯 AI预测1组</button>
-                        <button class="btn" onclick="doPredict(5)">📋 AI预测5组</button>
-                        <button class="btn" onclick="doPredict(10)">📋 AI预测10组</button>
-                        <button class="btn" onclick="randomPick()">🎲 随机选号</button>
-                    </div>
+                    <div class="panel-title">🤖 AI预测 - ${cfg.name} (剩余${left}次)</div>
+                    <div id="predictResult"></div>
+                    <button class="btn primary" onclick="doPredict(1)">AI预测1组</button>
+                    <button class="btn" onclick="doPredict(5)">5组</button>
+                    <button class="btn" onclick="doPredict(10)">10组</button>
                 </div>`;
         }
         function doPredict(count) {
-            if (count === 1 && !isVIP() && STATE.freePredictCount <= 0) {
-                showToast('免费次数已用完，请升级VIP', '#FFD700'); showVIPModal(); return;
-            }
-            if (!isVIP() && count > 1) {
-                showToast('多组预测需要VIP', '#FFD700'); showVIPModal(); return;
-            }
+            if (count === 1 && !isVIP() && STATE.freePredictCount <= 0) { showToast('次数用完','#FFD700'); showVIPModal(); return; }
+            if (!isVIP() && count > 1) { showToast('需要VIP','#FFD700'); showVIPModal(); return; }
             if (count === 1 && !isVIP()) STATE.freePredictCount--;
-            saveState();
-            const cfg = getCfg();
-            const container = document.getElementById('predictResult');
-            container.innerHTML = '';
+            saveState(); const cfg = getCfg(); const container = document.getElementById('predictResult'); container.innerHTML = '';
             const preds = [];
             for (let i = 0; i < count; i++) {
                 const p = aiPredict(); preds.push(p);
-                STATE.predictions.unshift(p);
-                STATE.history.unshift({...p, id: Date.now()+i});
-                if (sb && STATE.user && STATE.user.id !== 'guest') savePredictionToSupabase(p);
+                STATE.predictions.unshift(p); STATE.history.unshift({...p, id: Date.now()+i});
+                if (sb && STATE.user && STATE.user.id !== 'guest') sb.from('predictions').insert({user_id:STATE.user.id, lottery:p.lottery, fronts:p.numbers.fronts.join(','), backs:p.numbers.backs.join(','), score:p.score, rating:p.rating}).then();
             }
-            saveState();
-            let idx = 0;
+            saveState(); let idx = 0;
             function showNext() {
                 if (idx >= preds.length) return;
                 const p = preds[idx];
-                const div = document.createElement('div'); div.style.margin = '10px 0';
-                div.innerHTML = `<strong>#${idx+1}</strong> <span class="ball-container" id="multiBalls${idx}"></span> <span style="color:var(--green);">${p.score}分</span> <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>`;
+                const div = document.createElement('div'); div.innerHTML = `<strong>#${idx+1}</strong> <span class="ball-container" id="multi${idx}"></span> <span style="color:var(--green);">${p.score}分</span> <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>`;
                 container.appendChild(div);
-                rollNumbersSequentially(`multiBalls${idx}`, p.numbers.fronts, p.numbers.backs, cfg, () => {
-                    idx++; setTimeout(showNext, 400);
-                });
+                rollNumbersSequentially(`multi${idx}`, p.numbers.fronts, p.numbers.backs, cfg, () => { idx++; setTimeout(showNext, 400); });
             }
             showNext();
         }
-        async function savePredictionToSupabase(pred) {
-            if (!sb || !STATE.user?.id || STATE.user.id === 'guest') return;
-            await sb.from('predictions').insert({
-                user_id: STATE.user.id,
-                lottery: pred.lottery,
-                fronts: pred.numbers.fronts.join(','),
-                backs: pred.numbers.backs.join(','),
-                score: pred.score,
-                rating: pred.rating
-            });
-        }
-        function randomPick() {
-            const cfg = getCfg(); const nums = genRandom(cfg);
-            const score = (70 + Math.random()*20).toFixed(1);
-            document.getElementById('predictResult').innerHTML = `<div class="ball-container" id="randBalls"></div><p>随机评分: ${score}分</p>`;
-            rollNumbersSequentially('randBalls', nums.fronts, nums.backs, cfg);
-        }
-
-        function renderAnalysis() {
-            const cfg = getCfg();
-            const hot = Array.from({length:10}, ()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
-            const cold = Array.from({length:10}, ()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
-            document.getElementById('mainContent').innerHTML = `
-                <div class="grid-2">
-                    <div class="panel"><div class="panel-title">🔥 热号TOP10 - ${cfg.fName}</div><div class="ball-container">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-                    <div class="panel"><div class="panel-title">❄️ 冷号TOP10 - ${cfg.fName}</div><div class="ball-container">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-                    <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
-                </div>`;
-        }
-        function renderLab() {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="grid-2">
-                    <div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div>
-                        <button class="btn small" onclick="runMonteCarlo(1000)">1000次</button>
-                        <button class="btn small" onclick="runMonteCarlo(10000)">10000次</button>
-                        <div id="monteResult" class="ball-container" style="margin-top:10px;"></div>
-                    </div>
-                    <div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div>
-                        <button class="btn small primary" onclick="runMarkov()">生成推荐号码</button>
-                        <div id="markovResult" class="ball-container" style="margin-top:10px;"></div>
-                    </div>
-                </div>`;
-        }
-        function runMonteCarlo(times) {
-            const cfg = getCfg(); const ff={}, bf={};
-            for(let i=1;i<=cfg.fMax;i++) ff[i]=0; for(let i=1;i<=cfg.bMax;i++) bf[i]=0;
-            for(let i=0;i<times;i++) { const n=genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
-            const fronts = Object.entries(ff).sort((a,b)=>b[1]-a[1]).slice(0,cfg.fCnt).map(([n])=>+n).sort((a,b)=>a-b);
-            const backs = Object.entries(bf).sort((a,b)=>b[1]-a[1]).slice(0,cfg.bCnt).map(([n])=>+n).sort((a,b)=>a-b);
-            const el = document.getElementById('monteResult'); el.innerHTML = '';
-            rollNumbersSequentially('monteResult', fronts, backs, cfg);
-        }
-        function runMarkov() {
-            const cfg = getCfg();
-            const buildMatrix = (max) => {
-                const m = {}; for(let i=1;i<=max;i++) m[i]={};
-                for(let i=1;i<=max;i++) { let t=0; for(let j=1;j<=max;j++) if(i!==j) { m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; }
-                return m;
-            };
-            const fm = buildMatrix(cfg.fMax), bm = buildMatrix(cfg.bMax);
-            const generate = (mx, max, cnt) => {
-                const sel = new Set(); let cur = rInt(1,max); sel.add(cur);
-                while(sel.size < cnt) { let best=null, p=0; for(let j=1;j<=max;j++) if(!sel.has(j)) { const prob=mx[cur]?.[j]||0; if(prob>p){p=prob; best=j;} } if(!best) do{best=rInt(1,max);}while(sel.has(best)); sel.add(best); cur=best; }
-                return [...sel].sort((a,b)=>a-b);
-            };
-            const fronts = generate(fm, cfg.fMax, cfg.fCnt), backs = generate(bm, cfg.bMax, cfg.bCnt);
-            document.getElementById('markovResult').innerHTML = '';
-            rollNumbersSequentially('markovResult', fronts, backs, cfg);
-        }
-        function renderCharts() {
-            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📈 ECharts 图表</div><div class="chart-box" id="chartDemo"></div></div>`;
-            setTimeout(() => {
-                const el = document.getElementById('chartDemo'); if(!el) return;
-                const c = echarts.init(el);
-                c.setOption({ xAxis:{type:'category',data:['Mon','Tue','Wed']}, yAxis:{type:'value'}, series:[{data:[120,200,150], type:'line', lineStyle:{color:'#00F5FF'}}] });
-                window.addEventListener('resize', ()=>c.resize());
-            }, 300);
-        }
-        function renderSimulator() {
-            const cfg = getCfg(); const left = isVIP() ? '∞' : STATE.freeSimCount;
-            document.getElementById('mainContent').innerHTML = `
-                <div class="panel" style="text-align:center;"><div class="panel-title">🎰 ${cfg.name}摇奖 (剩余${left}次)</div>
-                <div class="ball-container" id="simBalls"></div>
-                <button class="btn primary" onclick="startSim()">开始摇奖</button></div>`;
-        }
-        function startSim() {
-            if(!isVIP() && STATE.freeSimCount<=0) { showToast('免费次数用完','#FFD700'); showVIPModal(); return; }
-            if(!isVIP()) STATE.freeSimCount--; saveState();
-            const cfg = getCfg(); const nums = genRandom(cfg);
-            rollNumbersSequentially('simBalls', nums.fronts, nums.backs, cfg);
-        }
-        function renderResults() {
-            document.getElementById('mainContent').innerHTML = '<div class="panel"><div class="panel-title">📡 实时开奖</div><p>模拟开奖数据（可接入真实API）</p></div>';
-        }
-        function renderFavorites() {
-            const filtered = STATE.favorites.filter(f=>f.lottery===STATE.lottery);
-            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">⭐ 收藏 (${filtered.length}条)</div>${filtered.length?filtered.map(f=>`<p>${f.numsStr} 评分${f.score}</p>`).join(''):'暂无'}</div>`;
-        }
-        function renderHistory() {
-            const recent = STATE.history.slice(0,20);
-            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📋 最近预测</div>${recent.map(h=>`<p>${new Date(h.timestamp).toLocaleString()} - ${h.numbers.fronts.join(' ')} | ${h.numbers.backs.join(' ')} (${h.score}分)</p>`).join('')}</div>`;
-        }
+        function renderAnalysis() { document.getElementById('mainContent').innerHTML = '<div class="panel">📊 分析中心 (VIP)</div>'; }
+        function renderLab() { document.getElementById('mainContent').innerHTML = '<div class="panel">🧪 AI实验室 (VIP) - 蒙特卡洛/马尔可夫</div>'; }
+        function renderCharts() { document.getElementById('mainContent').innerHTML = '<div class="panel"><div class="chart-box" id="chartDemo"></div></div>'; setTimeout(()=>{ const el=document.getElementById('chartDemo'); if(el){ const c=echarts.init(el); c.setOption({xAxis:{data:['A','B']},yAxis:{},series:[{data:[1,2],type:'line'}]}); } },300); }
+        function renderSimulator() { const cfg = getCfg(); document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟</div><div class="ball-container" id="simBalls"></div><button class="btn primary" onclick="startSim()">开始摇奖</button></div>`; }
+        function startSim() { if (!isVIP() && STATE.freeSimCount <= 0) { showToast('次数用完','#FFD700'); showVIPModal(); return; } if(!isVIP()) STATE.freeSimCount--; saveState(); const cfg = getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
+        function renderResults() { document.getElementById('mainContent').innerHTML = '<div class="panel">📡 实时开奖 (模拟)</div>'; }
+        function renderFavorites() { document.getElementById('mainContent').innerHTML = '<div class="panel">⭐ 收藏 (VIP)</div>'; }
+        function renderHistory() { document.getElementById('mainContent').innerHTML = '<div class="panel">📋 历史 (VIP)</div>'; }
         function renderSettings() {
             document.getElementById('mainContent').innerHTML = `
                 <div class="panel">
-                    <div class="panel-title">⚙️ 系统设置</div>
-                    <p>当前 Supabase URL: <code style="color:var(--cyan);">${STATE.settings.supabaseUrl || '未配置'}</code></p>
-                    <p style="font-size:0.7em;color:#888;">如需更换数据库，请修改代码顶部常量或在此填写后保存并重新登录。</p>
-                    <button class="btn small danger" onclick="resetSystem()">⚠️ 重置本地数据</button>
-                    <hr style="border-color:var(--border);">
-                    <p style="color:var(--gold);">📋 数据库建表SQL (复制到 Supabase SQL Editor)</p>
-                    <textarea readonly style="width:100%;height:150px;background:#000;color:#0f0;border:1px solid var(--border);padding:8px;">CREATE TABLE predictions (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id UUID REFERENCES auth.users NOT NULL, lottery TEXT, fronts TEXT, backs TEXT, score FLOAT, rating TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE profiles (id UUID REFERENCES auth.users PRIMARY KEY, vip BOOLEAN DEFAULT FALSE);
-ALTER TABLE predictions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own_pred" ON predictions FOR ALL USING (auth.uid()=user_id);
-CREATE POLICY "own_prof" ON profiles FOR ALL USING (auth.uid()=id);</textarea>
+                    <div class="panel-title">⚙️ 设置</div>
+                    <p>当前 Supabase: ${SUPABASE_URL || '未配置'}</p>
+                    <button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound; saveState(); showToast('音效:'+(STATE.settings.sound?'开':'关'));">🔊 音效 ${STATE.settings.sound?'开':'关'}</button>
+                    <button class="btn small" onclick="toggleMusic()">🎵 音乐 ${STATE.settings.music?'开':'关'}</button>
                 </div>`;
-        }
-        function resetSystem() {
-            if(confirm('确定重置所有本地数据吗？')) { STATE.favorites=[]; STATE.history=[]; STATE.freePredictCount=3; STATE.freeSimCount=10; saveState(); renderSettings(); }
         }
     </script>
 </body>
