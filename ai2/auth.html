@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI彩票模拟 - 登录注册 | Pro Max</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="ray-bg"></div>
+    <div class="mouse-glow" id="mouseGlow"></div>
+
+    <div class="login-container glass-panel hud-scan">
+        <div class="login-header">
+            <div class="main-title">AI 彩票模拟</div>
+            <div class="subtitle">Predictor Pro Max · Cyberpunk Edition</div>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label>📧 电子邮箱</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>🔐 密码</label>
+                <input type="password" id="loginPassword" placeholder="········" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary">🚀 进入AI控制中心</button>
+            <div class="error-msg" id="loginError"></div>
+        </form>
+
+        <!-- 注册表单 -->
+        <form id="registerForm" style="display:none;">
+            <div class="form-group">
+                <label>👤 用户名</label>
+                <input type="text" id="regUsername" placeholder="CyberPilot" required minlength="3">
+            </div>
+            <div class="form-group">
+                <label>📧 电子邮箱</label>
+                <input type="email" id="regEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>🔐 密码</label>
+                <input type="password" id="regPassword" placeholder="至少6位" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary">⚡ 注册新账户</button>
+            <div class="error-msg" id="regError"></div>
+            <div class="success-msg" id="regSuccess"></div>
+        </form>
+
+        <div class="toggle-text" id="toggleText">
+            还没有账户？ <span id="toggleBtn">立即注册</span>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // 粒子动画初始化（与主页面共用相同逻辑）
+        function initParticles() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2.5 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.6;
+                    this.speedY = (Math.random() - 0.5) * 0.6;
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    this.color = ['#00F5FF', '#6E00FF', '#00FF9D', '#ffffff'][Math.floor(Math.random() * 4)];
+                    this.life = Math.random() * 300 + 200;
+                    this.maxLife = this.life;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    const dx = mouseX - this.x;
+                    const dy = mouseY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 200) {
+                        const force = (200 - dist) / 200 * 0.04;
+                        this.speedX += dx / dist * force;
+                        this.speedY += dy / dist * force;
+                    }
+                    this.speedX *= 0.998;
+                    this.speedY *= 0.998;
+                    this.life--;
+                    if (this.life <= 0 || this.x < -20 || this.x > canvas.width + 20 || this.y < -20 || this.y > canvas.height + 20) {
+                        this.reset();
+                        this.x = Math.random() * canvas.width;
+                        this.y = Math.random() * canvas.height;
+                        this.life = this.maxLife;
+                    }
+                }
+                draw() {
+                    const alpha = (this.life / this.maxLife) * this.opacity;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = alpha;
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = alpha * 0.15;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 100) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = 'rgba(0,245,255,0.08)';
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                const glow = document.getElementById('mouseGlow');
+                if (glow) {
+                    glow.style.left = e.clientX + 'px';
+                    glow.style.top = e.clientY + 'px';
+                }
+            });
+            document.addEventListener('touchmove', (e) => {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }, { passive: true });
+        }
+        initParticles();
+    </script>
+</body>
+</html>
