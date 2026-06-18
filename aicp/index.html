@@ -84,13 +84,13 @@
         .chart-box { width:100%; height:350px; }
         .pred-group { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:8px; }
         .pred-item { display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); border-radius:12px; padding:8px 14px; }
+        .result-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     </style>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
 <div class="scanline"></div>
 
-<!-- 登录 -->
 <div id="loginOverlay" class="overlay">
     <div class="login-title">彩 票 预 测 模 拟</div>
     <div class="login-subtitle">▸ AI PREDICTION SYSTEM ◂</div>
@@ -101,7 +101,6 @@
         <p style="text-align:center;margin-top:15px;font-size:0.85em;">还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan);font-weight:bold;text-decoration:none;">立即注册 →</a></p>
     </div>
 </div>
-<!-- 注册 -->
 <div id="registerOverlay" class="overlay hidden">
     <div class="login-title">彩 票 预 测 模 拟</div>
     <div class="login-subtitle">▸ 创建新账号 ◂</div>
@@ -113,7 +112,6 @@
     </div>
 </div>
 
-<!-- 主应用 -->
 <div id="app" class="hidden">
     <nav class="navbar">
         <span class="logo">⚡ AI预测 Pro Max</span>
@@ -147,7 +145,6 @@
 <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
 <script>
-// ========== Supabase 配置 ==========
   const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 let sb = null;
@@ -163,7 +160,6 @@ function loadState(){ try{ const r=localStorage.getItem('lottery_pro_max'); if(r
 function saveState(){ localStorage.setItem('lottery_pro_max',JSON.stringify({favorites:STATE.favorites,predictions:STATE.predictions,history:STATE.history,settings:STATE.settings,user:STATE.user,freePredictCount:STATE.freePredictCount,freeSimCount:STATE.freeSimCount,customMusic:STATE.customMusic})); }
 loadState();
 
-// 粒子
 const canvasP=document.getElementById('particleCanvas'),ctxP=canvasP.getContext('2d');
 let particles=[],mouse={x:-999,y:-999};
 function resizeC(){ canvasP.width=innerWidth; canvasP.height=innerHeight; }
@@ -173,7 +169,6 @@ initP();
 function animP(){ ctxP.clearRect(0,0,canvasP.width,canvasP.height); particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<-20)p.x=canvasP.width+20;if(p.x>canvasP.width+20)p.x=-20;if(p.y<-20)p.y=canvasP.height+20;if(p.y>canvasP.height+20)p.y=-20;ctxP.beginPath();ctxP.arc(p.x,p.y,p.r,0,Math.PI*2);ctxP.fillStyle=p.color;ctxP.globalAlpha=p.alpha;ctxP.fill();});ctxP.globalAlpha=1;requestAnimationFrame(animP);}
 animP();
 
-// 音效
 let bgMusic=null;
 function initMusic(){ if(!bgMusic){bgMusic=new Audio();bgMusic.loop=true;bgMusic.volume=0.3;} if(STATE.customMusic)bgMusic.src=STATE.customMusic;else bgMusic.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='; if(STATE.settings.music)bgMusic.play().catch(()=>{}); }
 function toggleMusic(){ STATE.settings.music=!STATE.settings.music;saveState();if(STATE.settings.music){if(bgMusic)bgMusic.play().catch(()=>{});showToast('音乐已开启');}else{if(bgMusic)bgMusic.pause();showToast('音乐已关闭');}document.getElementById('musicToggle').textContent=STATE.settings.music?'🎵':'🔇'; }
@@ -190,16 +185,10 @@ function aiPredict(){ const cfg=getCfg();const nums=genRandom(cfg);const score=M
 function rollNumbersSequentially(containerId,fronts,backs,cfg,callback){
     const container=document.getElementById(containerId);if(!container)return;
     STATE.isRolling=true;container.innerHTML='';
-    const all=[];
-    fronts.forEach((n,i)=>all.push({num:n,type:'front',delay:i*600}));
-    backs.forEach((n,i)=>all.push({num:n,type:'back',delay:(fronts.length+i)*600}));
+    const all=[];fronts.forEach((n,i)=>all.push({num:n,type:'front',delay:i*600}));backs.forEach((n,i)=>all.push({num:n,type:'back',delay:(fronts.length+i)*600}));
     all.forEach(item=>{
         const ball=document.createElement('span');ball.className='ball rolling '+item.type;ball.textContent='?';ball.style.opacity='0.3';container.appendChild(ball);
-        setTimeout(()=>{
-            ball.style.opacity='1';ball.classList.add('rolling');
-            let cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax),cnt=0;const maxRolls=15+Math.floor(Math.random()*10);
-            const interval=setInterval(()=>{cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax);ball.textContent=String(cur).padStart(2,'0');cnt++;playTick();if(cnt>=maxRolls){clearInterval(interval);ball.textContent=String(item.num).padStart(2,'0');ball.classList.remove('rolling');ball.classList.add('stopped');playWin();setTimeout(()=>ball.classList.remove('stopped'),500);}},60);
-        },item.delay);
+        setTimeout(()=>{ball.style.opacity='1';ball.classList.add('rolling');let cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax),cnt=0;const maxR=15+Math.floor(Math.random()*10);const iv=setInterval(()=>{cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax);ball.textContent=String(cur).padStart(2,'0');cnt++;playTick();if(cnt>=maxR){clearInterval(iv);ball.textContent=String(item.num).padStart(2,'0');ball.classList.remove('rolling');ball.classList.add('stopped');playWin();setTimeout(()=>ball.classList.remove('stopped'),500);}},60);},item.delay);
     });
     const totalDuration=all.length?all[all.length-1].delay+1000:400;
     setTimeout(()=>{STATE.isRolling=false;if(callback)callback();},totalDuration);
@@ -212,7 +201,6 @@ function showVIPModal(){ const m=document.createElement('div');m.className='moda
 async function processPayment(){ showToast('处理中...','#FFD700');if(sb&&STATE.user){await sb.from('payments').insert({user_id:STATE.user.id,amount:9.9,status:'success'});await sb.from('profiles').update({vip:true}).eq('id',STATE.user.id);} STATE.user.vip=true;saveState();updateVIPUI();document.querySelector('.modal')?.remove();showToast('VIP已激活','#FFD700');await logAction('purchase_vip',{amount:9.9}); }
 function updateVIPUI(){ document.getElementById('vipBadge').style.display=isVIP()?'inline':'none';document.querySelectorAll('.vip-lock').forEach(l=>l.style.display=isVIP()?'none':'inline');document.getElementById('userDisplay').textContent=STATE.user?.email||'';document.getElementById('logoutBtn').style.display=STATE.user?'inline-block':'none';if(isAdmin())document.getElementById('adminTab').style.display='inline-block'; }
 
-// 认证
 async function handleRegister(){ const email=document.getElementById('regEmail').value.trim();const password=document.getElementById('regPass').value.trim();if(!email||password.length<6){showToast('邮箱和密码至少6位','#FF4D6D');return;}if(!sb){showToast('Supabase未配置','#FF4D6D');return;}const{data,error}=await sb.auth.signUp({email,password});if(error){showToast('注册失败:'+error.message,'#FF4D6D');return;}if(data.user){await sb.from('profiles').upsert({id:data.user.id,email,role:'user',vip:false});STATE.user={id:data.user.id,email,role:'user',vip:false};saveState();enterApp();showToast('注册成功！');} }
 async function handleLogin(){ const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPass').value.trim();if(!email||!password){showToast('请输入邮箱和密码','#FF4D6D');return;}if(!sb){showToast('Supabase未配置','#FF4D6D');return;}const{data,error}=await sb.auth.signInWithPassword({email,password});if(error){showToast('登录失败:'+error.message,'#FF4D6D');return;}if(data.user){const{data:profile}=await sb.from('profiles').select('*').eq('id',data.user.id).single();STATE.user={id:data.user.id,email,role:profile?.role||'user',vip:profile?.vip||false};saveState();enterApp();showToast('登录成功！');} }
 async function logout(){ if(sb)await sb.auth.signOut();STATE.user=null;saveState();location.reload(); }
@@ -223,7 +211,7 @@ async function checkSession(){ if(!sb)return;const{data:{session}}=await sb.auth
 if(STATE.user&&STATE.user.id){if(sb)checkSession();else enterApp();}else{if(sb)checkSession();}
 
 async function logAction(action,details={}){ if(sb&&STATE.user)await sb.from('user_logs').insert({user_id:STATE.user.id,action,details:JSON.stringify(details)}).then(()=>{}).catch(()=>{}); }
-// 核心：免费次数用完直接弹窗，不预测
+
 async function checkPredictionLimit(){
     if (isVIP()) return true;
     const today = new Date().toISOString().slice(0,10);
@@ -256,7 +244,6 @@ function switchTab(tab){ STATE.currentTab=tab;document.querySelectorAll('#navTab
 document.getElementById('navTabs').addEventListener('click',e=>{const tab=e.target.closest('.nav-tab');if(tab)switchTab(tab.dataset.tab);});
 function switchLottery(type){ STATE.lottery=type;document.getElementById('btnDLT').classList.toggle('active',type==='dlt');document.getElementById('btnSSQ').classList.toggle('active',type==='ssq');switchTab(STATE.currentTab); }
 
-// 数据大屏
 function getHotNumbers(count){ const freq={};STATE.history.filter(h=>h.lottery===STATE.lottery).forEach(h=>{h.numbers.fronts.forEach(n=>{freq[n]=(freq[n]||0)+1;});});return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,count).map(([n])=>+n).sort((a,b)=>a-b); }
 function buildDashboardHTML(){ const all=STATE.history.filter(h=>h.lottery===STATE.lottery);const total=all.length;const avgScore=total>0?(all.reduce((s,h)=>s+h.score,0)/total).toFixed(1):'-';const maxScore=total>0?Math.max(...all.map(h=>h.score)).toFixed(1):'-';const hot=getHotNumbers(5);return`<div class="dashboard-grid"><div class="dashboard-card"><div class="dashboard-value">${total}</div><div class="dashboard-label">总预测次数</div></div><div class="dashboard-card"><div class="dashboard-value">${avgScore}</div><div class="dashboard-label">平均评分</div></div><div class="dashboard-card"><div class="dashboard-value">${maxScore}</div><div class="dashboard-label">最高评分</div></div><div class="dashboard-card"><div class="dashboard-value">${total>0?(all.filter(h=>h.rating==='SSS'||h.rating==='SS').length):'-'}</div><div class="dashboard-label">S级以上预测</div></div><div class="dashboard-card" style="grid-column:span 2;"><div class="dashboard-label">🔥 热门${getCfg().fName}号码</div><div class="ball-row">${hot.length?hot.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.9em;">${String(n).padStart(2,'0')}</span>`).join(''):'<span style="color:#888;">暂无数据</span>'}</div></div></div>`; }
 
@@ -273,9 +260,7 @@ async function doPredict(count){
     const cfg=getCfg();const container=document.getElementById('predictResult');container.innerHTML='';
     const preds=[];for(let i=0;i<count;i++){const p=aiPredict();preds.push(p);STATE.predictions.unshift(p);STATE.history.unshift({...p,id:Date.now()+i});if(sb&&STATE.user&&STATE.user.id!=='guest'){sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then(()=>{}).catch(()=>{});}}
     saveState();
-
     const perRow = count===10 ? 5 : count;
-    const rows = Math.ceil(count/perRow);
     let idx=0;
     function showNext(){
         if(idx>=preds.length){updateDashboard();return;}
@@ -288,10 +273,7 @@ async function doPredict(count){
         rowEl.appendChild(item);
         const ballArea=document.getElementById(`ballArea${idx}`);
         const allBalls=[...p.numbers.fronts.map(n=>({num:n,type:'front'})),...p.numbers.backs.map(n=>({num:n,type:'back'}))];
-        allBalls.forEach((b,i)=>{
-            const span=document.createElement('span');span.className='ball rolling '+b.type;span.textContent='?';span.style.opacity='0.3';span.style.width='38px';span.style.height='38px';span.style.fontSize='0.85em';ballArea.appendChild(span);
-            setTimeout(()=>{span.style.opacity='1';let cur=rInt(1,b.type==='front'?cfg.fMax:cfg.bMax);let cnt=0;const maxR=12+Math.floor(Math.random()*8);const iv=setInterval(()=>{cur=rInt(1,b.type==='front'?cfg.fMax:cfg.bMax);span.textContent=String(cur).padStart(2,'0');cnt++;playTick();if(cnt>=maxR){clearInterval(iv);span.textContent=String(b.num).padStart(2,'0');span.classList.remove('rolling');span.classList.add('stopped');playWin();setTimeout(()=>span.classList.remove('stopped'),500);}},60);},i*500+100);
-        });
+        allBalls.forEach((b,i)=>{const span=document.createElement('span');span.className='ball rolling '+b.type;span.textContent='?';span.style.opacity='0.3';span.style.width='38px';span.style.height='38px';span.style.fontSize='0.85em';ballArea.appendChild(span);setTimeout(()=>{span.style.opacity='1';let cur=rInt(1,b.type==='front'?cfg.fMax:cfg.bMax);let cnt=0;const maxR=12+Math.floor(Math.random()*8);const iv=setInterval(()=>{cur=rInt(1,b.type==='front'?cfg.fMax:cfg.bMax);span.textContent=String(cur).padStart(2,'0');cnt++;playTick();if(cnt>=maxR){clearInterval(iv);span.textContent=String(b.num).padStart(2,'0');span.classList.remove('rolling');span.classList.add('stopped');playWin();setTimeout(()=>span.classList.remove('stopped'),500);}},60);},i*500+100);});
         idx++;setTimeout(showNext,allBalls.length*500+400);
     }
     showNext();
@@ -302,28 +284,28 @@ function randomPick(){ const cfg=getCfg();const nums=genRandom(cfg);const score=
 function saveFavorite(numsStr,score,rating){ if(!requireVIP('收藏'))return;const exists=STATE.favorites.find(f=>f.numsStr===numsStr&&f.lottery===STATE.lottery);if(exists){showToast('已收藏');return;}STATE.favorites.push({numsStr,score,rating,lottery:STATE.lottery,time:new Date().toISOString()});saveState();showToast('⭐已收藏'); }
 
 function renderAnalysis(){ const cfg=getCfg();const hot=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);const cold=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);document.getElementById('mainContent').innerHTML=`<div class="grid-2"><div class="panel"><div class="panel-title">🔥 热号TOP10 - ${cfg.fName}</div><div class="ball-container">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div><div class="panel"><div class="panel-title">❄️ 冷号TOP10 - ${cfg.fName}</div><div class="ball-container">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div><div class="panel"><div class="panel-title">📉 遗漏分析</div><table><tr><th>号码</th><th>当前遗漏</th><th>平均遗漏</th></tr>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div><div class="panel"><div class="panel-title">📐 和值走势</div><div class="chart-box" id="chartSum"></div></div></div>`;setTimeout(()=>{const el=document.getElementById('chartSum');if(el){const c=echarts.init(el);c.setOption({xAxis:{data:['1','2','3']},yAxis:{},series:[{data:[50,80,60],type:'line'}]});}},300); }
-function renderLab(){ document.getElementById('mainContent').innerHTML=`<div class="grid-2"><div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div><button class="btn small" onclick="runMonteCarlo(1000)">1000次</button><button class="btn small" onclick="runMonteCarlo(10000)">10000次</button><div id="monteResult" class="ball-container" style="margin-top:10px;"></div></div><div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div><button class="btn small primary" onclick="runMarkov()">生成推荐号码</button><div id="markovResult" class="ball-container" style="margin-top:10px;"></div></div><div class="panel"><div class="panel-title">📐 综合评分权重</div><table>${['热号','冷号','遗漏','马尔可夫链','蒙特卡洛','贝叶斯'].map((name,i)=>{const k=['hot','cold','miss','markov','monte','bayes'][i];return`<tr><td>${name}</td><td id="w${k}">${STATE.settings.weights[k]}%</td><td><input type="range" min="0" max="40" value="${STATE.settings.weights[k]}" oninput="updateWeight('${k}',this.value)"></td></tr>`;}).join('')}</table></div></div>`; }
-function runMonteCarlo(times){ const cfg=getCfg();const ff={},bf={};for(let i=1;i<=cfg.fMax;i++)ff[i]=0;for(let i=1;i<=cfg.bMax;i++)bf[i]=0;for(let i=0;i<times;i++){const n=genRandom(cfg);n.fronts.forEach(x=>ff[x]++);n.backs.forEach(x=>bf[x]++);}const fronts=Object.entries(ff).sort((a,b)=>b[1]-a[1]).slice(0,cfg.fCnt).map(([n])=>+n).sort((a,b)=>a-b);const backs=Object.entries(bf).sort((a,b)=>b[1]-a[1]).slice(0,cfg.bCnt).map(([n])=>+n).sort((a,b)=>a-b);rollNumbersSequentially('monteResult',fronts,backs,cfg); }
-function runMarkov(){ const cfg=getCfg();const bm=(max)=>{const m={};for(let i=1;i<=max;i++)m[i]={};for(let i=1;i<=max;i++){let t=0;for(let j=1;j<=max;j++)if(i!==j){m[i][j]=Math.random();t+=m[i][j];}for(let j=1;j<=max;j++)if(i!==j)m[i][j]/=t;}return m;};const fm=bm(cfg.fMax),bm2=bm(cfg.bMax);const g=(mx,max,cnt)=>{const s=new Set();let c=rInt(1,max);s.add(c);while(s.size<cnt){let b=null,p=0;for(let j=1;j<=max;j++)if(!s.has(j)){const pr=mx[c]?.[j]||0;if(pr>p){p=pr;b=j;}}if(!b)do{b=rInt(1,max);}while(s.has(b));s.add(b);c=b;}return[...s].sort((a,b)=>a-b);};const fronts=g(fm,cfg.fMax,cfg.fCnt),backs=g(bm2,cfg.bMax,cfg.bCnt);rollNumbersSequentially('markovResult',fronts,backs,cfg); }
+
+function renderLab(){ document.getElementById('mainContent').innerHTML=`<div class="grid-2"><div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div><button class="btn small" onclick="runMonteCarlo(1000)">1000次</button><button class="btn small" onclick="runMonteCarlo(10000)">10000次</button><div id="monteResult" class="ball-container" style="margin-top:10px;flex-direction:column;align-items:flex-start;"></div></div><div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div><button class="btn small primary" onclick="runMarkov()">生成5组推荐号码</button><div id="markovResult" class="ball-container" style="margin-top:10px;flex-direction:column;align-items:flex-start;"></div></div><div class="panel"><div class="panel-title">📐 综合评分权重</div><table>${['热号','冷号','遗漏','马尔可夫链','蒙特卡洛','贝叶斯'].map((name,i)=>{const k=['hot','cold','miss','markov','monte','bayes'][i];return`<tr><td>${name}</td><td id="w${k}">${STATE.settings.weights[k]}%</td><td><input type="range" min="0" max="40" value="${STATE.settings.weights[k]}" oninput="updateWeight('${k}',this.value)"></td></tr>`;}).join('')}</table></div></div>`; }
+
+function runMonteCarlo(times){ const cfg=getCfg();const ff={},bf={};for(let i=1;i<=cfg.fMax;i++)ff[i]=0;for(let i=1;i<=cfg.bMax;i++)bf[i]=0;for(let i=0;i<times;i++){const n=genRandom(cfg);n.fronts.forEach(x=>ff[x]++);n.backs.forEach(x=>bf[x]++);} const sortedFronts=Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n); const sortedBacks=Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n); const groups=[]; for(let i=0;i<5;i++){ const start=i*cfg.fCnt; const end=start+cfg.fCnt; if(sortedFronts.length>=end){ groups.push({fronts:sortedFronts.slice(start,end).sort((a,b)=>a-b),backs:sortedBacks.slice(i*cfg.bCnt,i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b)||[]}); } } const container=document.getElementById('monteResult'); if(container){ container.innerHTML=groups.map((g,idx)=>`<div class="result-row"><span style="color:var(--green);min-width:60px;">组${idx+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')} <span style="margin:0 5px;">+</span> ${g.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join(''); } }
+
+function runMarkov(){ const cfg=getCfg(); const buildMatrix=(max)=>{const m={};for(let i=1;i<=max;i++)m[i]={};for(let i=1;i<=max;i++){let t=0;for(let j=1;j<=max;j++)if(i!==j){m[i][j]=Math.random();t+=m[i][j];}for(let j=1;j<=max;j++)if(i!==j)m[i][j]/=t;}return m;}; const fm=buildMatrix(cfg.fMax),bm=buildMatrix(cfg.bMax); const generate=(mx,max,cnt)=>{const s=new Set();let c=rInt(1,max);s.add(c);while(s.size<cnt){let b=null,p=0;for(let j=1;j<=max;j++)if(!s.has(j)){const pr=mx[c]?.[j]||0;if(pr>p){p=pr;b=j;}}if(!b)do{b=rInt(1,max);}while(s.has(b));s.add(b);c=b;}return[...s].sort((a,b)=>a-b);}; const groups=[]; for(let i=0;i<5;i++){ const fronts=generate(fm,cfg.fMax,cfg.fCnt); const backs=generate(bm,cfg.bMax,cfg.bCnt); groups.push({fronts,backs}); } const container=document.getElementById('markovResult'); if(container){ container.innerHTML=groups.map((g,idx)=>`<div class="result-row"><span style="color:var(--green);min-width:60px;">组${idx+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')} <span style="margin:0 5px;">+</span> ${g.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join(''); } }
+
 function updateWeight(key,val){ STATE.settings.weights[key]=parseInt(val);saveState();renderLab(); }
 function renderCharts(){ document.getElementById('mainContent').innerHTML='<div class="panel"><div class="panel-title">📈 图表中心</div><div class="chart-box" id="mainChart"></div></div>';setTimeout(()=>{const el=document.getElementById('mainChart');if(el){const c=echarts.init(el);c.setOption({xAxis:{data:['A','B']},yAxis:{},series:[{data:[1,2],type:'line'}]});}},300); }
 function renderSimulator(){ const cfg=getCfg();const left=isVIP()?'∞':STATE.freeSimCount;document.getElementById('mainContent').innerHTML=`<div class="panel" style="text-align:center;"><div class="panel-title">🎰 ${cfg.name}摇奖模拟 (剩余${left}次)</div><div class="ball-container" id="simBalls"></div><button class="btn primary" onclick="startSim()">🎲 开始摇奖</button></div>`; }
 function startSim(){ if(!isVIP()&&STATE.freeSimCount<=0){showVIPModal();return;}if(!isVIP())STATE.freeSimCount--;saveState();const cfg=getCfg();rollNumbersSequentially('simBalls',genRandom(cfg).fronts,genRandom(cfg).backs,cfg); }
 
-async function fetchRealResults(lotteryType){
-    const apiKey=STATE.settings.apiKey;
-    if(apiKey){try{const code=lotteryType==='dlt'?'dlt':'ssq';const url=`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&issueno=&start=0&num=20`;const resp=await fetch(url);const data=await resp.json();if(data.status==='0'&&data.result&&data.result.list){return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,lotteryType==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(lotteryType==='dlt'?5:6).map(Number)}));}}catch(e){}}
-    return generateMockResults(lotteryType);
-}
-function generateMockResults(type){ const results=[];const now=new Date();for(let i=0;i<20;i++){const cfg=type==='dlt'?{fMax:35,fCnt:5,bMax:12,bCnt:2}:{fMax:33,fCnt:6,bMax:16,bCnt:1};const nums=genRandom(cfg);const date=new Date(now.getTime()-i*2*24*60*60*1000);results.push({issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,date:date.toISOString().slice(0,10),fronts:nums.fronts,backs:nums.backs});}return results; }
-async function renderResults(){ const cfg=getCfg();document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">📡 实时开奖 - ${cfg.name} (近20期)</div><div id="liveResult"></div><button class="btn small primary" onclick="renderResults()">🔄 刷新</button></div>`;const container=document.getElementById('liveResult');container.innerHTML='<span style="color:var(--cyan);">加载中...</span>';const results=await fetchRealResults(STATE.lottery);container.innerHTML='';results.forEach((r,idx)=>{const row=document.createElement('div');row.style.margin='6px 0';row.innerHTML=`<strong>${r.issue}</strong> (${r.date}) ${r.fronts.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.75em;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">${String(n).padStart(2,'0')}</span>`).join('')} + ${r.backs.map(n=>`<span class="ball back" style="width:32px;height:32px;font-size:0.75em;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">${String(n).padStart(2,'0')}</span>`).join('')}`;container.appendChild(row);}); }
+async function fetchRealResults(lotteryType){const apiKey=STATE.settings.apiKey;if(apiKey){try{const code=lotteryType==='dlt'?'dlt':'ssq';const url=`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&issueno=&start=0&num=20`;const resp=await fetch(url);const data=await resp.json();if(data.status==='0'&&data.result&&data.result.list){return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,lotteryType==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(lotteryType==='dlt'?5:6).map(Number)}));}}catch(e){}}return generateMockResults(lotteryType);}
+function generateMockResults(type){const results=[];const now=new Date();for(let i=0;i<20;i++){const cfg=type==='dlt'?{fMax:35,fCnt:5,bMax:12,bCnt:2}:{fMax:33,fCnt:6,bMax:16,bCnt:1};const nums=genRandom(cfg);const date=new Date(now.getTime()-i*2*24*60*60*1000);results.push({issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,date:date.toISOString().slice(0,10),fronts:nums.fronts,backs:nums.backs});}return results;}
+async function renderResults(){const cfg=getCfg();document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">📡 实时开奖 - ${cfg.name} (近20期)</div><div id="liveResult"></div><button class="btn small primary" onclick="renderResults()">🔄 刷新</button></div>`;const container=document.getElementById('liveResult');container.innerHTML='<span style="color:var(--cyan);">加载中...</span>';const results=await fetchRealResults(STATE.lottery);container.innerHTML='';results.forEach((r)=>{const row=document.createElement('div');row.style.margin='6px 0';row.innerHTML=`<strong>${r.issue}</strong> (${r.date}) ${r.fronts.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.75em;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">${String(n).padStart(2,'0')}</span>`).join('')} + ${r.backs.map(n=>`<span class="ball back" style="width:32px;height:32px;font-size:0.75em;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">${String(n).padStart(2,'0')}</span>`).join('')}`;container.appendChild(row);});}
 
-function renderFavorites(){ const cfg=getCfg();const fl=STATE.favorites.filter(f=>f.lottery===STATE.lottery);document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">⭐ 收藏中心 - ${cfg.name} (${fl.length}条)</div>${fl.length?fl.map((f,i)=>`<p style="text-align:center;">${f.numsStr.replace('|',' | ')} 评分:${f.score||'-'} <button class="btn small danger" onclick="removeFavorite(${i})">🗑</button></p>`).join(''):'<p>暂无收藏</p>'}</div>`; }
-function removeFavorite(i){ const cfg=getCfg();const fl=STATE.favorites.filter(f=>f.lottery===STATE.lottery);const ai=STATE.favorites.findIndex(f=>f===fl[i]);if(ai>=0){STATE.favorites.splice(ai,1);saveState();renderFavorites();} }
-function renderHistory(){ const r=STATE.history.slice(0,30);document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">📋 预测历史 (最近${r.length}条)</div>${r.length?r.map(h=>`<p style="text-align:center;font-size:0.8em;">${new Date(h.timestamp).toLocaleString()} - ${h.lottery==='dlt'?'大乐透':'双色球'} - ${h.numbers.fronts.join(' ')} | ${h.numbers.backs.join(' ')} (${h.score}分 ${h.rating})</p>`).join(''):'<p>暂无记录</p>'}</div>`; }
-async function renderAdmin(){ if(!isAdmin()){showToast('权限不足','#FF4D6D');return;}let html='<div class="panel"><div class="panel-title">👑 管理后台</div>';if(sb){const{data:users}=await sb.from('profiles').select('*');const{data:logs}=await sb.from('user_logs').select('*').order('created_at',{ascending:false}).limit(50);const{data:payments}=await sb.from('payments').select('*');html+=`<h3>用户列表</h3><table><tr><th>邮箱</th><th>角色</th><th>VIP</th></tr>${(users||[]).map(u=>`<tr><td>${u.email||''}</td><td>${u.role||'user'}</td><td>${u.vip?'是':'否'}</td></tr>`).join('')}</table><h3>最近日志</h3><table><tr><th>动作</th><th>详情</th><th>时间</th></tr>${(logs||[]).map(l=>`<tr><td>${l.action}</td><td>${l.details||''}</td><td>${new Date(l.created_at).toLocaleString()}</td></tr>`).join('')}</table><h3>收益统计</h3><p>支付记录:${(payments||[]).length}笔 | 模拟收入:¥${((payments||[]).length*9.9).toFixed(1)}</p>`;}html+='</div>';document.getElementById('mainContent').innerHTML=html; }
-function renderSettings(){ document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">⚙️ 系统设置</div><button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound;saveState();this.textContent='音效 '+(STATE.settings.sound?'开':'关');">音效 ${STATE.settings.sound?'开':'关'}</button><button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button><div style="margin-top:10px;"><input type="file" id="musicFileInput" accept="audio/*"><button class="btn small" onclick="uploadMusic()">上传音乐</button>${STATE.customMusic?'<span style="color:var(--green);margin-left:8px;">✓已自定义</span>':''}</div><div style="margin-top:10px;"><label>彩票API Key:</label><input id="apiKeyInput" value="${STATE.settings.apiKey||''}" style="width:200px;padding:5px;background:#000;color:#fff;border:1px solid var(--border);margin-left:8px;"><button class="btn small" onclick="STATE.settings.apiKey=document.getElementById('apiKeyInput').value;saveState();showToast('API Key已保存');" style="margin-left:5px;">保存</button></div><p style="margin-top:10px;">Supabase: ${SUPABASE_URL}</p></div>`; }
-function uploadMusic(){ const f=document.getElementById('musicFileInput').files[0];if(!f)return;const r=new FileReader();r.onload=e=>{STATE.customMusic=e.target.result;saveState();if(bgMusic){bgMusic.src=STATE.customMusic;if(STATE.settings.music)bgMusic.play().catch(()=>{});}showToast('音乐已更新');};r.readAsDataURL(f); }
+function renderFavorites(){const cfg=getCfg();const fl=STATE.favorites.filter(f=>f.lottery===STATE.lottery);document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">⭐ 收藏中心 - ${cfg.name} (${fl.length}条)</div>${fl.length?fl.map((f,i)=>`<p style="text-align:center;">${f.numsStr.replace('|',' | ')} 评分:${f.score||'-'} <button class="btn small danger" onclick="removeFavorite(${i})">🗑</button></p>`).join(''):'<p>暂无收藏</p>'}</div>`;}
+function removeFavorite(i){const cfg=getCfg();const fl=STATE.favorites.filter(f=>f.lottery===STATE.lottery);const ai=STATE.favorites.findIndex(f=>f===fl[i]);if(ai>=0){STATE.favorites.splice(ai,1);saveState();renderFavorites();}}
+function renderHistory(){const r=STATE.history.slice(0,30);document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">📋 预测历史 (最近${r.length}条)</div>${r.length?r.map(h=>`<p style="text-align:center;font-size:0.8em;">${new Date(h.timestamp).toLocaleString()} - ${h.lottery==='dlt'?'大乐透':'双色球'} - ${h.numbers.fronts.join(' ')} | ${h.numbers.backs.join(' ')} (${h.score}分 ${h.rating})</p>`).join(''):'<p>暂无记录</p>'}</div>`;}
+async function renderAdmin(){if(!isAdmin()){showToast('权限不足','#FF4D6D');return;}let html='<div class="panel"><div class="panel-title">👑 管理后台</div>';if(sb){const{data:users}=await sb.from('profiles').select('*');const{data:logs}=await sb.from('user_logs').select('*').order('created_at',{ascending:false}).limit(50);const{data:payments}=await sb.from('payments').select('*');html+=`<h3>用户列表</h3><table><tr><th>邮箱</th><th>角色</th><th>VIP</th></tr>${(users||[]).map(u=>`<tr><td>${u.email||''}</td><td>${u.role||'user'}</td><td>${u.vip?'是':'否'}</td></tr>`).join('')}</table><h3>最近日志</h3><table><tr><th>动作</th><th>详情</th><th>时间</th></tr>${(logs||[]).map(l=>`<tr><td>${l.action}</td><td>${l.details||''}</td><td>${new Date(l.created_at).toLocaleString()}</td></tr>`).join('')}</table><h3>收益统计</h3><p>支付记录:${(payments||[]).length}笔 | 模拟收入:¥${((payments||[]).length*9.9).toFixed(1)}</p>`;}html+='</div>';document.getElementById('mainContent').innerHTML=html;}
+function renderSettings(){document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">⚙️ 系统设置</div><button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound;saveState();this.textContent='音效 '+(STATE.settings.sound?'开':'关');">音效 ${STATE.settings.sound?'开':'关'}</button><button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button><div style="margin-top:10px;"><input type="file" id="musicFileInput" accept="audio/*"><button class="btn small" onclick="uploadMusic()">上传音乐</button>${STATE.customMusic?'<span style="color:var(--green);margin-left:8px;">✓已自定义</span>':''}</div><div style="margin-top:10px;"><label>彩票API Key:</label><input id="apiKeyInput" value="${STATE.settings.apiKey||''}" style="width:200px;padding:5px;background:#000;color:#fff;border:1px solid var(--border);margin-left:8px;"><button class="btn small" onclick="STATE.settings.apiKey=document.getElementById('apiKeyInput').value;saveState();showToast('API Key已保存');" style="margin-left:5px;">保存</button></div><p style="margin-top:10px;">Supabase: ${SUPABASE_URL}</p></div>`;}
+function uploadMusic(){const f=document.getElementById('musicFileInput').files[0];if(!f)return;const r=new FileReader();r.onload=e=>{STATE.customMusic=e.target.result;saveState();if(bgMusic){bgMusic.src=STATE.customMusic;if(STATE.settings.music)bgMusic.play().catch(()=>{});}showToast('音乐已更新');};r.readAsDataURL(f);}
 </script>
 </body>
 </html>
