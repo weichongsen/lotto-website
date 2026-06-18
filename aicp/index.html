@@ -4,115 +4,595 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>AI彩票预测专家 Pro Max | Cyberpunk Ultimate Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
     <style>
         :root {
-            --cyan: #00F5FF; --purple: #6E00FF; --green: #00FF9D; --red: #FF4D6D;
-            --bg: #0B1020; --panel: rgba(10, 18, 40, 0.85); --border: rgba(0, 245, 255, 0.3);
-            --glow: 0 0 20px rgba(0, 245, 255, 0.4); --text: #c8d6e5; --gold: #FFD700;
+            --cyan: #00F5FF;
+            --purple: #6E00FF;
+            --green: #00FF9D;
+            --red: #FF4D6D;
+            --bg: #0B1020;
+            --panel: rgba(10, 18, 40, 0.85);
+            --border: rgba(0, 245, 255, 0.3);
+            --glow: 0 0 20px rgba(0, 245, 255, 0.4);
+            --text: #c8d6e5;
+            --gold: #FFD700;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            background: var(--bg); color: var(--text);
-            font-family: 'Courier New', monospace; overflow-x: hidden; min-height:100vh;
-            user-select: none; -webkit-tap-highlight-color: transparent;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        #particleCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
-        .scanline { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.015) 2px, rgba(0,245,255,0.015) 4px); }
-        #app { position:relative; z-index:10; display:flex; flex-direction:column; min-height:100vh; }
-        .navbar { background: rgba(8,14,30,0.9); border-bottom:2px solid var(--border); backdrop-filter:blur(20px); position:sticky; top:0; z-index:100; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:8px 16px; gap:8px; box-shadow:0 4px 30px rgba(0,0,0,0.6); }
-        .navbar .logo { font-size:1.3em; font-weight:900; background:linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:2px; white-space:nowrap; }
-        .navbar .nav-tabs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-        .navbar .nav-tab { padding:7px 13px; border:1px solid rgba(0,245,255,0.35); border-radius:20px; cursor:pointer; font-size:0.78em; transition:all 0.3s; background:transparent; color:var(--text); white-space:nowrap; letter-spacing:1px; }
-        .navbar .nav-tab:hover { border-color:var(--cyan); box-shadow:0 0 15px rgba(0,245,255,0.35); color:#fff; background:rgba(0,245,255,0.08); }
-        .navbar .nav-tab.active { background:rgba(0,245,255,0.15); border-color:var(--cyan); color:#fff; box-shadow:var(--glow); font-weight:bold; }
-        .navbar .lottery-switch { display:flex; gap:4px; background:rgba(0,0,0,0.4); border-radius:25px; padding:3px; border:1px solid var(--border); }
-        .navbar .lottery-switch button { padding:7px 16px; border-radius:22px; border:none; cursor:pointer; font-weight:bold; font-size:0.8em; transition:all 0.3s; background:transparent; color:var(--text); letter-spacing:1px; }
-        .navbar .lottery-switch button.active { background:var(--cyan); color:#000; box-shadow:0 0 20px rgba(0,245,255,0.6); }
-        .main-content { flex:1; padding:16px; max-width:1400px; margin:0 auto; width:100%; }
-        .panel { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; backdrop-filter:blur(10px); box-shadow:0 8px 40px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
-        .panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--cyan), transparent); opacity:0.6; }
-        .panel-title { font-size:1.1em; font-weight:bold; color:var(--cyan); letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; text-transform:uppercase; }
-        .panel-title::before { content:'◆'; font-size:0.6em; animation:pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        .ball-container { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; }
-        .ball { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.2em; color:#fff; position:relative; box-shadow:0 0 25px rgba(0,245,255,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); transition:transform 0.2s; }
-        .ball.front { background:radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b 90%); box-shadow:0 0 25px rgba(255,77,109,0.6); }
-        .ball.back { background:radial-gradient(circle at 35% 30%, #5dade2, #1a5276 90%); box-shadow:0 0 25px rgba(0,180,255,0.6); }
-        .ball.rolling { animation:ballRoll 0.08s infinite; }
-        @keyframes ballRoll { 0%{transform:translateY(-3px);} 50%{transform:translateY(3px);} 100%{transform:translateY(-3px);} }
-        .ball.stopped { animation:ballStop 0.5s ease-out; }
-        @keyframes ballStop { 0%{transform:scale(1.3); box-shadow:0 0 50px rgba(255,215,0,1);} 60%{transform:scale(0.9);} 100%{transform:scale(1);} }
-        .btn { padding:10px 20px; border-radius:25px; border:1px solid var(--border); cursor:pointer; font-weight:bold; letter-spacing:1px; transition:all 0.3s; background:transparent; color:var(--text); font-family:inherit; font-size:0.85em; white-space:nowrap; }
-        .btn:hover { box-shadow:var(--glow); border-color:var(--cyan); color:#fff; transform:translateY(-2px); }
-        .btn.primary { background:linear-gradient(135deg, rgba(0,245,255,0.2), rgba(110,0,255,0.2)); border-color:var(--cyan); color:#fff; box-shadow:0 0 20px rgba(0,245,255,0.25); }
-        .btn.primary:hover { box-shadow:0 0 35px rgba(0,245,255,0.5); }
-        .btn.danger { border-color:var(--red); color:var(--red); }
-        .btn.danger:hover { box-shadow:0 0 25px rgba(255,77,109,0.5); }
-        .btn.small { padding:5px 12px; font-size:0.7em; border-radius:15px; }
-        .btn.vip { border-color:var(--gold); color:var(--gold); background:rgba(255,215,0,0.1); }
-        .btn.vip:hover { box-shadow:0 0 25px rgba(255,215,0,0.5); }
-        .rating-badge { display:inline-block; padding:6px 16px; border-radius:20px; font-weight:900; font-size:1em; letter-spacing:2px; border:2px solid; }
-        .rating-sss { border-color:#FFD700; color:#FFD700; box-shadow:0 0 30px rgba(255,215,0,0.7); animation:glowGold 1.5s infinite; }
-        @keyframes glowGold { 0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.5);} 50%{box-shadow:0 0 45px rgba(255,215,0,1);} }
-        .rating-ss { border-color:#ff6b9d; color:#ff6b9d; }
-        .rating-s { border-color:#ff9f43; color:#ff9f43; }
-        .rating-a { border-color:#54a0ff; color:#54a0ff; }
-        .rating-b { border-color:#5f27cd; color:#5f27cd; }
-        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,20,0.95); display:flex; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(10px); }
-        .overlay .login-title { font-size:2.8em; font-weight:900; letter-spacing:4px; text-align:center; margin-bottom:10px; background:linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:titleShine 3s infinite; }
-        @keyframes titleShine { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.5);} }
-        .overlay .login-subtitle { color:var(--cyan); letter-spacing:3px; margin-bottom:25px; font-size:0.9em; opacity:0.8; }
-        .overlay .login-box { background:var(--panel); border:2px solid var(--border); border-radius:20px; padding:30px; width:90%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.7); }
-        .overlay input { width:100%; padding:12px 16px; margin:8px 0; border-radius:25px; border:1px solid var(--border); background:rgba(0,0,0,0.4); color:#fff; font-family:inherit; font-size:0.9em; letter-spacing:1px; outline:none; transition:all 0.3s; }
-        .overlay input:focus { border-color:var(--cyan); box-shadow:0 0 20px rgba(0,245,255,0.3); }
-        .modal { position:fixed; top:0; left:0; width:100%; height:100%; z-index:8000; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); }
-        .modal-content { background:var(--panel); border:2px solid var(--border); border-radius:20px; padding:24px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); }
-        .toast { position:fixed; top:20px; right:20px; z-index:9999; padding:12px 20px; border-radius:25px; background:var(--panel); border:1px solid var(--green); color:var(--green); letter-spacing:1px; font-weight:bold; animation:toastIn 0.4s ease-out; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
-        @keyframes toastIn { from{opacity:0;transform:translateX(100px);} to{opacity:1;transform:translateX(0);} }
-        .music-btn { position:fixed; bottom:20px; right:20px; z-index:1000; width:50px; height:50px; border-radius:50%; background:var(--panel); border:1px solid var(--border); color:var(--cyan); font-size:1.4em; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s; }
-        .music-btn:hover { box-shadow:0 0 20px rgba(0,245,255,0.6); }
-        .predict-row { display:flex; align-items:center; gap:15px; margin:10px 0; flex-wrap:wrap; }
-        .predict-left { min-width:80px; text-align:center; }
-        .predict-right { flex:1; display:flex; flex-direction:column; gap:8px; }
-        .ball-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 245, 255, 0.015) 2px, rgba(0, 245, 255, 0.015) 4px);
+        }
+        #app {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(8, 14, 30, 0.9);
+            border-bottom: 2px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            gap: 8px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+        }
+        .navbar .logo {
+            font-size: 1.3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        .navbar .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .navbar .nav-tab {
+            padding: 7px 13px;
+            border: 1px solid rgba(0, 245, 255, 0.35);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.78em;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text);
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+        .navbar .nav-tab:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.35);
+            color: #fff;
+            background: rgba(0, 245, 255, 0.08);
+        }
+        .navbar .nav-tab.active {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: var(--cyan);
+            color: #fff;
+            box-shadow: var(--glow);
+            font-weight: bold;
+        }
+        .navbar .lottery-switch {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 25px;
+            padding: 3px;
+            border: 1px solid var(--border);
+        }
+        .navbar .lottery-switch button {
+            padding: 7px 16px;
+            border-radius: 22px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text);
+            letter-spacing: 1px;
+        }
+        .navbar .lottery-switch button.active {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.6);
+        }
+        .main-content {
+            flex: 1;
+            padding: 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0.6;
+        }
+        .panel-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+        .panel-title::before {
+            content: '◆';
+            font-size: 0.6em;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .ball-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .ball {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2em;
+            color: #fff;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5), inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+        .ball.front {
+            background: radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b 90%);
+            box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
+        }
+        .ball.back {
+            background: radial-gradient(circle at 35% 30%, #5dade2, #1a5276 90%);
+            box-shadow: 0 0 25px rgba(0, 180, 255, 0.6);
+        }
+        .ball.rolling {
+            animation: ballRoll 0.08s infinite;
+        }
+        @keyframes ballRoll {
+            0% {
+                transform: translateY(-3px);
+            }
+            50% {
+                transform: translateY(3px);
+            }
+            100% {
+                transform: translateY(-3px);
+            }
+        }
+        .ball.stopped {
+            animation: ballStop 0.5s ease-out;
+        }
+        @keyframes ballStop {
+            0% {
+                transform: scale(1.3);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+            }
+            60% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            box-shadow: var(--glow);
+            border-color: var(--cyan);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .btn.primary {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(110, 0, 255, 0.2));
+            border-color: var(--cyan);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.25);
+        }
+        .btn.primary:hover {
+            box-shadow: 0 0 35px rgba(0, 245, 255, 0.5);
+        }
+        .btn.danger {
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .btn.danger:hover {
+            box-shadow: 0 0 25px rgba(255, 77, 109, 0.5);
+        }
+        .btn.small {
+            padding: 5px 12px;
+            font-size: 0.7em;
+            border-radius: 15px;
+        }
+        .btn.vip {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .btn.vip:hover {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+        .rating-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1em;
+            letter-spacing: 2px;
+            border: 2px solid;
+        }
+        .rating-sss {
+            border-color: #FFD700;
+            color: #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+            animation: glowGold 1.5s infinite;
+        }
+        @keyframes glowGold {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 45px rgba(255, 215, 0, 1);
+            }
+        }
+        .rating-ss {
+            border-color: #ff6b9d;
+            color: #ff6b9d;
+        }
+        .rating-s {
+            border-color: #ff9f43;
+            color: #ff9f43;
+        }
+        .rating-a {
+            border-color: #54a0ff;
+            color: #54a0ff;
+        }
+        .rating-b {
+            border-color: #5f27cd;
+            color: #5f27cd;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(5, 8, 20, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+        .overlay .login-title {
+            font-size: 2.8em;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #FFD700, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShine 3s infinite;
+        }
+        @keyframes titleShine {
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.5);
+            }
+        }
+        .overlay .login-subtitle {
+            color: var(--cyan);
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .overlay .login-box {
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        }
+        .overlay input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .overlay input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 8000;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 25px;
+            background: var(--panel);
+            border: 1px solid var(--green);
+            color: var(--green);
+            letter-spacing: 1px;
+            font-weight: bold;
+            animation: toastIn 0.4s ease-out;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--cyan);
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .music-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.6);
+        }
+        .predict-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .predict-left {
+            min-width: 80px;
+            text-align: center;
+        }
+        .predict-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ball-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .vip-lock {
+            color: var(--gold);
+            font-size: 0.8em;
+            margin-left: 4px;
+        }
+        @media (max-width: 768px) {
+            .navbar .nav-tab {
+                padding: 5px 9px;
+                font-size: 0.65em;
+            }
+            .navbar .logo {
+                font-size: 1em;
+            }
+            .ball {
+                width: 38px;
+                height: 38px;
+                font-size: 0.9em;
+            }
+            .overlay .login-title {
+                font-size: 1.8em;
+            }
+            .panel {
+                padding: 12px;
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .chart-box {
+            width: 100%;
+            height: 350px;
+        }
     </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
     <div class="scanline"></div>
 
-    <!-- 登录覆盖层 -->
+    <!-- ========== 登录页面 ========== -->
     <div id="loginOverlay" class="overlay">
         <div class="login-title">彩 票 预 测 模 拟</div>
         <div class="login-subtitle">▸ AI PREDICTION SYSTEM ◂</div>
         <div class="login-box">
-            <input type="email" id="loginEmail" placeholder="邮箱">
-            <input type="password" id="loginPass" placeholder="密码">
+            <input type="email" id="loginEmail" placeholder="请输入邮箱地址" autocomplete="email">
+            <input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password">
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn primary" onclick="handleLogin()" style="flex:1;">登录</button>
+                <button class="btn primary" onclick="handleLogin()" style="flex:1;">🔐 登 录</button>
             </div>
-            <p style="text-align:center;margin-top:15px;">还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan);">立即注册</a></p>
+            <p style="text-align:center; margin-top:15px; font-size:0.85em; color:var(--text);">
+                还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan); font-weight:bold; text-decoration:none;">立即注册 →</a>
+            </p>
+            <p style="text-align:center; margin-top:8px; font-size:0.65em; color:#888;">
+                注册后请查看邮箱验证（Supabase Auth）
+            </p>
         </div>
     </div>
 
-    <!-- 注册覆盖层 -->
+    <!-- ========== 注册页面（独立） ========== -->
     <div id="registerOverlay" class="overlay hidden">
         <div class="login-title">彩 票 预 测 模 拟</div>
         <div class="login-subtitle">▸ 创建新账号 ◂</div>
         <div class="login-box">
-            <input type="email" id="regEmail" placeholder="邮箱">
-            <input type="password" id="regPass" placeholder="密码(至少6位)">
+            <input type="email" id="regEmail" placeholder="请输入邮箱地址" autocomplete="email">
+            <input type="password" id="regPass" placeholder="请设置密码（至少6位）" autocomplete="new-password">
+            <input type="password" id="regPassConfirm" placeholder="请再次输入密码" autocomplete="new-password">
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn primary" onclick="handleRegister()" style="flex:1;">注册</button>
+                <button class="btn primary" onclick="handleRegister()" style="flex:1;">📝 注 册</button>
             </div>
-            <p style="text-align:center;margin-top:15px;">已有账号？<a href="#" onclick="showLogin()" style="color:var(--cyan);">去登录</a></p>
+            <p style="text-align:center; margin-top:15px; font-size:0.85em; color:var(--text);">
+                已有账号？<a href="#" onclick="showLogin()" style="color:var(--cyan); font-weight:bold; text-decoration:none;">去登录 →</a>
+            </p>
         </div>
     </div>
 
-    <!-- 主应用 -->
+    <!-- ========== 主应用 ========== -->
     <div id="app" class="hidden">
         <nav class="navbar">
             <span class="logo">⚡ AI预测 Pro Max</span>
@@ -131,15 +611,17 @@
                 <span class="nav-tab" data-tab="history">📋 历史 <span class="vip-lock">🔒</span></span>
                 <span class="nav-tab" data-tab="settings">⚙️ 设置</span>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+            <div style="display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap;">
                 <span id="vipBadge" style="color:var(--gold); font-weight:bold; display:none;">👑 VIP</span>
                 <button class="btn small vip" onclick="showVIPModal()">升级VIP</button>
-                <span id="userDisplay" style="color:var(--text);"></span>
+                <span style="color:var(--text); font-size:0.8em;" id="userDisplay"></span>
                 <button class="btn small danger" onclick="logout()" style="display:none;" id="logoutBtn">退出</button>
             </div>
         </nav>
         <div class="main-content" id="mainContent"></div>
-        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;">AI彩票预测专家 Pro Max · 仅用于数据分析与可视化</footer>
+        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;letter-spacing:2px;z-index:10;">
+            AI彩票预测专家 Pro Max · 仅用于数据分析与可视化 · 不保证预测准确性
+        </footer>
     </div>
 
     <div id="toastContainer"></div>
@@ -156,15 +638,35 @@
             if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://your-project.supabase.co') {
                 sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
-        } catch (e) { console.warn('Supabase 初始化失败', e); }
+        } catch (e) {
+            console.warn('Supabase 初始化失败，将使用本地模式。', e);
+        }
 
         const STATE = {
-            lottery: 'dlt', currentTab: 'predict',
-            user: null, favorites: [], predictions: [], history: [],
-            settings: { sound: true, music: true },
-            freePredictCount: 3, freeSimCount: 10,
+            lottery: 'dlt',
+            currentTab: 'predict',
+            user: null,
+            favorites: [],
+            predictions: [],
+            history: [],
+            settings: {
+                sound: true,
+                music: true,
+                weights: {
+                    hot: 20,
+                    cold: 10,
+                    miss: 20,
+                    consec: 10,
+                    markov: 20,
+                    monte: 15,
+                    bayes: 5
+                },
+                strategy: 'balanced'
+            },
+            freePredictCount: 3,
+            freeSimCount: 10,
             isRolling: false,
-            customMusic: null, // 存储用户上传的音乐 dataURL
+            customMusic: null,
         };
 
         function loadState() {
@@ -183,56 +685,89 @@
                 }
             } catch (e) {}
         }
+
         function saveState() {
             localStorage.setItem('lottery_pro_max', JSON.stringify({
-                favorites: STATE.favorites, predictions: STATE.predictions, history: STATE.history,
-                settings: STATE.settings, user: STATE.user,
-                freePredictCount: STATE.freePredictCount, freeSimCount: STATE.freeSimCount,
+                favorites: STATE.favorites,
+                predictions: STATE.predictions,
+                history: STATE.history,
+                settings: STATE.settings,
+                user: STATE.user,
+                freePredictCount: STATE.freePredictCount,
+                freeSimCount: STATE.freeSimCount,
                 customMusic: STATE.customMusic
             }));
         }
         loadState();
 
-        // 粒子动画
+        // ==================== 粒子背景动画 ====================
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
-        let particles = [], mouse = { x: -999, y: -999 };
-        function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
-        resizeCanvas(); window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        let particles = [],
+            mouse = { x: -999, y: -999 };
+
+        function resizeCanvas() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', () => { resizeCanvas();
+            initParticles(); });
+
         function initParticles() {
             particles = [];
             const n = Math.min(120, Math.floor((canvas.width * canvas.height) / 8000));
             for (let i = 0; i < n; i++) {
                 particles.push({
-                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
-                    r: Math.random() * 2 + 0.5, alpha: Math.random() * 0.7 + 0.3,
-                    color: ['#00F5FF','#6E00FF','#00FF9D','#FF4D6D'][Math.floor(Math.random()*4)]
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.6,
+                    vy: (Math.random() - 0.5) * 0.6,
+                    r: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.7 + 0.3,
+                    color: ['#00F5FF', '#6E00FF', '#00FF9D', '#FF4D6D'][Math.floor(Math.random() * 4)]
                 });
             }
         }
         initParticles();
+
         function animateParticles() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if (p.x < -20) p.x = canvas.width + 20; if (p.x > canvas.width + 20) p.x = -20;
-                if (p.y < -20) p.y = canvas.height + 20; if (p.y > canvas.height + 20) p.y = -20;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-                ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fill();
-                const dx = mouse.x - p.x, dy = mouse.y - p.y, dist = Math.sqrt(dx*dx+dy*dy);
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < -20) p.x = canvas.width + 20;
+                if (p.x > canvas.width + 20) p.x = -20;
+                if (p.y < -20) p.y = canvas.height + 20;
+                if (p.y > canvas.height + 20) p.y = -20;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.fill();
+                const dx = mouse.x - p.x,
+                    dy = mouse.y - p.y,
+                    dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 180) {
-                    ctx.strokeStyle = p.color; ctx.globalAlpha = (1 - dist/180) * 0.5;
-                    ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+                    ctx.strokeStyle = p.color;
+                    ctx.globalAlpha = (1 - dist / 180) * 0.5;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
                 }
             });
-            ctx.globalAlpha = 1; requestAnimationFrame(animateParticles);
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateParticles);
         }
         animateParticles();
-        document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        document.addEventListener('mousemove', e => { mouse.x = e.clientX;
+            mouse.y = e.clientY; });
 
-        // 音效与背景音乐
+        // ==================== 音效与背景音乐系统 ====================
         let bgMusic = null;
+
         function initMusic() {
             if (!bgMusic) {
                 bgMusic = new Audio();
@@ -242,13 +777,14 @@
             if (STATE.customMusic) {
                 bgMusic.src = STATE.customMusic;
             } else {
-                // 默认空白音频（防止报错）
-                bgMusic.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+                bgMusic.src =
+                    'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
             }
             if (STATE.settings.music) {
                 bgMusic.play().catch(() => {});
             }
         }
+
         function toggleMusic() {
             STATE.settings.music = !STATE.settings.music;
             saveState();
@@ -261,78 +797,120 @@
             }
             document.getElementById('musicToggle').textContent = STATE.settings.music ? '🎵' : '🔇';
         }
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+
         function playTickSound() {
             if (!STATE.settings.sound) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.value = 800 + Math.random() * 400;
-            gain.gain.value = 0.05; osc.type = 'sine';
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.stop(audioCtx.currentTime + 0.1);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 800 + Math.random() * 400;
+                gain.gain.value = 0.05;
+                osc.type = 'sine';
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
         }
+
         function playWinSound() {
             if (!STATE.settings.sound) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.value = 1200; gain.gain.value = 0.08;
-            osc.type = 'triangle';
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            osc.stop(audioCtx.currentTime + 0.3);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 1200;
+                gain.gain.value = 0.08;
+                osc.type = 'triangle';
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {}
         }
 
-        function showToast(msg, color='#00FF9D') {
+        // ==================== 工具函数 ====================
+        function showToast(msg, color = '#00FF9D') {
             const c = document.getElementById('toastContainer');
-            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-            t.style.borderColor = color; t.style.color = color; c.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.5s'; setTimeout(() => t.remove(), 500); }, 2000);
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            t.style.borderColor = color;
+            t.style.color = color;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0';
+                t.style.transition = 'opacity 0.5s';
+                setTimeout(() => t.remove(), 500); }, 2000);
         }
+
         function getCfg() {
-            return STATE.lottery === 'dlt' ?
-                { name:'大乐透', fName:'前区', bName:'后区', fMax:35, fCnt:5, bMax:12, bCnt:2 } :
-                { name:'双色球', fName:'红球', bName:'蓝球', fMax:33, fCnt:6, bMax:16, bCnt:1 };
+            return STATE.lottery === 'dlt' ? { name: '大乐透', fName: '前区', bName: '后区', fMax: 35, fCnt: 5, bMax: 12,
+                bCnt: 2 } : { name: '双色球', fName: '红球', bName: '蓝球', fMax: 33, fCnt: 6, bMax: 16, bCnt: 1 };
         }
-        function rInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+
+        function rInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
         function genRandom(cfg) {
-            const f=new Set(); while(f.size<cfg.fCnt) f.add(rInt(1,cfg.fMax));
-            const b=new Set(); while(b.size<cfg.bCnt) b.add(rInt(1,cfg.bMax));
-            return { fronts: [...f].sort((a,b)=>a-b), backs: [...b].sort((a,b)=>a-b) };
+            const f = new Set();
+            while (f.size < cfg.fCnt) f.add(rInt(1, cfg.fMax));
+            const b = new Set();
+            while (b.size < cfg.bCnt) b.add(rInt(1, cfg.bMax));
+            return { fronts: [...f].sort((a, b) => a - b), backs: [...b].sort((a, b) => a - b) };
         }
+
         function aiPredict() {
-            const cfg = getCfg(); const nums = genRandom(cfg);
-            const score = Math.min(99.9, 70 + Math.random() * 25);
+            const cfg = getCfg();
+            const nums = genRandom(cfg);
+            const strategy = STATE.settings.strategy;
+            let base = 70;
+            if (strategy === 'conservative') base = 65;
+            else if (strategy === 'aggressive') base = 75;
+            else if (strategy === 'extreme') base = 80;
+            const score = Math.min(99.9, base + Math.random() * 25);
             const confidence = Math.min(99.9, score - 2 + Math.random() * 8);
             let rating = 'B';
-            if (score >= 97) rating = 'SSS'; else if (score >= 93) rating = 'SS';
-            else if (score >= 88) rating = 'S'; else if (score >= 80) rating = 'A';
-            return { numbers: nums, score: parseFloat(score.toFixed(1)), rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
+            if (score >= 97) rating = 'SSS';
+            else if (score >= 93) rating = 'SS';
+            else if (score >= 88) rating = 'S';
+            else if (score >= 80) rating = 'A';
+            return { numbers: nums, score: parseFloat(score.toFixed(1)), confidence: parseFloat(confidence.toFixed(1)),
+                rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
         }
 
+        // ==================== 号码球滚动动画 ====================
         function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
-            const container = document.getElementById(containerId); if (!container) return;
-            STATE.isRolling = true; container.innerHTML = '';
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            STATE.isRolling = true;
+            container.innerHTML = '';
             const all = [];
-            fronts.forEach((n,i) => all.push({ num:n, type:'front', delay: i*600 }));
-            backs.forEach((n,i) => all.push({ num:n, type:'back', delay: (fronts.length + i)*600 }));
+            fronts.forEach((n, i) => all.push({ num: n, type: 'front', delay: i * 600 }));
+            backs.forEach((n, i) => all.push({ num: n, type: 'back', delay: (fronts.length + i) * 600 }));
             all.forEach(item => {
-                const ball = document.createElement('span'); ball.className = 'ball rolling ' + item.type;
-                ball.textContent = '?'; ball.style.opacity = '0.3'; container.appendChild(ball);
+                const ball = document.createElement('span');
+                ball.className = 'ball rolling ' + item.type;
+                ball.textContent = '?';
+                ball.style.opacity = '0.3';
+                container.appendChild(ball);
                 setTimeout(() => {
-                    ball.style.opacity = '1'; ball.classList.add('rolling');
-                    let cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax), cnt = 0;
-                    const maxRolls = 15 + Math.floor(Math.random()*10);
+                    ball.style.opacity = '1';
+                    ball.classList.add('rolling');
+                    let cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax),
+                        cnt = 0;
+                    const maxRolls = 15 + Math.floor(Math.random() * 10);
                     const interval = setInterval(() => {
                         cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax);
-                        ball.textContent = String(cur).padStart(2,'0'); cnt++;
+                        ball.textContent = String(cur).padStart(2, '0');
+                        cnt++;
                         playTickSound();
                         if (cnt >= maxRolls) {
                             clearInterval(interval);
-                            ball.textContent = String(item.num).padStart(2,'0');
-                            ball.classList.remove('rolling'); ball.classList.add('stopped');
+                            ball.textContent = String(item.num).padStart(2, '0');
+                            ball.classList.remove('rolling');
+                            ball.classList.add('stopped');
                             playWinSound();
                             setTimeout(() => ball.classList.remove('stopped'), 500);
                         }
@@ -342,78 +920,127 @@
             setTimeout(() => { STATE.isRolling = false; if (callback) callback(); }, all.length * 600 + 400);
         }
 
+        // ==================== VIP 系统 ====================
         function isVIP() { return STATE.user && STATE.user.vip; }
+
         function requireVIP(act) {
-            if (!isVIP()) { showToast(`🔒 ${act}需要VIP`, '#FFD700'); showVIPModal(); return false; }
+            if (!isVIP()) { showToast(`🔒 ${act}需要VIP会员`, '#FFD700');
+                showVIPModal(); return false; }
             return true;
         }
+
         function showVIPModal() {
-            const modal = document.createElement('div'); modal.className = 'modal';
+            const modal = document.createElement('div');
+            modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3 style="color:var(--gold);">✨ 升级VIP会员</h3>
-                    <p>解锁全部高级功能</p>
-                    <button class="btn primary" onclick="processPayment()">💳 支付 ¥9.9</button>
-                    <button class="btn small" onclick="this.closest('.modal').remove()">关闭</button>
+                    <h3 style="color:var(--gold); text-align:center;">✨ 升级VIP会员</h3>
+                    <p style="text-align:center;">解锁全部高级功能：分析中心、AI实验室、图表、收藏历史等。</p>
+                    <p style="text-align:center; color:var(--green); font-size:1.2em;">月费 ¥9.9</p>
+                    <div style="text-align:center; margin-top:15px;">
+                        <button class="btn primary" onclick="processPayment()">💳 立即支付</button>
+                    </div>
+                    <div style="text-align:center; margin-top:10px;">
+                        <button class="btn small" onclick="this.closest('.modal').remove()">关闭</button>
+                    </div>
+                    <p style="font-size:0.65em;color:#888;text-align:center;margin-top:8px;">真实支付请替换为Stripe/支付宝接口</p>
                 </div>`;
             document.body.appendChild(modal);
         }
+
         async function processPayment() {
-            showToast('支付处理中...','#FFD700');
+            showToast('正在处理支付...', '#FFD700');
             setTimeout(async () => {
-                if (STATE.user && sb) { await sb.from('profiles').upsert({ id: STATE.user.id, vip: true }); }
-                STATE.user.vip = true; saveState(); updateVIPUI();
-                document.querySelector('.modal')?.remove(); showToast('🎉 VIP已激活','#FFD700');
+                if (STATE.user && sb) {
+                    const { error } = await sb.from('profiles').upsert({ id: STATE.user.id,
+                        vip: true });
+                    if (error) { showToast('VIP状态更新失败，请重试', '#FF4D6D'); return; }
+                }
+                STATE.user.vip = true;
+                saveState();
+                updateVIPUI();
+                document.querySelector('.modal')?.remove();
+                showToast('🎉 支付成功！VIP已激活', '#FFD700');
             }, 1500);
         }
+
         function updateVIPUI() {
-            document.getElementById('vipBadge').style.display = isVIP() ? 'inline':'none';
-            document.querySelectorAll('.vip-lock').forEach(l => l.style.display = isVIP() ? 'none':'inline');
-            document.getElementById('userDisplay').textContent = STATE.user?.email||'';
-            document.getElementById('logoutBtn').style.display = STATE.user ? 'inline-block':'none';
+            const badge = document.getElementById('vipBadge');
+            const locks = document.querySelectorAll('.vip-lock');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const userDisplay = document.getElementById('userDisplay');
+            if (STATE.user) {
+                userDisplay.textContent = STATE.user.email;
+                logoutBtn.style.display = 'inline-block';
+                if (isVIP()) {
+                    badge.style.display = 'inline';
+                    locks.forEach(l => l.style.display = 'none');
+                } else {
+                    badge.style.display = 'none';
+                    locks.forEach(l => l.style.display = 'inline');
+                }
+            } else {
+                badge.style.display = 'none';
+                locks.forEach(l => l.style.display = 'inline');
+                userDisplay.textContent = '';
+                logoutBtn.style.display = 'none';
+            }
         }
 
+        // ==================== Supabase Auth ====================
         async function handleRegister() {
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
-            if (!email || pass.length < 6) { showToast('邮箱和密码至少6位','#FF4D6D'); return; }
-            if (!sb) { showToast('Supabase未配置','#FF4D6D'); return; }
+            const passConfirm = document.getElementById('regPassConfirm').value.trim();
+            if (!email || pass.length < 6) { showToast('请输入有效邮箱和至少6位密码', '#FF4D6D'); return; }
+            if (pass !== passConfirm) { showToast('两次输入的密码不一致', '#FF4D6D'); return; }
+            if (!sb) { showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return; }
             const { data, error } = await sb.auth.signUp({ email, password: pass });
             if (error) { showToast('注册失败: ' + error.message, '#FF4D6D'); return; }
-            showToast('注册成功！请查看邮箱验证', '#00FF9D');
-            if (data.user) { STATE.user = { id: data.user.id, email, vip: false }; saveState(); enterApp(); }
+            showToast('注册成功！请查看邮箱验证链接', '#00FF9D');
+            if (data.user) { STATE.user = { id: data.user.id, email, vip: false };
+                saveState();
+                enterApp(); }
         }
+
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            if (!email || !pass) { showToast('请输入邮箱和密码','#FF4D6D'); return; }
-            if (!sb) { showToast('Supabase未配置','#FF4D6D'); return; }
-            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+            const password = document.getElementById('loginPass').value.trim();
+            if (!email || !password) { showToast('请输入邮箱和密码', '#FF4D6D'); return; }
+            if (!sb) { showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return; }
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
             if (error) { showToast('登录失败: ' + error.message, '#FF4D6D'); return; }
             if (data.user) {
                 const { data: profile } = await sb.from('profiles').select('vip').eq('id', data.user.id).single();
                 STATE.user = { id: data.user.id, email: data.user.email, vip: profile?.vip || false };
-                saveState(); enterApp();
+                saveState();
+                enterApp();
             }
         }
+
         async function logout() {
             if (sb) await sb.auth.signOut();
-            STATE.user = null; saveState();
+            STATE.user = null;
+            saveState();
             location.reload();
         }
+
         function showRegister() {
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('registerOverlay').classList.remove('hidden');
         }
+
         function showLogin() {
             document.getElementById('registerOverlay').classList.add('hidden');
             document.getElementById('loginOverlay').classList.remove('hidden');
         }
+
         function enterApp() {
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('registerOverlay').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            updateVIPUI(); switchTab('predict');
+            updateVIPUI();
+            switchTab('predict');
             initMusic();
         }
 
@@ -423,33 +1050,71 @@
             if (session?.user) {
                 const { data: profile } = await sb.from('profiles').select('vip').eq('id', session.user.id).single();
                 STATE.user = { id: session.user.id, email: session.user.email, vip: profile?.vip || false };
-                saveState(); enterApp();
+                saveState();
+                enterApp();
             }
         }
-        if (STATE.user) enterApp(); else checkSession();
 
+        // 页面加载时检查登录
+        if (STATE.user && STATE.user.id && STATE.user.id !== 'guest') {
+            if (sb) checkSession();
+            else enterApp();
+        } else if (STATE.user?.id === 'guest') {
+            enterApp();
+        } else if (sb) {
+            checkSession();
+        }
+
+        // ==================== 导航切换 ====================
         function switchTab(tab) {
             STATE.currentTab = tab;
             document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
             const el = document.querySelector(`#navTabs .nav-tab[data-tab="${tab}"]`);
             if (el) el.classList.add('active');
-            switch(tab) {
-                case 'predict': renderPredict(); break;
-                case 'analysis': if(!requireVIP('分析中心')) return; renderAnalysis(); break;
-                case 'lab': if(!requireVIP('AI实验室')) return; renderLab(); break;
-                case 'charts': if(!requireVIP('图表中心')) return; renderCharts(); break;
-                case 'simulator': renderSimulator(); break;
-                case 'results': renderResults(); break;
-                case 'favorites': if(!requireVIP('收藏中心')) return; renderFavorites(); break;
-                case 'history': if(!requireVIP('预测历史')) return; renderHistory(); break;
-                case 'settings': renderSettings(); break;
+            switch (tab) {
+                case 'predict':
+                    renderPredict();
+                    break;
+                case 'analysis':
+                    if (!requireVIP('分析中心')) return;
+                    renderAnalysis();
+                    break;
+                case 'lab':
+                    if (!requireVIP('AI实验室')) return;
+                    renderLab();
+                    break;
+                case 'charts':
+                    if (!requireVIP('图表中心')) return;
+                    renderCharts();
+                    break;
+                case 'simulator':
+                    renderSimulator();
+                    break;
+                case 'results':
+                    renderResults();
+                    break;
+                case 'favorites':
+                    if (!requireVIP('收藏中心')) return;
+                    renderFavorites();
+                    break;
+                case 'history':
+                    if (!requireVIP('预测历史')) return;
+                    renderHistory();
+                    break;
+                case 'settings':
+                    renderSettings();
+                    break;
+                default:
+                    renderPredict();
             }
-            window.scrollTo({top:0, behavior:'smooth'});
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
         document.getElementById('navTabs').addEventListener('click', e => {
             const tab = e.target.closest('.nav-tab');
             if (tab) switchTab(tab.dataset.tab);
         });
+
         function switchLottery(type) {
             STATE.lottery = type;
             document.getElementById('btnDLT').classList.toggle('active', type === 'dlt');
@@ -457,38 +1122,54 @@
             switchTab(STATE.currentTab);
         }
 
+        // ==================== 页面渲染函数 ====================
         function renderPredict() {
-            const cfg = getCfg(); const left = isVIP() ? '∞' : STATE.freePredictCount;
+            const cfg = getCfg();
+            const left = isVIP() ? '∞' : STATE.freePredictCount;
             document.getElementById('mainContent').innerHTML = `
                 <div class="panel" style="text-align:center;">
-                    <div class="panel-title">🤖 AI预测 - ${cfg.name} (剩余${left}次)</div>
+                    <div class="panel-title">🤖 AI预测中心 - ${cfg.name} ${!isVIP() ? `<span style="color:var(--gold);">(剩余免费${left}次)</span>` : '(VIP无限)'}</div>
                     <div id="predictResult"></div>
-                    <button class="btn primary" onclick="doPredict(1)">AI预测1组</button>
-                    <button class="btn" onclick="doPredict(5)">5组</button>
-                    <button class="btn" onclick="doPredict(10)">10组</button>
+                    <div class="flex-row" style="justify-content:center; margin-top:15px;">
+                        <button class="btn primary" onclick="doPredict(1)">🎯 AI预测1组</button>
+                        <button class="btn" onclick="doPredict(5)">📋 AI预测5组</button>
+                        <button class="btn" onclick="doPredict(10)">📋 AI预测10组</button>
+                        <button class="btn" onclick="randomPick()">🎲 随机选号</button>
+                    </div>
                 </div>`;
         }
+
         function doPredict(count) {
-            if (count === 1 && !isVIP() && STATE.freePredictCount <= 0) { showToast('次数用完','#FFD700'); showVIPModal(); return; }
-            if (!isVIP() && count > 1) { showToast('需要VIP','#FFD700'); showVIPModal(); return; }
+            if (count === 1 && !isVIP() && STATE.freePredictCount <= 0) { showToast('免费次数已用完，请升级VIP',
+                '#FFD700');
+                showVIPModal(); return; }
+            if (!isVIP() && count > 1) { showToast('多组预测需要VIP', '#FFD700');
+                showVIPModal(); return; }
             if (count === 1 && !isVIP()) STATE.freePredictCount--;
-            saveState(); const cfg = getCfg(); const container = document.getElementById('predictResult'); container.innerHTML = '';
+            saveState();
+            const cfg = getCfg();
+            const container = document.getElementById('predictResult');
+            container.innerHTML = '';
             const preds = [];
             for (let i = 0; i < count; i++) {
-                const p = aiPredict(); preds.push(p);
-                STATE.predictions.unshift(p); STATE.history.unshift({...p, id: Date.now()+i});
-                if (sb && STATE.user && STATE.user.id !== 'guest') sb.from('predictions').insert({user_id:STATE.user.id, lottery:p.lottery, fronts:p.numbers.fronts.join(','), backs:p.numbers.backs.join(','), score:p.score, rating:p.rating}).then();
+                const p = aiPredict();
+                preds.push(p);
+                STATE.predictions.unshift(p);
+                STATE.history.unshift({ ...p, id: Date.now() + i });
+                if (sb && STATE.user && STATE.user.id !== 'guest') savePredictionToSupabase(p);
             }
             saveState();
             let idx = 0;
+
             function showNext() {
                 if (idx >= preds.length) return;
                 const p = preds[idx];
-                const row = document.createElement('div'); row.className = 'predict-row';
+                const row = document.createElement('div');
+                row.className = 'predict-row';
                 row.innerHTML = `
                     <div class="predict-left">
-                        <div style="color:var(--green); font-size:1.2em;">${p.score}分</div>
-                        <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>
+                        <div style="color:var(--green); font-size:1.3em; font-weight:bold;">${p.score}分</div>
+                        <span class="rating-badge rating-${p.rating.toLowerCase()}" style="font-size:0.8em;">${p.rating}</span>
                     </div>
                     <div class="predict-right">
                         <div class="ball-row" id="frontRow${idx}"></div>
@@ -496,47 +1177,208 @@
                     </div>`;
                 container.appendChild(row);
                 rollNumbersSequentially(`frontRow${idx}`, p.numbers.fronts, [], cfg, () => {});
-                rollNumbersSequentially(`backRow${idx}`, p.numbers.backs, [], {...cfg, fName:'', bName:''}, () => {});
-                idx++; setTimeout(showNext, 400);
+                rollNumbersSequentially(`backRow${idx}`, p.numbers.backs, [], { ...cfg, fName: '', bName: '' },
+                    () => {});
+                idx++;
+                setTimeout(showNext, 500);
             }
             showNext();
         }
-        function renderAnalysis() { document.getElementById('mainContent').innerHTML = '<div class="panel">📊 分析中心 (VIP)</div>'; }
-        function renderLab() { document.getElementById('mainContent').innerHTML = '<div class="panel">🧪 AI实验室 (VIP) - 蒙特卡洛/马尔可夫</div>'; }
-        function renderCharts() { document.getElementById('mainContent').innerHTML = '<div class="panel"><div class="chart-box" id="chartDemo"></div></div>'; setTimeout(()=>{ const el=document.getElementById('chartDemo'); if(el){ const c=echarts.init(el); c.setOption({xAxis:{data:['A','B']},yAxis:{},series:[{data:[1,2],type:'line'}]}); } },300); }
-        function renderSimulator() { const cfg = getCfg(); document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟</div><div class="ball-container" id="simBalls"></div><button class="btn primary" onclick="startSim()">开始摇奖</button></div>`; }
-        function startSim() { if (!isVIP() && STATE.freeSimCount <= 0) { showToast('次数用完','#FFD700'); showVIPModal(); return; } if(!isVIP()) STATE.freeSimCount--; saveState(); const cfg = getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
-        function renderResults() { document.getElementById('mainContent').innerHTML = '<div class="panel">📡 实时开奖 (模拟)</div>'; }
-        function renderFavorites() { document.getElementById('mainContent').innerHTML = '<div class="panel">⭐ 收藏 (VIP)</div>'; }
-        function renderHistory() { document.getElementById('mainContent').innerHTML = '<div class="panel">📋 历史 (VIP)</div>'; }
-        function renderSettings() {
+
+        async function savePredictionToSupabase(pred) {
+            if (!sb || !STATE.user?.id || STATE.user.id === 'guest') return;
+            await sb.from('predictions').insert({
+                user_id: STATE.user.id,
+                lottery: pred.lottery,
+                fronts: pred.numbers.fronts.join(','),
+                backs: pred.numbers.backs.join(','),
+                score: pred.score,
+                rating: pred.rating
+            });
+        }
+
+        function randomPick() {
+            const cfg = getCfg();
+            const nums = genRandom(cfg);
+            const score = (70 + Math.random() * 20).toFixed(1);
+            const rating = score >= 85 ? 'S' : score >= 75 ? 'A' : 'B';
+            document.getElementById('predictResult').innerHTML = `
+                <div class="predict-row">
+                    <div class="predict-left">
+                        <div style="color:var(--green); font-size:1.3em; font-weight:bold;">${score}分</div>
+                        <span class="rating-badge rating-${rating.toLowerCase()}" style="font-size:0.8em;">${rating}</span>
+                    </div>
+                    <div class="predict-right">
+                        <div class="ball-row" id="randFront"></div>
+                        <div class="ball-row" id="randBack"></div>
+                    </div>
+                </div>`;
+            rollNumbersSequentially('randFront', nums.fronts, [], cfg, () => {});
+            rollNumbersSequentially('randBack', nums.backs, [], { ...cfg, fName: '', bName: '' }, () => {});
+        }
+
+        function renderAnalysis() {
+            const cfg = getCfg();
+            const hot = Array.from({ length: 10 }, () => rInt(1, cfg.fMax)).sort((a, b) => a - b);
+            const cold = Array.from({ length: 10 }, () => rInt(1, cfg.fMax)).sort((a, b) => a - b);
             document.getElementById('mainContent').innerHTML = `
-                <div class="panel">
-                    <div class="panel-title">⚙️ 设置</div>
-                    <div style="margin-bottom:15px;">
-                        <label>🔊 摇奖音效</label>
-                        <button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound; saveState(); showToast('音效:'+(STATE.settings.sound?'开':'关')); this.textContent='音效 '+(STATE.settings.sound?'开':'关');">音效 ${STATE.settings.sound?'开':'关'}</button>
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">🔥 热号TOP10 - ${cfg.fName}</div><div class="ball-container">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+                    <div class="panel"><div class="panel-title">❄️ 冷号TOP10 - ${cfg.fName}</div><div class="ball-container">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+                    <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
+                </div>`;
+        }
+
+        function renderLab() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div>
+                        <button class="btn small" onclick="runMonteCarlo(1000)">1000次</button>
+                        <button class="btn small" onclick="runMonteCarlo(10000)">10000次</button>
+                        <div id="monteResult" class="ball-container" style="margin-top:10px;"></div>
                     </div>
-                    <div style="margin-bottom:15px;">
-                        <label>🎵 背景音乐</label>
-                        <button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button>
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <label>📁 上传自定义音乐 (MP3/WAV)</label>
-                        <input type="file" id="musicFileInput" accept="audio/*" style="display:block; margin-top:5px;">
-                        <button class="btn small" onclick="uploadMusic()">应用音乐</button>
-                        <p style="font-size:0.7em; color:#888;">上传后自动替换背景音乐，刷新页面仍有效</p>
-                    </div>
-                    <div style="margin-top:20px;">
-                        <p>Supabase: ${SUPABASE_URL || '未配置'}</p>
-                        <button class="btn small danger" onclick="resetSystem()">重置本地数据</button>
+                    <div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div>
+                        <button class="btn small primary" onclick="runMarkov()">生成推荐号码</button>
+                        <div id="markovResult" class="ball-container" style="margin-top:10px;"></div>
                     </div>
                 </div>`;
         }
+
+        function runMonteCarlo(times) {
+            const cfg = getCfg();
+            const ff = {},
+                bf = {};
+            for (let i = 1; i <= cfg.fMax; i++) ff[i] = 0;
+            for (let i = 1; i <= cfg.bMax; i++) bf[i] = 0;
+            for (let i = 0; i < times; i++) { const n = genRandom(cfg);
+                n.fronts.forEach(x => ff[x]++);
+                n.backs.forEach(x => bf[x]++); }
+            const fronts = Object.entries(ff).sort((a, b) => b[1] - a[1]).slice(0, cfg.fCnt).map(([n]) => +n).sort((a,
+                b) => a - b);
+            const backs = Object.entries(bf).sort((a, b) => b[1] - a[1]).slice(0, cfg.bCnt).map(([n]) => +n).sort((a, b) =>
+                a - b);
+            document.getElementById('monteResult').innerHTML = '';
+            rollNumbersSequentially('monteResult', fronts, backs, cfg);
+        }
+
+        function runMarkov() {
+            const cfg = getCfg();
+            const buildMatrix = (max) => {
+                const m = {};
+                for (let i = 1; i <= max; i++) m[i] = {};
+                for (let i = 1; i <= max; i++) { let t = 0; for (let j = 1; j <= max; j++) if (i !== j) { m[i][j] = Math
+                            .random();
+                        t += m[i][j]; } for (let j = 1; j <= max; j++) if (i !== j) m[i][j] /= t; }
+                return m;
+            };
+            const fm = buildMatrix(cfg.fMax),
+                bm = buildMatrix(cfg.bMax);
+            const generate = (mx, max, cnt) => {
+                const sel = new Set();
+                let cur = rInt(1, max);
+                sel.add(cur);
+                while (sel.size < cnt) { let best = null,
+                        p = 0; for (let j = 1; j <= max; j++) if (!sel.has(j)) { const prob = mx[cur]?.[j] || 0; if (
+                            prob > p) { p = prob;
+                            best = j; } } if (!best) do { best = rInt(1, max); } while (sel.has(best));
+                    sel.add(best);
+                    cur = best; }
+                return [...sel].sort((a, b) => a - b);
+            };
+            const fronts = generate(fm, cfg.fMax, cfg.fCnt),
+                backs = generate(bm, cfg.bMax, cfg.bCnt);
+            document.getElementById('markovResult').innerHTML = '';
+            rollNumbersSequentially('markovResult', fronts, backs, cfg);
+        }
+
+        function renderCharts() {
+            document.getElementById('mainContent').innerHTML =
+                '<div class="panel"><div class="panel-title">📈 图表中心</div><div class="chart-box" id="chartDemo"></div></div>';
+            setTimeout(() => {
+                const el = document.getElementById('chartDemo');
+                if (el) {
+                    const c = echarts.init(el);
+                    c.setOption({ xAxis: { type: 'category', data: ['A', 'B', 'C'] }, yAxis: { type: 'value' },
+                        series: [{ data: [120, 200, 150], type: 'line',
+                        lineStyle: { color: '#00F5FF' } }] });
+                    window.addEventListener('resize', () => c.resize());
+                }
+            }, 300);
+        }
+
+        function renderSimulator() {
+            const cfg = getCfg();
+            const left = isVIP() ? '∞' : STATE.freeSimCount;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel" style="text-align:center;">
+                    <div class="panel-title">🎰 ${cfg.name}摇奖模拟 (剩余${left}次)</div>
+                    <div class="ball-container" id="simBalls"></div>
+                    <button class="btn primary" onclick="startSim()">🎲 开始摇奖</button>
+                </div>`;
+        }
+
+        function startSim() {
+            if (!isVIP() && STATE.freeSimCount <= 0) { showToast('免费摇奖次数已用完，请升级VIP', '#FFD700');
+                showVIPModal(); return; }
+            if (!isVIP()) STATE.freeSimCount--;
+            saveState();
+            const cfg = getCfg();
+            const nums = genRandom(cfg);
+            rollNumbersSequentially('simBalls', nums.fronts, nums.backs, cfg);
+        }
+
+        function renderResults() {
+            document.getElementById('mainContent').innerHTML =
+                '<div class="panel"><div class="panel-title">📡 实时开奖</div><p style="text-align:center;">模拟开奖数据（可接入真实API）</p></div>';
+        }
+
+        function renderFavorites() {
+            const filtered = STATE.favorites.filter(f => f.lottery === STATE.lottery);
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel">
+                    <div class="panel-title">⭐ 收藏中心 - ${getCfg().name} (${filtered.length}条)</div>
+                    ${filtered.length === 0 ? '<p style="text-align:center;">暂无收藏</p>' : filtered.map(f => `<p style="text-align:center;">${f.numsStr.replace('|',' | ')} 评分:${f.score||'-'} 评级:${f.rating||'B'}</p>`).join('')}
+                </div>`;
+        }
+
+        function renderHistory() {
+            const recent = STATE.history.slice(0, 30);
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel">
+                    <div class="panel-title">📋 预测历史 (最近${recent.length}条)</div>
+                    ${recent.length === 0 ? '<p style="text-align:center;">暂无记录</p>' : recent.map(h => `<p style="text-align:center; font-size:0.8em;">${new Date(h.timestamp).toLocaleString()} - ${h.lottery==='dlt'?'大乐透':'双色球'} - ${h.numbers.fronts.join(' ')} | ${h.numbers.backs.join(' ')} (${h.score}分 ${h.rating})</p>`).join('')}
+                </div>`;
+        }
+
+        function renderSettings() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel">
+                    <div class="panel-title">⚙️ 系统设置</div>
+                    <div style="margin-bottom:15px;">
+                        <label style="color:var(--cyan);">🔊 摇奖音效</label>
+                        <button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound; saveState(); this.textContent='音效 '+(STATE.settings.sound?'开':'关'); showToast('音效已'+(STATE.settings.sound?'开启':'关闭'));">音效 ${STATE.settings.sound?'开':'关'}</button>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="color:var(--cyan);">🎵 背景音乐</label>
+                        <button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="color:var(--cyan);">📁 上传自定义背景音乐 (MP3/WAV/OGG)</label>
+                        <input type="file" id="musicFileInput" accept="audio/*" style="display:block; margin-top:8px; color:var(--text);">
+                        <button class="btn small primary" onclick="uploadMusic()" style="margin-top:5px;">应用音乐</button>
+                        ${STATE.customMusic ? '<span style="color:var(--green); margin-left:10px; font-size:0.8em;">✓ 已自定义</span>' : '<span style="color:#888; margin-left:10px; font-size:0.8em;">使用默认音乐</span>'}
+                    </div>
+                    <hr style="border-color:var(--border); margin:15px 0;">
+                    <p style="font-size:0.8em;">当前 Supabase: <code style="color:var(--cyan);">${SUPABASE_URL || '未配置'}</code></p>
+                    <button class="btn small danger" onclick="resetSystem()" style="margin-top:10px;">⚠️ 重置本地数据</button>
+                </div>`;
+        }
+
         function uploadMusic() {
             const fileInput = document.getElementById('musicFileInput');
-            if (!fileInput.files || !fileInput.files[0]) {
-                showToast('请选择音频文件', '#FF4D6D'); return;
+            if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                showToast('请先选择音频文件', '#FF4D6D');
+                return;
             }
             const file = fileInput.files[0];
             const reader = new FileReader();
@@ -547,14 +1389,23 @@
                     bgMusic.src = STATE.customMusic;
                     if (STATE.settings.music) bgMusic.play().catch(() => {});
                 }
-                showToast('音乐已更新！', '#00FF9D');
+                showToast('🎵 背景音乐已更新！', '#00FF9D');
+                renderSettings();
             };
             reader.readAsDataURL(file);
         }
+
         function resetSystem() {
-            if(confirm('重置所有本地数据？')) {
-                STATE.favorites=[]; STATE.history=[]; STATE.freePredictCount=3; STATE.freeSimCount=10;
-                STATE.customMusic = null; saveState(); renderSettings();
+            if (confirm('确定要重置所有本地数据吗？此操作不可恢复。')) {
+                STATE.favorites = [];
+                STATE.history = [];
+                STATE.predictions = [];
+                STATE.freePredictCount = 3;
+                STATE.freeSimCount = 10;
+                STATE.customMusic = null;
+                saveState();
+                renderSettings();
+                showToast('系统数据已重置');
             }
         }
     </script>
