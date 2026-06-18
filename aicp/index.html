@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI彩票预测专家 Pro Max | 数据大屏版</title>
+    <title>AI彩票预测专家 Pro Max | 数据大屏升级版</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -85,6 +85,7 @@
         <p style="text-align:center;margin-top:15px;"><a href="#" onclick="showRegister()" style="color:var(--cyan);">注册新账号</a></p>
     </div>
 </div>
+<!-- 注册 -->
 <div id="registerOverlay" class="overlay hidden">
     <div class="login-title">注册账号</div>
     <div class="login-box">
@@ -129,7 +130,7 @@
 <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
 <script>
-// ========== Supabase 配置（请替换为你的真实凭证） ==========
+// ========== Supabase 配置 ==========
 const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -191,7 +192,18 @@ function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
     setTimeout(() => { STATE.isRolling = false; if(callback) callback(); }, all.length*500+800);
 }
 
-// VIP 与权限
+function animateExistingBalls(containerId, cfg) {
+    const container = document.getElementById(containerId); if(!container) return;
+    const balls = container.querySelectorAll('.ball');
+    balls.forEach((ball, idx) => {
+        const num = ball.getAttribute('data-num'); if(!num) return;
+        ball.classList.add('rolling');
+        let cur = rInt(1, ball.classList.contains('front')?cfg.fMax:cfg.bMax), cnt = 0;
+        const iv = setInterval(() => { cur = rInt(1, ball.classList.contains('front')?cfg.fMax:cfg.bMax); ball.textContent=String(cur).padStart(2,'0'); cnt++; if(cnt>=10) { clearInterval(iv); ball.textContent=String(num).padStart(2,'0'); ball.classList.remove('rolling'); ball.classList.add('stopped'); setTimeout(()=>ball.classList.remove('stopped'),400); } }, 70*(idx+1));
+    });
+}
+
+// VIP/权限
 function isVIP() { return STATE.user?.vip; }
 function isAdmin() { return STATE.user?.role === 'admin'; }
 function updateVIPUI() {
@@ -276,107 +288,84 @@ function switchTab(tab) {
 document.getElementById('navTabs').addEventListener('click', e => { const tab = e.target.closest('.nav-tab'); if(tab) switchTab(tab.dataset.tab); });
 function switchLottery(type) { STATE.lottery = type; document.getElementById('btnDLT').classList.toggle('active', type==='dlt'); document.getElementById('btnSSQ').classList.toggle('active', type==='ssq'); switchTab(STATE.currentTab); }
 
-// ========== 预测 + 数据大屏 ==========
+// ========== 数据大屏 ==========
 let dashboardChart = null;
+async function initChinaMap() {
+    const mapDom = document.getElementById('chinaMap'); if(!mapDom) return;
+    try {
+        const geoJson = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json').then(r => r.json());
+        echarts.registerMap('china', geoJson);
+    } catch(e) {
+        mapDom.innerHTML = '<p style="color:var(--red);">地图加载失败</p>'; return;
+    }
+    if(dashboardChart) dashboardChart.dispose();
+    dashboardChart = echarts.init(mapDom);
+    dashboardChart.setOption({
+        backgroundColor: 'transparent', tooltip: { trigger: 'item' },
+        visualMap: { min:0, max:100, left:'left', bottom:'10%', text:['热门','冷门'], inRange:{color:['#0B1020','#00F5FF','#FFD700']}, textStyle:{color:'#c8d6e5'} },
+        series:[{ type:'map', map:'china', roam:true, label:{show:false}, itemStyle:{borderColor:'#00F5FF',borderWidth:1}, emphasis:{label:{color:'#fff'},itemStyle:{areaColor:'#6E00FF'}}, data:Array.from({length:34},(_,i)=>({name:`示例${i}`,value:Math.floor(Math.random()*100)})) }]
+    });
+}
+function updateDashboardData() {
+    if(!sb || !STATE.user) return;
+    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(50).then(({data})=>{
+        if(!data) return;
+        const total = data.length, scores = data.map(d=>d.score);
+        const avg = total>0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
+        const max = total>0 ? Math.max(...scores).toFixed(1) : '-';
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statAvg').textContent = avg;
+        document.getElementById('statMax').textContent = max;
+        const freq = {}; data.forEach(d=>{ d.fronts.split(',').forEach(n=>freq[n]=(freq[n]||0)+1); });
+        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
+        document.getElementById('hotNumbers').innerHTML = hot.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
+    });
+}
 
+// 预测
 async function renderPredict() {
-    const used = isVIP() ? 0 : await getTodayUsage();
-    const left = isVIP() ? '∞' : Math.max(0, 3 - used);
+    const used = isVIP()?0:await getTodayUsage();
+    const left = isVIP()?'∞':Math.max(0,3-used);
     document.getElementById('mainContent').innerHTML = `
-        <div class="panel">
-            <div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
-            <div id="predictResult"></div>
-            <div class="flex-row" style="justify-content:center;margin-top:15px;">
-                <button class="btn primary" id="btnPred1" onclick="doPredict(1)">1组</button>
-                <button class="btn" id="btnPred5" onclick="doPredict(5)">5组</button>
-                <button class="btn" id="btnPred10" onclick="doPredict(10)">10组</button>
-                <button class="btn" onclick="randomPick()">随机</button>
-            </div>
-            <p style="text-align:center;font-size:0.7em;color:var(--gold);">🔒 5组/10组需VIP</p>
+        <div class="panel"><div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
+        <div id="predictResult"></div>
+        <div class="flex-row" style="justify-content:center;margin-top:15px;">
+            <button class="btn primary" id="btnPred1" onclick="doPredict(1)">1组</button>
+            <button class="btn" id="btnPred5" onclick="doPredict(5)">5组</button>
+            <button class="btn" id="btnPred10" onclick="doPredict(10)">10组</button>
+            <button class="btn" onclick="randomPick()">随机</button>
         </div>
+        <p style="text-align:center;font-size:0.7em;color:var(--gold);">🔒 5组/10组需VIP</p></div>
         <div class="panel" id="dashboardPanel">
             <div class="panel-title">📡 实时数据大屏</div>
             <div class="grid-2">
                 <div>
-                    <div class="dashboard-grid" id="dashboardStats">
-                        <div class="dashboard-card"><div class="dashboard-value" id="statTotal">0</div><div class="dashboard-label">总预测次数</div></div>
-                        <div class="dashboard-card"><div class="dashboard-value" id="statAvg">-</div><div class="dashboard-label">平均评分</div></div>
-                        <div class="dashboard-card"><div class="dashboard-value" id="statMax">-</div><div class="dashboard-label">最高评分</div></div>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card"><div class="dashboard-value" id="statTotal">0</div><div class="dashboard-label">总预测</div></div>
+                        <div class="dashboard-card"><div class="dashboard-value" id="statAvg">-</div><div class="dashboard-label">平均分</div></div>
+                        <div class="dashboard-card"><div class="dashboard-value" id="statMax">-</div><div class="dashboard-label">最高分</div></div>
                     </div>
-                    <div style="margin-top:15px;font-size:0.8em;">🔥 热号前区：<span id="hotNumbers"></span></div>
+                    <div style="margin-top:10px;">🔥 热号前区：<span id="hotNumbers"></span></div>
                 </div>
                 <div class="chart-box" id="chinaMap"></div>
             </div>
         </div>`;
-    initChinaMap();
-    updateDashboardData();
-}
-
-async function initChinaMap() {
-    const mapDom = document.getElementById('chinaMap');
-    if (!mapDom) return;
-    try {
-        const geoJson = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json').then(r => r.json());
-        echarts.registerMap('china', geoJson);
-        if (dashboardChart) dashboardChart.dispose();
-        dashboardChart = echarts.init(mapDom);
-        dashboardChart.setOption({
-            backgroundColor: 'transparent',
-            tooltip: { trigger: 'item' },
-            visualMap: {
-                min: 0, max: 100,
-                left: 'left', bottom: '10%',
-                text: ['热门', '冷门'],
-                inRange: { color: ['#0B1020', '#00F5FF', '#FFD700'] },
-                textStyle: { color: '#c8d6e5' }
-            },
-            series: [{
-                type: 'map', map: 'china',
-                roam: true, label: { show: false },
-                itemStyle: { borderColor: '#00F5FF', borderWidth: 1 },
-                emphasis: { label: { color: '#fff' }, itemStyle: { areaColor: '#6E00FF' } },
-                data: []
-            }]
-        });
-    } catch (e) { console.warn('地图加载失败'); }
-}
-
-function updateDashboardData() {
-    if (!sb || !STATE.user) return;
-    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at', { ascending: false }).limit(50).then(({ data }) => {
-        if (!data) return;
-        const total = data.length;
-        const scores = data.map(d => d.score);
-        const avg = total > 0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
-        const max = total > 0 ? Math.max(...scores).toFixed(1) : '-';
-        document.getElementById('statTotal').textContent = total;
-        document.getElementById('statAvg').textContent = avg;
-        document.getElementById('statMax').textContent = max;
-        const freq = {};
-        data.forEach(d => { d.fronts.split(',').forEach(n => freq[n] = (freq[n]||0)+1); });
-        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
-        document.getElementById('hotNumbers').innerHTML = hot.map(n => `<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
-        if (dashboardChart) {
-            const mapData = [];
-            for (let i = 1; i <= 34; i++) mapData.push({ name: `示例${i}`, value: Math.floor(Math.random()*100) });
-            dashboardChart.setOption({ series: [{ data: mapData }] });
-        }
-    });
+    initChinaMap(); updateDashboardData();
 }
 
 async function doPredict(count) {
-    if (STATE.isRolling) return;
-    if (count > 1 && !isVIP()) { showVIPModal(); return; }
-    if (count === 1 && !isVIP()) { if (!await checkLimit()) return; await incUsage(); }
-    document.querySelectorAll('#btnPred1, #btnPred5, #btnPred10').forEach(b => b.disabled = true);
-    const cfg = getCfg(); const container = document.getElementById('predictResult'); container.innerHTML = '';
-    const preds = []; for(let i=0;i<count;i++) { const p = aiPredict(); preds.push(p); if(sb && STATE.user) sb.from('predictions').insert({ user_id:STATE.user.id, lottery:p.lottery, fronts:p.numbers.fronts.join(','), backs:p.numbers.backs.join(','), score:p.score, rating:p.rating }).then(); }
-    const cols = count===10 ? 2 : 1;
-    const grid = document.createElement('div'); grid.className = 'pred-grid'; grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    for(let c=0; c<cols; c++) {
-        const colDiv = document.createElement('div'); colDiv.className = 'pred-col';
-        for(let i=c*5; i<Math.min((c+1)*5, preds.length); i++) {
-            const item = document.createElement('div'); item.className = 'pred-item';
+    if(STATE.isRolling) return;
+    if(count > 1 && !isVIP()) { showVIPModal(); return; }
+    if(count === 1 && !isVIP()) { if(!await checkLimit()) return; await incUsage(); }
+    document.querySelectorAll('#btnPred1,#btnPred5,#btnPred10').forEach(b=>b.disabled=true);
+    const cfg=getCfg(); const container=document.getElementById('predictResult'); container.innerHTML='';
+    const preds = []; for(let i=0;i<count;i++) { const p=aiPredict(); preds.push(p); if(sb&&STATE.user) sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then(); }
+    const cols = count===10?2:1;
+    const grid = document.createElement('div'); grid.className='pred-grid'; grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+    for(let c=0;c<cols;c++) {
+        const colDiv = document.createElement('div'); colDiv.className='pred-col';
+        for(let i=c*5;i<Math.min((c+1)*5,preds.length);i++) {
+            const item = document.createElement('div'); item.className='pred-item';
             item.innerHTML = `<span style="color:var(--green);font-weight:bold;">${preds[i].score}分</span><span class="rating-badge rating-${preds[i].rating.toLowerCase()}">${preds[i].rating}</span><span class="ball-row" id="balls${i}"></span>`;
             colDiv.appendChild(item);
         }
@@ -386,40 +375,38 @@ async function doPredict(count) {
     let idx = 0;
     function showNext() {
         if(idx >= preds.length) {
-            document.querySelectorAll('#btnPred1, #btnPred5, #btnPred10').forEach(b => b.disabled = false);
-            getTodayUsage().then(used => { const left = isVIP()?'∞':Math.max(0,3-used); const el = document.getElementById('freeCount'); if(el) el.textContent = left; });
-            updateDashboardData();
-            return;
+            document.querySelectorAll('#btnPred1,#btnPred5,#btnPred10').forEach(b=>b.disabled=false);
+            getTodayUsage().then(used=>{ const left=isVIP()?'∞':Math.max(0,3-used); const el=document.getElementById('freeCount'); if(el) el.textContent=left; });
+            updateDashboardData(); return;
         }
-        const p = preds[idx]; const ballArea = document.getElementById(`balls${idx}`);
-        [...p.numbers.fronts.map(n=>({num:n,type:'front'})), ...p.numbers.backs.map(n=>({num:n,type:'back'}))].forEach((b,i) => {
-            const span = document.createElement('span'); span.className = 'ball rolling '+b.type; span.textContent='?'; span.style.width='38px';span.style.height='38px';span.style.fontSize='0.85em';
-            ballArea.appendChild(span);
-            setTimeout(() => { span.style.opacity='1'; let cur=rInt(1, b.type==='front'?cfg.fMax:cfg.bMax), cnt=0; const iv = setInterval(() => { cur=rInt(1, b.type==='front'?cfg.fMax:cfg.bMax); span.textContent=String(cur).padStart(2,'0'); cnt++; playTick(); if(cnt>=10){ clearInterval(iv); span.textContent=String(b.num).padStart(2,'0'); span.classList.remove('rolling'); span.classList.add('stopped'); playWin(); } }, 70); }, i*500+100);
+        const p = preds[idx];
+        const frontId=`front${idx}`, backId=`back${idx}`;
+        document.getElementById(`balls${idx}`).innerHTML = `<span id="${frontId}" class="ball-row"></span><span id="${backId}" class="ball-row"></span>`;
+        rollNumbersSequentially(frontId, p.numbers.fronts, [], cfg, () => {
+            rollNumbersSequentially(backId, p.numbers.backs, [], cfg, () => { idx++; setTimeout(showNext,300); });
         });
-        idx++; setTimeout(showNext, 800);
     }
     showNext();
 }
 function randomPick() {
-    const cfg = getCfg(); const nums = genRandom(cfg); const score = (70+Math.random()*20).toFixed(1); const rating = score>=85?'S':score>=75?'A':'B';
+    const cfg=getCfg(); const nums=genRandom(cfg); const score=(70+Math.random()*20).toFixed(1); const rating=score>=85?'S':score>=75?'A':'B';
     document.getElementById('predictResult').innerHTML = `<div class="pred-item"><span style="color:var(--green);">${score}分</span><span class="rating-badge rating-${rating.toLowerCase()}">${rating}</span><span class="ball-row">${nums.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}${nums.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</span></div>`;
 }
 
-// ========== 分析中心 ==========
+// 分析
 function renderAnalysis() {
     const cfg = getCfg();
-    const hot = Array.from({length:10}, () => rInt(1, cfg.fMax)).sort((a,b) => a-b);
-    const cold = Array.from({length:10}, () => rInt(1, cfg.fMax)).sort((a,b) => a-b);
+    const hot = Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
+    const cold = Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
     document.getElementById('mainContent').innerHTML = `
         <div class="grid-2">
-            <div class="panel"><div class="panel-title">🔥 热号 TOP10 · ${cfg.name}前区</div><div class="ball-row">${hot.map(n => `<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-            <div class="panel"><div class="panel-title">❄️ 冷号 TOP10</div><div class="ball-row">${cold.map(n => `<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-            <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10}, (_, i) => `<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
+            <div class="panel"><div class="panel-title">🔥 热号TOP10 · ${cfg.name}前区</div><div class="ball-row">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+            <div class="panel"><div class="panel-title">❄️ 冷号TOP10</div><div class="ball-row">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+            <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
         </div>`;
 }
 
-// ========== 智能实验室 ==========
+// 实验室
 function renderLab() {
     document.getElementById('mainContent').innerHTML = `
         <div class="grid-2">
@@ -429,37 +416,28 @@ function renderLab() {
 }
 function runMonteCarlo(times) {
     const cfg = getCfg(); const ff={}, bf={};
-    for(let i=1;i<=cfg.fMax;i++) ff[i]=0; for(let i=1;i<=cfg.bMax;i++) bf[i]=0;
-    for(let i=0;i<times;i++) { const n = genRandom(cfg); n.fronts.forEach(x => ff[x]++); n.backs.forEach(x => bf[x]++); }
-    const sf = Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n), sb2 = Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n);
-    const groups = [];
-    for(let i=0;i<5;i++) {
-        const fs = sf.slice(i*cfg.fCnt, i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b);
-        const bs = sb2.slice(i*cfg.bCnt, i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b);
-        if(fs.length===cfg.fCnt && bs.length===cfg.bCnt) groups.push({fronts:fs, backs:bs});
-    }
-    const c = document.getElementById('monteResult');
-    if(c) c.innerHTML = groups.map((g,i) => `<div class="result-row"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    for(let i=1;i<=cfg.fMax;i++)ff[i]=0; for(let i=1;i<=cfg.bMax;i++)bf[i]=0;
+    for(let i=0;i<times;i++){ const n = genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
+    const sf=Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n), sb2=Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n);
+    const groups=[]; for(let i=0;i<5;i++){ const fs=sf.slice(i*cfg.fCnt,i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b); const bs=sb2.slice(i*cfg.bCnt,i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b); if(fs.length===cfg.fCnt&&bs.length===cfg.bCnt) groups.push({fronts:fs,backs:bs}); }
+    const container = document.getElementById('monteResult');
+    container.innerHTML = groups.map((g,i)=>`<div class="result-row" id="monteGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    for(let i=0;i<groups.length;i++) animateExistingBalls(`monteGroup${i}`, cfg);
 }
 function runMarkov() {
-    const cfg = getCfg();
-    const bm = (max) => { const m={}; for(let i=1;i<=max;i++) m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++) if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; } return m; };
-    const fm = bm(cfg.fMax), bm2 = bm(cfg.bMax);
-    const g = (mx,max,cnt) => { const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++) if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){p=pr; b=j;} } if(!b) do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
-    const groups = [];
-    for(let i=0;i<5;i++) groups.push({ fronts: g(fm,cfg.fMax,cfg.fCnt), backs: g(bm2,cfg.bMax,cfg.bCnt) });
-    const c = document.getElementById('markovResult');
-    if(c) c.innerHTML = groups.map((g,i) => `<div class="result-row"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    const cfg=getCfg(); const bm=(max)=>{ const m={}; for(let i=1;i<=max;i++)m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++) if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; } return m; };
+    const fm=bm(cfg.fMax), bm2=bm(cfg.bMax); const g=(mx,max,cnt)=>{ const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++) if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){ p=pr; b=j; } } if(!b) do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
+    const groups=[]; for(let i=0;i<5;i++) groups.push({fronts:g(fm,cfg.fMax,cfg.fCnt), backs:g(bm2,cfg.bMax,cfg.bCnt)});
+    const container = document.getElementById('markovResult');
+    container.innerHTML = groups.map((g,i)=>`<div class="result-row" id="markovGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    for(let i=0;i<groups.length;i++) animateExistingBalls(`markovGroup${i}`, cfg);
 }
 
-// 摇奖模拟
-function renderSimulator() {
-    const cfg = getCfg();
-    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟 · ${cfg.name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始摇奖</button></div>`;
-}
+// 摇奖
+function renderSimulator() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟 · ${getCfg().name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始</button></div>`; }
 function startSim() { const cfg=getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
 
-// 开奖大厅
+// 开奖
 async function renderResults() {
     const cfg = getCfg();
     document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📡 开奖大厅 · ${cfg.name}</div><div class="flex-row" style="gap:10px;"><button class="btn small" onclick="switchLottery('dlt');renderResults();">大乐透</button><button class="btn small" onclick="switchLottery('ssq');renderResults();">双色球</button></div><div id="liveResult" style="margin-top:10px;"></div></div>`;
@@ -470,22 +448,31 @@ async function renderResults() {
 async function fetchRealResults(type) {
     const { data: apiKeyRow } = await sb.from('app_settings').select('value').eq('key','api_key').single();
     const apiKey = apiKeyRow?.value;
-    if(apiKey) {
-        try {
-            const code = type==='dlt'?'dlt':'ssq';
-            const resp = await fetch(`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&start=0&num=20`);
-            const data = await resp.json();
-            if(data.status==='0'&&data.result) return data.result.list.map(item => ({ issue:item.issueno, date:item.opendate, fronts:item.number.split(' ').slice(0,type==='dlt'?5:6).map(Number), backs:item.number.split(' ').slice(type==='dlt'?5:6).map(Number) }));
-        } catch(e) {}
-    }
-    const results=[]; const now=new Date();
-    for(let i=0;i<20;i++){ const cfg=getCfg(); const nums=genRandom(cfg); const date=new Date(now.getTime()-i*2*86400000); results.push({ issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`, date:date.toISOString().slice(0,10), fronts:nums.fronts, backs:nums.backs }); }
-    return results;
+    if(apiKey) { try { const code = type==='dlt'?'dlt':'ssq'; const resp = await fetch(`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&start=0&num=20`); const data = await resp.json(); if(data.status==='0'&&data.result) return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,type==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(type==='dlt'?5:6).map(Number)})); } catch(e) {} }
+    const results=[]; const now=new Date(); for(let i=0;i<20;i++){ const cfg=getCfg(); const nums=genRandom(cfg); const date=new Date(now.getTime()-i*2*86400000); results.push({issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,date:date.toISOString().slice(0,10),fronts:nums.fronts,backs:nums.backs}); } return results;
 }
 
-// 收藏/历史/个人/管理/设置
-function renderFavorites() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">⭐ 收藏库</div><p>暂无收藏</p></div>`; }
-function renderHistory() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📋 历史轨迹</div><p>暂无记录</p></div>`; }
+// 收藏/历史
+async function renderFavorites() {
+    if(!sb || !STATE.user) return;
+    const { data } = await sb.from('favorites').select('*').eq('user_id', STATE.user.id).order('created_at',{ascending:false});
+    let html = '<div class="panel"><div class="panel-title">⭐ 收藏库</div>';
+    if(data && data.length) {
+        data.forEach(f => { html += `<div class="result-row"><span>${f.nums_str.replace('|',' | ')} 评分:${f.score}</span><button class="btn small danger" onclick="removeFavorite('${f.id}')">删除</button></div>`; });
+    } else html += '<p>暂无收藏</p>';
+    html += '</div>'; document.getElementById('mainContent').innerHTML = html;
+}
+async function renderHistory() {
+    if(!sb || !STATE.user) return;
+    const { data } = await sb.from('predictions').select('*').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(30);
+    let html = '<div class="panel"><div class="panel-title">📋 历史轨迹</div>';
+    if(data && data.length) {
+        data.forEach(p => { html += `<div class="result-row"><span style="color:var(--green);">${p.score}分</span><span class="rating-badge rating-${(p.rating||'b').toLowerCase()}">${p.rating}</span>${p.fronts.split(',').map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${p.backs.split(',').map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`; });
+    } else html += '<p>暂无记录</p>';
+    html += '</div>'; document.getElementById('mainContent').innerHTML = html;
+}
+
+// 个人中心
 function renderProfile() {
     const user = STATE.user;
     document.getElementById('mainContent').innerHTML = `
@@ -509,7 +496,11 @@ async function saveProfile() {
     await sb.from('profiles').update({ display_name: displayName, avatar_url: STATE.user.avatar_url }).eq('id', STATE.user.id);
     STATE.user.display_name = displayName; updateVIPUI(); showToast('资料已保存');
 }
+
+// 管理后台
 function renderAdmin() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">👑 管理后台</div></div>`; }
+
+// 管理员设置
 async function renderSettings() {
     const { data } = await sb.from('app_settings').select('value').eq('key','api_key').single();
     const currentKey = data?.value || '';
