@@ -2,1960 +2,666 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>AI彩票预测专家 Pro Max</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI彩票预测专家 Pro Max | Cyberpunk Ultimate Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== 全局样式 ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --cyan: #00F5FF; --purple: #6E00FF; --green: #00FF9D; --red: #FF4D6D;
+            --bg: #0B1020; --panel: rgba(10, 18, 40, 0.85); --border: rgba(0, 245, 255, 0.3);
+            --glow: 0 0 20px rgba(0, 245, 255, 0.4); --text: #c8d6e5; --gold: #FFD700;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0B1020;
-            color: #e0f0ff;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
+            background: var(--bg); color: var(--text);
+            font-family: 'Courier New', monospace; overflow-x: hidden; min-height: 100vh;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        #particle-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-        .app-container {
-            position: relative;
-            z-index: 2;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-        .glass-panel {
-            background: rgba(11, 16, 32, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            border-radius: 24px;
-            padding: 18px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 30px rgba(0, 245, 255, 0.15);
-            transition: 0.3s;
-        }
-        .glass-panel:hover {
-            border-color: #6E00FF;
-            box-shadow: 0 0 50px rgba(110, 0, 255, 0.2);
-        }
-        .neon-text {
-            color: #00F5FF;
-            text-shadow: 0 0 12px #00F5FF;
-        }
-        .navbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(11, 16, 32, 0.85);
-            backdrop-filter: blur(30px);
-            border-radius: 50px;
-            padding: 12px 22px;
-            margin-bottom: 20px;
-            border: 1px solid #6E00FF;
-        }
-        .nav-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .nav-links span {
-            color: #00F5FF;
-            cursor: pointer;
-            font-size: 0.9rem;
-            padding: 5px 10px;
-            border-radius: 15px;
-            transition: 0.3s;
-            user-select: none;
-        }
-        .nav-links span:hover {
-            background: rgba(0, 245, 255, 0.2);
-        }
-        .switch-btn {
-            padding: 8px 20px;
-            border-radius: 25px;
-            background: transparent;
-            color: #aaa;
-            border: 2px solid #6E00FF;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 0 5px;
-            transition: 0.3s;
-        }
-        .switch-btn.active {
-            background: #00F5FF;
-            color: #0B1020;
-            border-color: #00F5FF;
-            box-shadow: 0 0 20px #00F5FF;
-        }
-        .cyber-btn {
-            background: transparent;
-            border: 2px solid #00F5FF;
-            color: #00F5FF;
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-weight: bold;
-            margin: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 0.9rem;
-        }
-        .cyber-btn:hover {
-            background: #00F5FF;
-            color: #0B1020;
-            box-shadow: 0 0 25px #00F5FF;
-        }
-        .cyber-btn.danger {
-            border-color: #FF4D6D;
-            color: #FF4D6D;
-        }
-        .cyber-btn.danger:hover {
-            background: #FF4D6D;
-            color: #fff;
-        }
-        .cyber-btn.purple {
-            border-color: #6E00FF;
-            color: #6E00FF;
-        }
-        .cyber-btn.purple:hover {
-            background: #6E00FF;
-            color: #fff;
-        }
-        .cyber-btn.gold {
-            border-color: #FFD700;
-            color: #FFD700;
-        }
-        .cyber-btn.gold:hover {
-            background: #FFD700;
-            color: #0B1020;
-        }
-        .number-ball {
-            display: inline-block;
-            width: 42px;
-            height: 42px;
-            line-height: 42px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #6E00FF, #0B1020);
-            border: 2px solid #00F5FF;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            margin: 3px;
-            font-size: 1.1rem;
-            box-shadow: 0 0 18px #00F5FF;
-            transition: all 0.15s;
-        }
-        .red-ball {
-            border-color: #FF4D6D;
-            box-shadow: 0 0 22px #FF4D6D;
-        }
-        .blue-ball {
-            border-color: #00F5FF;
-            box-shadow: 0 0 22px #00F5FF;
-        }
-        .rolling {
-            animation: rollEffect 0.06s linear infinite;
-            background: radial-gradient(circle at 30% 30%, #FFD700, #0B1020);
-            border-color: #FFD700;
-            box-shadow: 0 0 30px #FFD700;
-        }
-        @keyframes rollEffect {
-            0%,
-            100% {
-                transform: translateY(-2px) scale(1.05);
-            }
-            50% {
-                transform: translateY(2px) scale(0.95);
-            }
-        }
-        .prediction-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 15px 0;
-        }
-        .prediction-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .prediction-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            background: rgba(0, 245, 255, 0.05);
-            padding: 8px 12px;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            min-height: 58px;
-            transition: 0.2s;
-        }
-        .grid-2col {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 18px;
-        }
-        textarea,
-        input[type="text"],
-        input[type="password"],
-        select {
-            width: 100%;
-            background: #0B1020;
-            border: 2px solid #6E00FF;
-            color: #00F5FF;
-            padding: 10px;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            margin: 5px 0;
-        }
-        input::placeholder {
-            color: #555;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .tab-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .tab-bar .cyber-btn {
-            font-size: 0.8rem;
-            padding: 5px 14px;
-            border-width: 1px;
-        }
-        .tab-bar .cyber-btn.active {
-            background: #00F5FF;
-            color: #0B1020;
-        }
-        .slider-group {
-            margin: 8px 0;
-        }
-        .slider-group label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-        input[type="range"] {
-            width: 100%;
-            accent-color: #00F5FF;
-            background: #0B1020;
-            height: 4px;
-        }
-        .favorite-item,
-        .history-item {
-            background: rgba(0, 245, 255, 0.1);
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .inline-balls {
-            display: inline-flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 4px;
-        }
-        .adv-result-box {
-            min-height: 60px;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            border: 1px solid rgba(0, 245, 255, 0.1);
-        }
-        footer {
-            text-align: center;
-            margin: 25px 0;
-            color: #6E00FF;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        /* ===== 登录/注册模态框 ===== */
-        .auth-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-        }
-        .auth-panel {
-            max-width: 420px;
-            width: 92%;
-            padding: 30px;
-            position: relative;
-        }
-        .auth-view {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .auth-view.active {
-            display: flex;
-        }
-        .auth-view h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .auth-view .cyber-btn {
-            width: 100%;
-            text-align: center;
-            justify-content: center;
-            padding: 10px;
-        }
-        .auth-switch-link {
-            color: #6E00FF;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-        .auth-switch-link:hover {
-            color: #00F5FF;
-            text-shadow: 0 0 10px #00F5FF;
-        }
-        .auth-message {
-            color: #FF4D6D;
-            font-size: 0.9rem;
-            text-align: center;
-            min-height: 24px;
-            margin-top: 4px;
-        }
-        .auth-message.success {
-            color: #00FF9D;
-        }
-
-        @media (max-width: 768px) {
-            .prediction-grid {
-                grid-template-columns: 1fr;
-            }
-            .navbar {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .nav-links {
-                justify-content: center;
-            }
-            .number-ball {
-                width: 34px;
-                height: 34px;
-                line-height: 34px;
-                font-size: 0.9rem;
-            }
-            .grid-2col {
-                grid-template-columns: 1fr;
-            }
-        }
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.015) 2px, rgba(0,245,255,0.015) 4px); }
+        #app { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar { background: rgba(8,14,30,0.9); border-bottom: 2px solid var(--border); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 8px 16px; gap: 8px; box-shadow: 0 4px 30px rgba(0,0,0,0.6); }
+        .navbar .logo { font-size: 1.3em; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; white-space: nowrap; }
+        .navbar .nav-tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .navbar .nav-tab { padding: 7px 13px; border: 1px solid rgba(0,245,255,0.35); border-radius: 20px; cursor: pointer; font-size: 0.78em; transition: all 0.3s; background: transparent; color: var(--text); white-space: nowrap; letter-spacing: 1px; }
+        .navbar .nav-tab:hover { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,245,255,0.35); color: #fff; background: rgba(0,245,255,0.08); }
+        .navbar .nav-tab.active { background: rgba(0,245,255,0.15); border-color: var(--cyan); color: #fff; box-shadow: var(--glow); font-weight: bold; }
+        .navbar .lottery-switch { display: flex; gap: 4px; background: rgba(0,0,0,0.4); border-radius: 25px; padding: 3px; border: 1px solid var(--border); }
+        .navbar .lottery-switch button { padding: 7px 16px; border-radius: 22px; border: none; cursor: pointer; font-weight: bold; font-size: 0.8em; transition: all 0.3s; background: transparent; color: var(--text); letter-spacing: 1px; }
+        .navbar .lottery-switch button.active { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,245,255,0.6); }
+        .main-content { flex: 1; padding: 16px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); box-shadow: 0 8px 40px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+        .panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.6; }
+        .panel-title { font-size: 1.1em; font-weight: bold; color: var(--cyan); letter-spacing: 2px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+        .panel-title::before { content: '◆'; font-size: 0.6em; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .ball-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+        .ball { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2em; color: #fff; position: relative; box-shadow: 0 0 25px rgba(0,245,255,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .ball.front { background: radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b 90%); box-shadow: 0 0 25px rgba(255,77,109,0.6); }
+        .ball.back { background: radial-gradient(circle at 35% 30%, #5dade2, #1a5276 90%); box-shadow: 0 0 25px rgba(0,180,255,0.6); }
+        .ball.rolling { animation: ballRoll 0.08s infinite; }
+        @keyframes ballRoll { 0% { transform: translateY(-3px); } 50% { transform: translateY(3px); } 100% { transform: translateY(-3px); } }
+        .ball.stopped { animation: ballStop 0.5s ease-out; }
+        @keyframes ballStop { 0% { transform: scale(1.3); box-shadow: 0 0 50px rgba(255,215,0,1); } 60% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        .btn { padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border); cursor: pointer; font-weight: bold; letter-spacing: 1px; transition: all 0.3s; background: transparent; color: var(--text); font-family: inherit; font-size: 0.85em; white-space: nowrap; }
+        .btn:hover { box-shadow: var(--glow); border-color: var(--cyan); color: #fff; transform: translateY(-2px); }
+        .btn.primary { background: linear-gradient(135deg, rgba(0,245,255,0.2), rgba(110,0,255,0.2)); border-color: var(--cyan); color: #fff; box-shadow: 0 0 20px rgba(0,245,255,0.25); }
+        .btn.primary:hover { box-shadow: 0 0 35px rgba(0,245,255,0.5); }
+        .btn.danger { border-color: var(--red); color: var(--red); }
+        .btn.danger:hover { box-shadow: 0 0 25px rgba(255,77,109,0.5); }
+        .btn.small { padding: 5px 12px; font-size: 0.7em; border-radius: 15px; }
+        .btn.vip { border-color: var(--gold); color: var(--gold); background: rgba(255,215,0,0.1); }
+        .btn.vip:hover { box-shadow: 0 0 25px rgba(255,215,0,0.5); }
+        .score-display { text-align: center; font-size: 2.5em; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
+        .rating-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 1em; letter-spacing: 2px; border: 2px solid; }
+        .rating-sss { border-color: #FFD700; color: #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.7); animation: glowGold 1.5s infinite; }
+        @keyframes glowGold { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); } 50% { box-shadow: 0 0 45px rgba(255,215,0,1); } }
+        .rating-ss { border-color: #ff6b9d; color: #ff6b9d; box-shadow: 0 0 20px rgba(255,107,157,0.5); }
+        .rating-s { border-color: #ff9f43; color: #ff9f43; }
+        .rating-a { border-color: #54a0ff; color: #54a0ff; }
+        .rating-b { border-color: #5f27cd; color: #5f27cd; }
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(5,8,20,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(10px); }
+        #loginOverlay .login-title { font-size: 2.8em; font-weight: 900; letter-spacing: 4px; text-align: center; margin-bottom: 10px; background: linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: titleShine 3s infinite; }
+        @keyframes titleShine { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
+        #loginOverlay .login-subtitle { color: var(--cyan); letter-spacing: 3px; margin-bottom: 25px; font-size: 0.9em; opacity: 0.8; }
+        #loginOverlay .login-box { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+        #loginOverlay input { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 25px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; font-family: inherit; font-size: 0.9em; letter-spacing: 1px; outline: none; transition: all 0.3s; }
+        #loginOverlay input:focus { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
+        #loginOverlay .login-btn-row { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        #loginOverlay .login-btn-row .btn { flex: 1; min-width: 100px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 8000; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8em; letter-spacing: 1px; }
+        th, td { padding: 8px 10px; border: 1px solid rgba(0,245,255,0.2); text-align: center; }
+        th { background: rgba(0,245,255,0.1); color: var(--cyan); font-weight: bold; }
+        tr:hover td { background: rgba(0,245,255,0.04); }
+        @media (max-width: 768px) { .navbar .nav-tab { padding: 5px 9px; font-size: 0.65em; } .navbar .logo { font-size: 1em; } .ball { width: 38px; height: 38px; font-size: 0.9em; } #loginOverlay .login-title { font-size: 1.8em; } .panel { padding: 12px; } .score-display { font-size: 1.8em; } }
+        .hidden { display: none !important; }
+        .flex-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        .chart-box { width: 100%; height: 350px; }
+        .toast { position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 12px 20px; border-radius: 25px; background: var(--panel); border: 1px solid var(--green); color: var(--green); letter-spacing: 1px; font-weight: bold; animation: toastIn 0.4s ease-out; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .ai-core-spin { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--cyan); border-right-color: var(--purple); animation: coreSpin 2s linear infinite; margin: 10px auto; }
+        @keyframes coreSpin { to { transform: rotate(360deg); } }
+        .hud-radar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(0,245,255,0.4); position: relative; overflow: hidden; margin: 10px auto; background: rgba(0,245,255,0.03); }
+        .hud-radar::after { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 50%; background: var(--cyan); transform-origin: top center; animation: radarSweep 3s infinite linear; opacity: 0.7; }
+        @keyframes radarSweep { to { transform: rotate(360deg); } }
+        .vip-lock { color: var(--gold); font-size: 0.8em; margin-left: 4px; }
     </style>
 </head>
 <body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="scanline"></div>
 
-    <canvas id="particle-canvas"></canvas>
-
-    <!-- ===== 登录/注册模态框 ===== -->
-    <div id="auth-modal" class="auth-modal">
-        <div class="auth-panel glass-panel">
-
-            <!-- ===== 登录视图 ===== -->
-            <div id="login-view" class="auth-view active">
-                <h2 class="neon-text">🔐 登录</h2>
-                <input type="text" id="login-username" placeholder="用户名" />
-                <input type="password" id="login-password" placeholder="密码" />
-                <button class="cyber-btn" onclick="handleLogin()">登 录</button>
-                <div class="auth-switch-link" onclick="switchAuthView('register')">
-                    还没有账号？<span style="color:#00F5FF;">立即注册</span>
-                </div>
-                <div id="login-message" class="auth-message"></div>
+    <!-- 登录覆盖层 -->
+    <div id="loginOverlay">
+        <div class="login-title">彩 票 预 测 模 拟</div>
+        <div class="login-subtitle">▸ AI PREDICTION SYSTEM ◂</div>
+        <div class="login-box">
+            <input type="email" id="loginEmail" placeholder="邮箱（真实注册）" autocomplete="email">
+            <input type="password" id="loginPass" placeholder="密码（至少6位）" autocomplete="current-password">
+            <div class="login-btn-row">
+                <button class="btn primary" onclick="handleLogin()">🔐 登录</button>
+                <button class="btn" onclick="handleRegister()">📝 注册</button>
             </div>
-
-            <!-- ===== 注册视图 ===== -->
-            <div id="register-view" class="auth-view">
-                <h2 class="neon-text">📝 注册</h2>
-                <input type="text" id="register-username" placeholder="用户名" />
-                <input type="password" id="register-password" placeholder="密码" />
-                <input type="password" id="register-confirm" placeholder="确认密码" />
-                <button class="cyber-btn purple" onclick="handleRegister()">注 册</button>
-                <div class="auth-switch-link" onclick="switchAuthView('login')">
-                    已有账号？<span style="color:#00F5FF;">去登录</span>
-                </div>
-                <div id="register-message" class="auth-message"></div>
-            </div>
-
+            <p style="text-align:center;margin-top:10px;font-size:0.7em;color:#888;">注册后请查看邮箱验证（Supabase Auth）</p>
+            <button class="btn small" style="width:100%;margin-top:5px;" onclick="guestMode()">👤 游客模式（本地体验）</button>
         </div>
     </div>
 
-    <!-- ===== 主应用 ===== -->
-    <div id="app-container" class="app-container" style="display:none;">
-
-        <!-- 导航 -->
-        <div class="navbar">
-            <span class="neon-text" style="font-size:1.6rem; font-weight:800;">🤖 AI预测专家 Pro Max</span>
-            <div>
-                <button class="switch-btn active" id="switch-dlt" onclick="switchLottery('dlt')">大乐透</button>
-                <button class="switch-btn" id="switch-ssq" onclick="switchLottery('ssq')">双色球</button>
+    <!-- 主应用 -->
+    <div id="app" class="hidden">
+        <nav class="navbar">
+            <span class="logo">⚡ AI预测 Pro Max</span>
+            <div class="lottery-switch">
+                <button id="btnDLT" class="active" onclick="switchLottery('dlt')">大乐透</button>
+                <button id="btnSSQ" onclick="switchLottery('ssq')">双色球</button>
             </div>
-            <div class="nav-links">
-                <span onclick="switchTab('prediction')">🔮预测</span>
-                <span onclick="switchTab('analysis')">📊分析</span>
-                <span onclick="switchTab('advanced')">🧠高级引擎</span>
-                <span onclick="switchTab('lab')">🧪实验室</span>
-                <span onclick="switchTab('charts')">📈图表</span>
-                <span onclick="switchTab('simulation')">🎱摇奖</span>
-                <span onclick="switchTab('favorites')">⭐收藏</span>
-                <span onclick="switchTab('history')">📜历史</span>
-                <span onclick="switchTab('settings')">⚙️设置</span>
-                <span onclick="handleLogout()" style="color:#FF4D6D;">🚪退出</span>
+            <div class="nav-tabs" id="navTabs">
+                <span class="nav-tab active" data-tab="predict">🎯 AI预测</span>
+                <span class="nav-tab" data-tab="analysis">📊 分析 <span class="vip-lock">🔒</span></span>
+                <span class="nav-tab" data-tab="lab">🧪 实验室 <span class="vip-lock">🔒</span></span>
+                <span class="nav-tab" data-tab="charts">📈 图表 <span class="vip-lock">🔒</span></span>
+                <span class="nav-tab" data-tab="simulator">🎰 摇奖</span>
+                <span class="nav-tab" data-tab="results">📡 开奖</span>
+                <span class="nav-tab" data-tab="favorites">⭐ 收藏 <span class="vip-lock">🔒</span></span>
+                <span class="nav-tab" data-tab="history">📋 历史 <span class="vip-lock">🔒</span></span>
+                <span class="nav-tab" data-tab="settings">⚙️ 设置</span>
             </div>
-            <div style="color:#aaa; font-size:0.8rem;" id="user-info"></div>
-        </div>
-
-        <!-- ===== 预测中心 ===== -->
-        <div id="tab-prediction" class="tab-content active">
-            <div class="glass-panel">
-                <h2 class="neon-text">🔮 AI预测结果中心 <span style="font-size:0.8rem;color:#aaa;">(滚动定格)</span></h2>
-                <div id="prediction-display" style="min-height:80px; margin:15px 0;"></div>
-                <div>
-                    <button class="cyber-btn" onclick="generatePrediction(1)">🤖 预测1组</button>
-                    <button class="cyber-btn" onclick="generatePrediction(5)">⚡ 预测5组</button>
-                    <button class="cyber-btn" onclick="generatePrediction(10)">🔥 预测10组</button>
-                    <button class="cyber-btn" onclick="randomPick()">🎲 随机选号</button>
-                    <button class="cyber-btn" onclick="saveFavorite()">⭐ 收藏当前</button>
-                    <button class="cyber-btn" onclick="exportCurrent()">📤 导出</button>
-                </div>
-                <div style="margin-top:12px; display:flex; gap:20px; flex-wrap:wrap;">
-                    <span>评分: <strong id="ai-score" style="color:#aaa;">未开通</strong></span>
-                    <span>可信度: <strong id="ai-trust" style="color:#aaa;">未开通</strong></span>
-                    <span>评级: <span id="ai-rating" style="color:#aaa;">--</span></span>
-                </div>
-                <div style="margin-top:8px;">
-                    <button class="cyber-btn gold" onclick="upgradeVIP()">💎 升级VIP</button>
-                </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+                <span id="vipBadge" style="color:var(--gold); font-weight:bold; display:none;">👑 VIP</span>
+                <button class="btn small vip" onclick="showVIPModal()">升级VIP</button>
+                <span style="color:var(--text);" id="userDisplay"></span>
+                <button class="btn small danger" onclick="logout()" style="display:none;" id="logoutBtn">退出</button>
             </div>
-
-            <div class="glass-panel">
-                <h3 class="neon-text">🎰 蒙特卡洛模拟</h3>
-                <div id="monte-carlo-balls" style="min-height:50px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;"></div>
-                <div>
-                    <button class="cyber-btn" onclick="runMonteCarloPage(1000)">1,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloPage(10000)">10,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloPage(50000)">50,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloPage(100000)">100,000次</button>
-                </div>
-                <span>出现概率: <span id="monte-score" class="neon-text">—</span></span>
-            </div>
-        </div>
-
-        <!-- ===== 分析中心 ===== -->
-        <div id="tab-analysis" class="tab-content">
-            <div class="glass-panel">
-                <div class="tab-bar" id="analysis-tabs">
-                    <button class="cyber-btn active" data-atab="hot" onclick="renderAnalysis('hot')">🔥热号</button>
-                    <button class="cyber-btn" data-atab="cold" onclick="renderAnalysis('cold')">❄️冷号</button>
-                    <button class="cyber-btn" data-atab="miss" onclick="renderAnalysis('miss')">⏳遗漏</button>
-                    <button class="cyber-btn" data-atab="sum" onclick="renderAnalysis('sum')">📐和值</button>
-                    <button class="cyber-btn" data-atab="oe" onclick="renderAnalysis('oe')">⚖️奇偶</button>
-                    <button class="cyber-btn" data-atab="size" onclick="renderAnalysis('size')">📏大小</button>
-                    <button class="cyber-btn" data-atab="consec" onclick="renderAnalysis('consec')">🔗连号</button>
-                    <button class="cyber-btn" data-atab="repeat" onclick="renderAnalysis('repeat')">🔄重号</button>
-                    <button class="cyber-btn" data-atab="ac" onclick="renderAnalysis('ac')">🔢AC值</button>
-                    <button class="cyber-btn" data-atab="span" onclick="renderAnalysis('span')">📏跨度</button>
-                </div>
-                <div id="analysis-content"></div>
-            </div>
-        </div>
-
-        <!-- ===== 高级引擎 ===== -->
-        <div id="tab-advanced" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">🧠 高级AI预测引擎</h3>
-                <div class="tab-bar" id="adv-tabs">
-                    <button class="cyber-btn active" data-adv="monte" onclick="renderAdvanced('monte')">🎲蒙特卡洛</button>
-                    <button class="cyber-btn" data-adv="markov" onclick="renderAdvanced('markov')">🔗马尔可夫链</button>
-                    <button class="cyber-btn" data-adv="bayes" onclick="renderAdvanced('bayes')">📊贝叶斯</button>
-                    <button class="cyber-btn" data-adv="ensemble" onclick="renderAdvanced('ensemble')">🧩综合评分</button>
-                </div>
-                <div id="advanced-content"></div>
-            </div>
-        </div>
-
-        <!-- ===== 实验室 ===== -->
-        <div id="tab-lab" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">🧪 AI实验室</h3>
-                <div class="grid-2col">
-                    <div>
-                        <h4>🎛️ 自定义权重</h4>
-                        <div class="slider-group"><label>热号 <span id="w-hot">20</span>%</label><input type="range" min="0" max="100" value="20" data-w="hot" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>冷号 <span id="w-cold">10</span>%</label><input type="range" min="0" max="100" value="10" data-w="cold" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>遗漏 <span id="w-miss">20</span>%</label><input type="range" min="0" max="100" value="20" data-w="miss" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>和值 <span id="w-sum">15</span>%</label><input type="range" min="0" max="100" value="15" data-w="sum" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>奇偶 <span id="w-oe">10</span>%</label><input type="range" min="0" max="100" value="10" data-w="oe" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>马尔可夫 <span id="w-markov">20</span>%</label><input type="range" min="0" max="100" value="20" data-w="markov" oninput="updateWeight(this)"></div>
-                        <div class="slider-group"><label>蒙特卡洛 <span id="w-monte">15</span>%</label><input type="range" min="0" max="100" value="15" data-w="monte" oninput="updateWeight(this)"></div>
-                        <button class="cyber-btn" onclick="applyWeights()">应用权重</button>
-                    </div>
-                    <div>
-                        <h4>🧠 AI策略模式</h4>
-                        <select id="strategy-select" style="width:100%;">
-                            <option value="balanced">平衡模式</option>
-                            <option value="conservative">稳健模式</option>
-                            <option value="aggressive">激进模式</option>
-                            <option value="extreme">极限模式</option>
-                        </select>
-                        <button class="cyber-btn" onclick="applyStrategy()">应用策略</button>
-                        <div style="margin-top:15px; color:#aaa; font-size:0.9rem;" id="strategy-desc">当前策略: 平衡模式</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== 图表中心 ===== -->
-        <div id="tab-charts" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">📈 ECharts图表中心</h3>
-                <div class="tab-bar" id="chart-tabs">
-                    <button class="cyber-btn active" data-ctab="hotTrend" onclick="renderChart('hotTrend')">🔥热号趋势</button>
-                    <button class="cyber-btn" data-ctab="coldTrend" onclick="renderChart('coldTrend')">❄️冷号趋势</button>
-                    <button class="cyber-btn" data-ctab="missTrend" onclick="renderChart('missTrend')">⏳遗漏走势</button>
-                    <button class="cyber-btn" data-ctab="sumTrend" onclick="renderChart('sumTrend')">📐和值走势</button>
-                    <button class="cyber-btn" data-ctab="oePie" onclick="renderChart('oePie')">⚖️奇偶比例</button>
-                    <button class="cyber-btn" data-ctab="sizePie" onclick="renderChart('sizePie')">📏大小比例</button>
-                    <button class="cyber-btn" data-ctab="scoreTrend" onclick="renderChart('scoreTrend')">📈评分走势</button>
-                </div>
-                <div id="chart-container" style="height:350px;"></div>
-            </div>
-        </div>
-
-        <!-- ===== 摇奖模拟 ===== -->
-        <div id="tab-simulation" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">🎱 摇奖模拟中心 <span style="font-size:0.8rem;color:#aaa;">(只显示摇出球，滚动定格)</span></h3>
-                <div id="draw-balls" style="min-height:60px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;"></div>
-                <button class="cyber-btn" onclick="startDraw()">🌀 开始摇奖</button>
-                <span style="margin-left:15px; color:#aaa;">音效: <input type="checkbox" id="draw-sound" checked></span>
-            </div>
-        </div>
-
-        <!-- ===== 收藏 ===== -->
-        <div id="tab-favorites" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">⭐ 收藏中心</h3>
-                <div id="favorites-list"></div>
-                <button class="cyber-btn" onclick="exportFavorites()">📤 导出收藏</button>
-                <button class="cyber-btn danger" onclick="clearFavorites()">🗑️ 清空收藏</button>
-            </div>
-        </div>
-
-        <!-- ===== 历史 ===== -->
-        <div id="tab-history" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">📜 预测历史</h3>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-                    <button class="cyber-btn" onclick="loadHistory(50)">最近50</button>
-                    <button class="cyber-btn" onclick="loadHistory(100)">最近100</button>
-                    <button class="cyber-btn" onclick="loadHistory(0)">全部</button>
-                    <input type="text" id="hist-search" placeholder="搜索号码..." style="flex:1; min-width:120px;">
-                    <button class="cyber-btn" onclick="searchHistory()">🔍</button>
-                </div>
-                <div id="history-list"></div>
-                <button class="cyber-btn" onclick="exportHistory()">📤 导出历史</button>
-                <button class="cyber-btn danger" onclick="clearHistory()">🗑️ 清空历史</button>
-            </div>
-        </div>
-
-        <!-- ===== 设置 ===== -->
-        <div id="tab-settings" class="tab-content">
-            <div class="glass-panel">
-                <h3 class="neon-text">⚙️ 系统设置</h3>
-                <div class="grid-2col">
-                    <div><label>主题</label><select id="theme-select" onchange="setTheme(this.value)"><option value="tech">科技蓝</option><option value="cyber">赛博朋克</option><option value="purple">AI紫</option><option value="dark">深空黑</option></select></div>
-                    <div><label>动画</label><select id="animation-toggle" onchange="animationEnabled=this.value==='on'"><option value="on">开启</option><option value="off">关闭</option></select></div>
-                    <div><label>音效</label><select id="sound-toggle" onchange="soundEnabled=this.value==='on'"><option value="on">开启</option><option value="off">关闭</option></select></div>
-                </div>
-                <div style="margin-top:15px;">
-                    <label>🎵 背景音乐导入</label>
-                    <input type="file" id="bgm-file" accept="audio/*" onchange="loadBGM(this)">
-                    <button class="cyber-btn" onclick="playBGM()">▶ 播放</button>
-                    <button class="cyber-btn" onclick="stopBGM()">⏹ 停止</button>
-                </div>
-                <div style="margin-top:15px;">
-                    <button class="cyber-btn" onclick="exportAllJSON()">📤 导出JSON</button>
-                    <button class="cyber-btn" onclick="exportAllExcel()">📤 导出Excel</button>
-                    <button class="cyber-btn danger" onclick="resetSystem()">⚠️ 重置系统</button>
-                    <button class="cyber-btn" onclick="clearCache()">🧹 清理缓存</button>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <span>⚠️ 本系统仅用于历史数据统计分析与可视化展示，不预测未来开奖结果。</span>
-            <span style="margin-left:20px;">免费摇奖剩余: <span id="remain-count">10</span> 次 | <span id="vip-status">普通用户</span></span>
+        </nav>
+        <div class="main-content" id="mainContent"></div>
+        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;letter-spacing:2px;z-index:10;">
+            AI彩票预测专家 Pro Max · 仅用于数据分析与可视化 · 不保证预测准确性
         </footer>
     </div>
 
-    <!-- ===== 引入ECharts 和 Supabase ===== -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
+    <div id="toastContainer"></div>
 
     <script>
-        // ============================================================
-        // 1. Supabase 配置（请替换为您的真实凭证）
-        // ============================================================
-        const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
-        let supabase = null;
-        let useLocalMode = false;
+        // ========== 请在此处填入你的 Supabase 凭证 ==========
+        const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co'; // 替换为你的 Supabase URL
+        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';               // 替换为你的 anon key
+        // =================================================
 
+        // 初始化 Supabase 客户端
+        let sb = null;
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('✅ Supabase 初始化成功');
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://your-project.supabase.co') {
+                sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
         } catch (e) {
-            console.warn('⚠️ Supabase 初始化失败，使用本地模拟模式', e);
-            useLocalMode = true;
+            console.warn('Supabase 初始化失败，将使用本地模式。', e);
         }
 
-        // ============================================================
-        // 2. 本地模拟数据
-        // ============================================================
-        let localUsers = JSON.parse(localStorage.getItem('localUsers') || '[]');
-        let localFavorites = JSON.parse(localStorage.getItem('localFavorites') || '[]');
-        let localHistory = JSON.parse(localStorage.getItem('localHistory') || '[]');
+        // 全局状态
+        const STATE = {
+            lottery: 'dlt',
+            currentTab: 'predict',
+            user: null,          // { id, email, vip }
+            favorites: [],
+            predictions: [],
+            history: [],
+            settings: {
+                supabaseUrl: SUPABASE_URL,
+                supabaseKey: SUPABASE_ANON_KEY,
+                animation: true,
+                sound: false,
+                weights: { hot:20, cold:10, miss:20, consec:10, markov:20, monte:15, bayes:5 },
+                strategy: 'balanced'
+            },
+            freePredictCount: 3,
+            freeSimCount: 10,
+            isRolling: false,
+        };
 
-        function saveLocalUsers() { localStorage.setItem('localUsers', JSON.stringify(localUsers)); }
-
-        function saveLocalFavorites() { localStorage.setItem('localFavorites', JSON.stringify(localFavorites)); }
-
-        function saveLocalHistory() { localStorage.setItem('localHistory', JSON.stringify(localHistory)); }
-
-        // ============================================================
-        // 3. 全局状态
-        // ============================================================
-        let currentUser = null;
-        let currentType = 'dlt';
-        let currentPrediction = null;
-        let historyDB = { dlt: [], ssq: [] };
-        let animationEnabled = true;
-        let soundEnabled = true;
-        let audioCtx = null;
-        let bgmAudio = null;
-        let chartInstance = null;
-
-        // ============================================================
-        // 4. 工具函数
-        // ============================================================
-        function getConfig(type) {
-            if (type === 'dlt') return { frontMax: 35, backMax: 12, frontCount: 5, backCount: 2, label: '大乐透' };
-            return { frontMax: 33, backMax: 16, frontCount: 6, backCount: 1, label: '双色球' };
-        }
-
-        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-        function pickN(arr, n) {
-            const copy = [...arr];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = rand(0, i);
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy.slice(0, n).sort((a, b) => a - b);
-        }
-
-        function formatNum(n) { return String(n).padStart(2, '0'); }
-
-        function getRandomSet(type) {
-            const cfg = getConfig(type);
-            const front = pickN(Array.from({ length: cfg.frontMax }, (_, i) => i + 1), cfg.frontCount);
-            const back = pickN(Array.from({ length: cfg.backMax }, (_, i) => i + 1), cfg.backCount);
-            return { front, back };
-        }
-
-        // ============================================================
-        // 5. 音效
-        // ============================================================
-        function initAudio() {
-            if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-        }
-
-        function playBeep(freq = 520, type = 'square', duration = 0.1, vol = 0.06) {
-            if (!soundEnabled || !audioCtx) return;
+        // 本地存储管理
+        function loadState() {
             try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
+                const raw = localStorage.getItem('lottery_pro_max');
+                if (raw) {
+                    const d = JSON.parse(raw);
+                    STATE.favorites = d.favorites || [];
+                    STATE.predictions = d.predictions || [];
+                    STATE.history = d.history || [];
+                    STATE.settings = { ...STATE.settings, ...d.settings };
+                    STATE.user = d.user || null;
+                    STATE.freePredictCount = d.freePredictCount ?? 3;
+                    STATE.freeSimCount = d.freeSimCount ?? 10;
+                }
             } catch (e) {}
+            // 如果本地存储了不同的凭证，则重新初始化 sb
+            if (STATE.settings.supabaseUrl && STATE.settings.supabaseKey &&
+                STATE.settings.supabaseUrl !== SUPABASE_URL) {
+                try {
+                    sb = supabase.createClient(STATE.settings.supabaseUrl, STATE.settings.supabaseKey);
+                } catch (e) {}
+            }
+        }
+        function saveState() {
+            const toSave = {
+                favorites: STATE.favorites,
+                predictions: STATE.predictions,
+                history: STATE.history,
+                settings: STATE.settings,
+                user: STATE.user,
+                freePredictCount: STATE.freePredictCount,
+                freeSimCount: STATE.freeSimCount,
+            };
+            localStorage.setItem('lottery_pro_max', JSON.stringify(toSave));
+        }
+        loadState();
+
+        // 粒子背景动画
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [], mouse = { x: -999, y: -999 };
+        function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+        resizeCanvas(); window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        function initParticles() {
+            particles = [];
+            const n = Math.min(120, Math.floor((canvas.width * canvas.height) / 8000));
+            for (let i = 0; i < n; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+                    r: Math.random() * 2 + 0.5, alpha: Math.random() * 0.7 + 0.3,
+                    color: ['#00F5FF','#6E00FF','#00FF9D','#FF4D6D'][Math.floor(Math.random()*4)]
+                });
+            }
+        }
+        initParticles();
+        function animateParticles() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < -20) p.x = canvas.width + 20; if (p.x > canvas.width + 20) p.x = -20;
+                if (p.y < -20) p.y = canvas.height + 20; if (p.y > canvas.height + 20) p.y = -20;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fill();
+                const dx = mouse.x - p.x, dy = mouse.y - p.y, dist = Math.sqrt(dx*dx+dy*dy);
+                if (dist < 180) {
+                    ctx.strokeStyle = p.color; ctx.globalAlpha = (1 - dist/180) * 0.5;
+                    ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+                }
+            });
+            ctx.globalAlpha = 1; requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+        document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+        // 工具函数
+        function showToast(msg, color='#00FF9D') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+            t.style.borderColor = color; t.style.color = color; c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.5s'; setTimeout(() => t.remove(), 500); }, 2000);
+        }
+        function getCfg() {
+            return STATE.lottery === 'dlt' ?
+                { name:'大乐透', fName:'前区', bName:'后区', fMax:35, fCnt:5, bMax:12, bCnt:2 } :
+                { name:'双色球', fName:'红球', bName:'蓝球', fMax:33, fCnt:6, bMax:16, bCnt:1 };
+        }
+        function rInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+        function genRandom(cfg) {
+            const f=new Set(); while(f.size<cfg.fCnt) f.add(rInt(1,cfg.fMax));
+            const b=new Set(); while(b.size<cfg.bCnt) b.add(rInt(1,cfg.bMax));
+            return { fronts: [...f].sort((a,b)=>a-b), backs: [...b].sort((a,b)=>a-b) };
+        }
+        function aiPredict() {
+            const cfg = getCfg(); const nums = genRandom(cfg);
+            const strategy = STATE.settings.strategy; let base = 70;
+            if (strategy === 'conservative') base = 65;
+            else if (strategy === 'aggressive') base = 75;
+            else if (strategy === 'extreme') base = 80;
+            const score = Math.min(99.9, base + Math.random() * 25);
+            const confidence = Math.min(99.9, score - 2 + Math.random() * 8);
+            let rating = 'B';
+            if (score >= 97) rating = 'SSS';
+            else if (score >= 93) rating = 'SS';
+            else if (score >= 88) rating = 'S';
+            else if (score >= 80) rating = 'A';
+            return { cfg, numbers: nums, score: parseFloat(score.toFixed(1)), confidence: parseFloat(confidence.toFixed(1)), rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
         }
 
-        function playRollSound() { playBeep(620, 'square', 0.04); }
+        // 号码球滚动动画
+        function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
+            const container = document.getElementById(containerId); if (!container) return;
+            STATE.isRolling = true; container.innerHTML = '';
+            const all = [];
+            fronts.forEach((n,i) => all.push({ num:n, type:'front', delay: i*600 }));
+            backs.forEach((n,i) => all.push({ num:n, type:'back', delay: (fronts.length + i)*600 }));
+            all.forEach(item => {
+                const ball = document.createElement('span'); ball.className = 'ball rolling ' + item.type;
+                ball.textContent = '?'; ball.style.opacity = '0.3'; container.appendChild(ball);
+                setTimeout(() => {
+                    ball.style.opacity = '1'; ball.classList.add('rolling');
+                    let cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax), cnt = 0;
+                    const maxRolls = 15 + Math.floor(Math.random()*10);
+                    const interval = setInterval(() => {
+                        cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax);
+                        ball.textContent = String(cur).padStart(2,'0'); cnt++;
+                        if (cnt >= maxRolls) {
+                            clearInterval(interval);
+                            ball.textContent = String(item.num).padStart(2,'0');
+                            ball.classList.remove('rolling'); ball.classList.add('stopped');
+                            setTimeout(() => ball.classList.remove('stopped'), 500);
+                        }
+                    }, 60);
+                }, item.delay);
+            });
+            setTimeout(() => { STATE.isRolling = false; if (callback) callback(); }, all.length * 600 + 400);
+        }
 
-        function playStopSound() { playBeep(920, 'sine', 0.1); }
-
-        // ============================================================
-        // 6. 用户认证（Supabase + 本地模拟）
-        // ============================================================
-        async function login(username, password) {
-            if (useLocalMode) {
-                const user = localUsers.find(u => u.username === username && u.password === password);
-                if (!user) throw new Error('用户名或密码错误');
-                return { ...user, id: user.id || 'local_' + Date.now() };
+        // VIP 功能
+        function isVIP() { return STATE.user && STATE.user.vip; }
+        function requireVIP(act) {
+            if (!isVIP()) {
+                showToast(`🔒 ${act}需要VIP会员`, '#FFD700');
+                showVIPModal();
+                return false;
+            }
+            return true;
+        }
+        function showVIPModal() {
+            const modal = document.createElement('div'); modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 style="color:var(--gold);">✨ 升级VIP会员</h3>
+                    <p>解锁全部高级功能：分析中心、AI实验室、图表、收藏历史等。</p>
+                    <p style="color:var(--green);">月费 ¥9.9</p>
+                    <button class="btn primary" onclick="processPayment()">💳 立即支付</button>
+                    <button class="btn small" onclick="this.closest('.modal').remove()">关闭</button>
+                    <p style="font-size:0.65em;color:#888;margin-top:8px;">真实支付请替换为Stripe/支付宝接口</p>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+        async function processPayment() {
+            // 模拟支付成功，真实场景替换为支付网关调用
+            showToast('正在处理支付...', '#FFD700');
+            setTimeout(async () => {
+                if (STATE.user && sb) {
+                    const { error } = await sb.from('profiles').upsert({ id: STATE.user.id, vip: true });
+                    if (error) { showToast('VIP状态更新失败，请重试', '#FF4D6D'); return; }
+                }
+                STATE.user.vip = true;
+                saveState();
+                updateVIPUI();
+                document.querySelector('.modal')?.remove();
+                showToast('🎉 支付成功！VIP已激活', '#FFD700');
+            }, 1500);
+        }
+        function updateVIPUI() {
+            const badge = document.getElementById('vipBadge');
+            const locks = document.querySelectorAll('.vip-lock');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const userDisplay = document.getElementById('userDisplay');
+            if (STATE.user) {
+                userDisplay.textContent = STATE.user.email;
+                logoutBtn.style.display = 'inline-block';
+                if (isVIP()) {
+                    badge.style.display = 'inline';
+                    locks.forEach(l => l.style.display = 'none');
+                } else {
+                    badge.style.display = 'none';
+                    locks.forEach(l => l.style.display = 'inline');
+                }
             } else {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .eq('password', password)
-                    .single();
-                if (error || !data) throw new Error('用户名或密码错误');
-                return data;
+                badge.style.display = 'none';
+                locks.forEach(l => l.style.display = 'inline');
+                userDisplay.textContent = '';
+                logoutBtn.style.display = 'none';
             }
         }
 
-        async function register(username, password) {
-            if (useLocalMode) {
-                if (localUsers.some(u => u.username === username)) throw new Error('用户名已被注册');
-                const newUser = { id: 'local_' + Date.now(), username, password, remain: 10, is_vip: false };
-                localUsers.push(newUser);
-                saveLocalUsers();
-                return newUser;
-            } else {
-                const { data: existing } = await supabase
-                    .from('users')
-                    .select('username')
-                    .eq('username', username)
-                    .single();
-                if (existing) throw new Error('用户名已被注册');
-                const { data, error } = await supabase
-                    .from('users')
-                    .insert([{ username, password, remain: 10, is_vip: false }])
-                    .select()
-                    .single();
-                if (error) throw new Error(error.message);
-                return data;
+        // Supabase Auth
+        async function handleRegister() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            if (!email || !password || password.length < 6) {
+                showToast('请输入有效邮箱和至少6位密码', '#FF4D6D'); return;
             }
-        }
-
-        // ============================================================
-        // 7. 登录/注册 UI 控制
-        // ============================================================
-        function switchAuthView(view) {
-            document.getElementById('login-view').classList.toggle('active', view === 'login');
-            document.getElementById('register-view').classList.toggle('active', view === 'register');
-            document.getElementById('login-message').textContent = '';
-            document.getElementById('register-message').textContent = '';
-            document.getElementById('register-message').className = 'auth-message';
+            if (!sb) {
+                showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return;
+            }
+            const { data, error } = await sb.auth.signUp({ email, password });
+            if (error) {
+                showToast('注册失败: ' + error.message, '#FF4D6D'); return;
+            }
+            showToast('注册成功！请查看邮箱验证链接', '#00FF9D');
         }
 
         async function handleLogin() {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-            const msgEl = document.getElementById('login-message');
-
-            if (!username || !password) {
-                msgEl.textContent = '请填写用户名和密码';
-                return;
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            if (!email || !password) {
+                showToast('请输入邮箱和密码', '#FF4D6D'); return;
             }
-            try {
-                const user = await login(username, password);
-                currentUser = user;
-                showApp();
-                msgEl.textContent = '';
-            } catch (err) {
-                msgEl.textContent = err.message || '登录失败，请重试';
-                console.error('登录错误:', err);
+            if (!sb) {
+                showToast('Supabase 未配置，请先在设置中填写 URL 和 Key', '#FF4D6D'); return;
             }
-        }
-
-        async function handleRegister() {
-            const username = document.getElementById('register-username').value.trim();
-            const password = document.getElementById('register-password').value.trim();
-            const confirm = document.getElementById('register-confirm').value.trim();
-            const msgEl = document.getElementById('register-message');
-
-            if (!username || !password || !confirm) {
-                msgEl.textContent = '请填写完整信息';
-                return;
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) {
+                showToast('登录失败: ' + error.message, '#FF4D6D'); return;
             }
-            if (password !== confirm) {
-                msgEl.textContent = '两次密码输入不一致';
-                return;
-            }
-            if (password.length < 4) {
-                msgEl.textContent = '密码长度至少4位';
-                return;
-            }
-            try {
-                const user = await register(username, password);
-                currentUser = user;
-                msgEl.textContent = '✅ 注册成功！';
-                msgEl.className = 'auth-message success';
-                setTimeout(() => {
-                    showApp();
-                    msgEl.textContent = '';
-                    msgEl.className = 'auth-message';
-                }, 600);
-            } catch (err) {
-                msgEl.textContent = err.message || '注册失败，请重试';
-                msgEl.className = 'auth-message';
-                console.error('注册错误:', err);
+            if (data.user) {
+                const { data: profile } = await sb.from('profiles').select('vip').eq('id', data.user.id).single();
+                STATE.user = { id: data.user.id, email: data.user.email, vip: profile?.vip || false };
+                saveState();
+                enterApp();
             }
         }
 
-        // ============================================================
-        // 8. 主应用 UI 控制
-        // ============================================================
-        function showApp() {
-            document.getElementById('app-container').style.display = 'block';
-            document.getElementById('auth-modal').style.display = 'none';
-            updateUserInfo();
-            switchTab('prediction');
-            loadFavorites();
-            loadHistory(0);
-            renderAnalysis('hot');
-            renderAdvanced('monte');
-            renderChart('hotTrend');
+        async function logout() {
+            if (sb) await sb.auth.signOut();
+            STATE.user = null;
+            saveState();
+            location.reload();
         }
 
-        function hideApp() {
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('auth-modal').style.display = 'flex';
+        function guestMode() {
+            STATE.user = { id: 'guest', email: 'guest@local', vip: false };
+            saveState();
+            enterApp();
         }
 
-        function updateUserInfo() {
-            if (!currentUser) return;
-            document.getElementById('user-info').textContent =
-                `👤 ${currentUser.username} (${currentUser.is_vip ? 'VIP' : '普通'})`;
-            document.getElementById('remain-count').textContent = currentUser.remain;
-            document.getElementById('vip-status').textContent = currentUser.is_vip ? 'VIP用户' : '普通用户';
-        }
-
-        function handleLogout() {
-            if (confirm('确定要退出吗？')) {
-                currentUser = null;
-                hideApp();
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
-                document.getElementById('register-username').value = '';
-                document.getElementById('register-password').value = '';
-                document.getElementById('register-confirm').value = '';
-                switchAuthView('login');
+        async function checkSession() {
+            if (!sb) return;
+            const { data: { session } } = await sb.auth.getSession();
+            if (session?.user) {
+                const { data: profile } = await sb.from('profiles').select('vip').eq('id', session.user.id).single();
+                STATE.user = { id: session.user.id, email: session.user.email, vip: profile?.vip || false };
+                saveState();
+                enterApp();
             }
         }
 
-        // ============================================================
-        // 9. 摇奖次数与VIP
-        // ============================================================
-        async function consumeRemain() {
-            if (currentUser.is_vip) return true;
-            if (currentUser.remain <= 0) {
-                alert('免费摇奖次数已用完，请升级VIP！');
-                return false;
+        function enterApp() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            updateVIPUI();
+            switchTab('predict');
+        }
+
+        // 页面加载时自动检查登录
+        if (STATE.user && STATE.user.id && STATE.user.id !== 'guest') {
+            if (sb) checkSession(); else enterApp();
+        } else if (STATE.user?.id === 'guest') {
+            enterApp();
+        } else if (sb) {
+            checkSession();
+        }
+
+        // 导航切换
+        function switchTab(tab) {
+            STATE.currentTab = tab;
+            document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
+            const el = document.querySelector(`#navTabs .nav-tab[data-tab="${tab}"]`);
+            if (el) el.classList.add('active');
+            switch(tab) {
+                case 'predict': renderPredict(); break;
+                case 'analysis': if(!requireVIP('分析中心')) return; renderAnalysis(); break;
+                case 'lab': if(!requireVIP('AI实验室')) return; renderLab(); break;
+                case 'charts': if(!requireVIP('图表中心')) return; renderCharts(); break;
+                case 'simulator': renderSimulator(); break;
+                case 'results': renderResults(); break;
+                case 'favorites': if(!requireVIP('收藏中心')) return; renderFavorites(); break;
+                case 'history': if(!requireVIP('预测历史')) return; renderHistory(); break;
+                case 'settings': renderSettings(); break;
+                default: renderPredict();
             }
-            currentUser.remain -= 1;
-            if (useLocalMode) {
-                const idx = localUsers.findIndex(u => u.id === currentUser.id);
-                if (idx !== -1) { localUsers[idx].remain = currentUser.remain;
-                    saveLocalUsers(); }
-            } else {
-                await supabase.from('users').update({ remain: currentUser.remain }).eq('id', currentUser.id);
-            }
-            updateUserInfo();
-            return true;
+            window.scrollTo({top:0, behavior:'smooth'});
         }
-
-        async function upgradeVIP() {
-            if (!currentUser) { alert('请先登录'); return; }
-            if (currentUser.is_vip) {
-                alert('您已经是VIP用户！');
-                return;
-            }
-            const confirm = window.confirm('💎 升级VIP需要支付 $9.99，是否继续？');
-            if (!confirm) return;
-            if (useLocalMode) {
-                const idx = localUsers.findIndex(u => u.id === currentUser.id);
-                if (idx !== -1) {
-                    localUsers[idx].is_vip = true;
-                    localUsers[idx].remain = 999;
-                    currentUser = localUsers[idx];
-                    saveLocalUsers();
-                }
-            } else {
-                const { error } = await supabase
-                    .from('users')
-                    .update({ is_vip: true, remain: 999 })
-                    .eq('id', currentUser.id);
-                if (error) { alert('升级失败，请稍后重试'); return; }
-                currentUser.is_vip = true;
-                currentUser.remain = 999;
-            }
-            updateUserInfo();
-            alert('🎉 升级成功！您现在享有无限次数和全部功能！');
-        }
-
-        // ============================================================
-        // 10. 数据获取
-        // ============================================================
-        async function fetchRealData(type) {
-            if (useLocalMode) {
-                return Array.from({ length: 80 }, () => getRandomSet(type));
-            }
-            try {
-                const { data, error } = await supabase
-                    .from('lottery_data')
-                    .select('*')
-                    .eq('type', type)
-                    .order('date', { ascending: false })
-                    .limit(300);
-                if (error) throw error;
-                if (data && data.length > 0) {
-                    return data.map(d => ({ front: d.front, back: d.back }));
-                } else {
-                    return Array.from({ length: 80 }, () => getRandomSet(type));
-                }
-            } catch (e) {
-                console.warn('使用模拟数据', e);
-                return Array.from({ length: 80 }, () => getRandomSet(type));
-            }
-        }
-
-        async function initHistory() {
-            historyDB.dlt = await fetchRealData('dlt');
-            historyDB.ssq = await fetchRealData('ssq');
-        }
-
-        // ============================================================
-        // 11. 频率与加权随机
-        // ============================================================
-        function getFrequency(type) {
-            const frontMap = new Map(),
-                backMap = new Map();
-            (historyDB[type] || []).forEach(d => {
-                d.front.forEach(n => frontMap.set(n, (frontMap.get(n) || 0) + 1));
-                d.back.forEach(n => backMap.set(n, (backMap.get(n) || 0) + 1));
-            });
-            return { front: frontMap, back: backMap };
-        }
-
-        function weightedRandom(type) {
-            const freq = getFrequency(type);
-            const cfg = getConfig(type);
-
-            function pick(pool, freqMap, count) {
-                let selected = new Set();
-                let candidates = pool.map(n => ({ n, w: (freqMap.get(n) || 1) + 0.5 }));
-                while (selected.size < count) {
-                    let totalW = candidates.reduce((s, c) => s + c.w, 0);
-                    let rand = Math.random() * totalW,
-                        sum = 0;
-                    for (let c of candidates) {
-                        sum += c.w;
-                        if (rand <= sum && !selected.has(c.n)) { selected.add(c.n); break; }
-                    }
-                }
-                return Array.from(selected).sort((a, b) => a - b);
-            }
-            const frontPool = Array.from({ length: cfg.frontMax }, (_, i) => i + 1);
-            const backPool = Array.from({ length: cfg.backMax }, (_, i) => i + 1);
-            return { front: pick(frontPool, freq.front, cfg.frontCount), back: pick(backPool, freq.back, cfg.backCount) };
-        }
-
-        // ============================================================
-        // 12. 滚动动画
-        // ============================================================
-        function animateNumbersOnly(container, finalSet, type, delayBetween = 300, rollDuration = 1000) {
-            return new Promise(resolve => {
-                if (!animationEnabled) {
-                    renderStatic(container, finalSet);
-                    resolve();
-                    return;
-                }
-                const cfg = getConfig(type);
-                const allNumbers = finalSet.front.concat(finalSet.back);
-                container.innerHTML = '';
-                const balls = [];
-                for (let i = 0; i < allNumbers.length; i++) {
-                    const ball = document.createElement('span');
-                    ball.className = 'number-ball';
-                    ball.textContent = '?';
-                    container.appendChild(ball);
-                    balls.push(ball);
-                }
-
-                function rollBall(index) {
-                    if (index >= allNumbers.length) { resolve(); return; }
-                    const ball = balls[index];
-                    const isFront = index < finalSet.front.length;
-                    const maxNum = isFront ? cfg.frontMax : cfg.backMax;
-                    ball.classList.add('rolling');
-                    playRollSound();
-                    const interval = setInterval(() => {
-                        ball.textContent = Math.floor(Math.random() * maxNum) + 1;
-                    }, 60);
-                    setTimeout(() => {
-                        clearInterval(interval);
-                        ball.classList.remove('rolling');
-                        ball.textContent = allNumbers[index];
-                        if (isFront) ball.classList.add('red-ball');
-                        else ball.classList.add('blue-ball');
-                        playStopSound();
-                        setTimeout(() => rollBall(index + 1), delayBetween);
-                    }, rollDuration);
-                }
-                rollBall(0);
-            });
-        }
-
-        function renderStatic(container, set) {
-            container.innerHTML = '';
-            set.front.forEach(n => {
-                const s = document.createElement('span');
-                s.className = 'number-ball red-ball';
-                s.textContent = n;
-                container.appendChild(s);
-            });
-            set.back.forEach(n => {
-                const s = document.createElement('span');
-                s.className = 'number-ball blue-ball';
-                s.textContent = n;
-                container.appendChild(s);
-            });
-        }
-
-        // ============================================================
-        // 13. 预测功能
-        // ============================================================
-        async function generatePrediction(count = 1) {
-            if (!currentUser) { alert('请先登录'); return; }
-            initAudio();
-            const container = document.getElementById('prediction-display');
-            container.innerHTML = '';
-            if (count === 1) {
-                const set = weightedRandom(currentType);
-                currentPrediction = set;
-                await animateNumbersOnly(container, set, currentType);
-                if (currentUser) saveHistory(set);
-            } else {
-                const sets = Array.from({ length: count }, () => weightedRandom(currentType));
-                const grid = document.createElement('div');
-                grid.className = 'prediction-grid';
-                const leftCol = document.createElement('div');
-                leftCol.className = 'prediction-column';
-                const rightCol = document.createElement('div');
-                rightCol.className = 'prediction-column';
-                grid.appendChild(leftCol);
-                grid.appendChild(rightCol);
-                container.appendChild(grid);
-
-                const items = [];
-                for (let i = 0; i < count; i++) {
-                    const item = document.createElement('div');
-                    item.className = 'prediction-item';
-                    item.innerHTML = `<strong style="color:#00F5FF; min-width:45px;">组${i+1}</strong>`;
-                    const ballContainer = document.createElement('span');
-                    item.appendChild(ballContainer);
-                    if (i < Math.ceil(count / 2)) leftCol.appendChild(item);
-                    else rightCol.appendChild(item);
-                    items.push({ item, ballContainer, set: sets[i] });
-                }
-                for (let i = 0; i < items.length; i++) {
-                    items[i].item.style.border = '2px solid #FFD700';
-                    items[i].item.style.boxShadow = '0 0 20px #FFD700';
-                    await animateNumbersOnly(items[i].ballContainer, items[i].set, currentType, 200, 800);
-                    items[i].item.style.border = '1px solid rgba(0, 245, 255, 0.2)';
-                    items[i].item.style.boxShadow = 'none';
-                    await new Promise(r => setTimeout(r, 300));
-                }
-                if (sets.length > 0 && currentUser) saveHistory(sets[0]);
-            }
-        }
-
-        function randomPick() {
-            if (!currentUser) { alert('请先登录'); return; }
-            const set = getRandomSet(currentType);
-            currentPrediction = set;
-            const container = document.getElementById('prediction-display');
-            renderStatic(container, set);
-        }
-
-        function exportCurrent() {
-            if (!currentPrediction) { alert('请先生成预测'); return; }
-            const data = [{
-                type: currentType,
-                front: currentPrediction.front,
-                back: currentPrediction.back,
-                time: new Date().toISOString(),
-                score: '未开通'
-            }];
-            exportJSON(data, 'prediction.json');
-        }
-
-        async function saveHistory(set) {
-            if (!currentUser) return;
-            if (useLocalMode) {
-                localHistory.push({
-                    id: 'hist_' + Date.now(),
-                    user_id: currentUser.id,
-                    type: currentType,
-                    front: set.front,
-                    back: set.back,
-                    score: '未开通',
-                    time: new Date().toISOString()
-                });
-                saveLocalHistory();
-            } else {
-                await supabase.from('history').insert([{
-                    user_id: currentUser.id,
-                    type: currentType,
-                    front: set.front,
-                    back: set.back,
-                    score: '未开通'
-                }]);
-            }
-        }
-
-        async function saveFavorite() {
-            if (!currentUser) { alert('请先登录'); return; }
-            if (!currentPrediction) { alert('请先生成预测'); return; }
-            if (useLocalMode) {
-                localFavorites.push({
-                    id: 'fav_' + Date.now(),
-                    user_id: currentUser.id,
-                    type: currentType,
-                    front: currentPrediction.front,
-                    back: currentPrediction.back,
-                    score: '未开通',
-                    time: new Date().toISOString()
-                });
-                saveLocalFavorites();
-                alert('✅ 已收藏');
-            } else {
-                await supabase.from('favorites').insert([{
-                    user_id: currentUser.id,
-                    type: currentType,
-                    front: currentPrediction.front,
-                    back: currentPrediction.back,
-                    score: '未开通'
-                }]);
-                alert('✅ 已收藏');
-            }
-            loadFavorites();
-        }
-
-        // ============================================================
-        // 14. 蒙特卡洛
-        // ============================================================
-        async function runMonteCarloPage(n) {
-            if (!currentUser) { alert('请先登录'); return; }
-            initAudio();
-            const container = document.getElementById('monte-carlo-balls');
-            const scoreSpan = document.getElementById('monte-score');
-            const freq = {};
-            for (let i = 0; i < n; i++) {
-                const set = weightedRandom(currentType);
-                const key = set.front.join(',') + '|' + set.back.join(',');
-                freq[key] = (freq[key] || 0) + 1;
-            }
-            const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-            if (sorted.length === 0) return;
-            const best = sorted[0];
-            const parts = best[0].split('|');
-            const front = parts[0].split(',').map(Number);
-            const back = parts[1].split(',').map(Number);
-            const set = { front, back };
-            container.innerHTML = '';
-            await animateNumbersOnly(container, set, currentType, 200, 800);
-            const prob = (best[1] / n * 100);
-            scoreSpan.textContent = prob.toFixed(1) + '%';
-            const info = document.createElement('div');
-            info.style.width = '100%';
-            info.style.marginTop = '8px';
-            info.style.color = '#aaa';
-            info.textContent = `出现次数: ${best[1]} / ${n} (${prob.toFixed(2)}%)`;
-            container.appendChild(info);
-        }
-
-        async function runMonteCarloAdvanced(n) {
-            if (!currentUser) { alert('请先登录'); return; }
-            initAudio();
-            const result = document.getElementById('mc-result');
-            if (!result) return;
-            const freq = {};
-            for (let i = 0; i < n; i++) {
-                const set = weightedRandom(currentType);
-                const key = set.front.join(',') + '|' + set.back.join(',');
-                freq[key] = (freq[key] || 0) + 1;
-            }
-            const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-            if (sorted.length === 0) return;
-            const best = sorted[0];
-            const parts = best[0].split('|');
-            const front = parts[0].split(',').map(Number);
-            const back = parts[1].split(',').map(Number);
-            const set = { front, back };
-            result.innerHTML = '';
-            await animateNumbersOnly(result, set, currentType, 200, 800);
-            const info = document.createElement('div');
-            info.style.marginTop = '10px';
-            info.style.color = '#aaa';
-            info.textContent = `出现次数: ${best[1]} / ${n} (${(best[1]/n*100).toFixed(2)}%)`;
-            result.appendChild(info);
-        }
-
-        // ============================================================
-        // 15. 马尔可夫链
-        // ============================================================
-        function runMarkov() {
-            if (!currentUser) { alert('请先登录'); return; }
-            const result = document.getElementById('markov-result');
-            if (!result) return;
-            const data = historyDB[currentType];
-            if (data.length < 5) { result.innerHTML = '历史数据不足'; return; }
-            const trans = {};
-            for (let i = 0; i < data.length - 1; i++) {
-                const cur = data[i].front.join(',');
-                const next = data[i + 1].front.join(',');
-                if (!trans[cur]) trans[cur] = {};
-                trans[cur][next] = (trans[cur][next] || 0) + 1;
-            }
-            const entries = Object.entries(trans).slice(0, 5);
-            let html = '前区转移矩阵 (Top 5):<br>';
-            entries.forEach(([from, tos]) => {
-                const sorted = Object.entries(tos).sort((a, b) => b[1] - a[1]).slice(0, 3);
-                html += `${from} → ${sorted.map(([t,c])=>`${t}(${c}次)`).join(' | ')}<br>`;
-            });
-            result.innerHTML = html;
-        }
-
-        // ============================================================
-        // 16. 贝叶斯
-        // ============================================================
-        async function runBayes() {
-            if (!currentUser) { alert('请先登录'); return; }
-            initAudio();
-            const result = document.getElementById('bayes-result');
-            if (!result) return;
-            const freq = getFrequency(currentType);
-            const cfg = getConfig(currentType);
-            const sortedFront = [...freq.front.entries()].sort((a, b) => b[1] - a[1]);
-            const sortedBack = [...freq.back.entries()].sort((a, b) => b[1] - a[1]);
-            const front = sortedFront.slice(0, cfg.frontCount).map(([n]) => Number(n)).sort((a, b) => a - b);
-            const back = sortedBack.slice(0, cfg.backCount).map(([n]) => Number(n)).sort((a, b) => a - b);
-            const set = { front, back };
-            result.innerHTML = '';
-            await animateNumbersOnly(result, set, currentType, 200, 800);
-            const total = historyDB[currentType].length * cfg.frontCount;
-            const prob = (sortedFront[0]?.[1] / total * 100 || 0).toFixed(2);
-            const info = document.createElement('div');
-            info.style.marginTop = '10px';
-            info.style.color = '#aaa';
-            info.textContent = `最高概率号码: ${sortedFront[0]?.[0]} (${prob}%)`;
-            result.appendChild(info);
-        }
-
-        // ============================================================
-        // 17. 综合评分
-        // ============================================================
-        async function runEnsemble() {
-            if (!currentUser) { alert('请先登录'); return; }
-            initAudio();
-            const result = document.getElementById('ensemble-result');
-            if (!result) return;
-            const set = weightedRandom(currentType);
-            result.innerHTML = '';
-            await animateNumbersOnly(result, set, currentType, 200, 800);
-            const info = document.createElement('div');
-            info.style.marginTop = '10px';
-            info.style.color = '#aaa';
-            info.innerHTML = `综合评分: 未开通`;
-            result.appendChild(info);
-        }
-
-        // ============================================================
-        // 18. 摇奖模拟
-        // ============================================================
-        async function startDraw() {
-            if (!currentUser) { alert('请先登录'); return; }
-            if (!(await consumeRemain())) return;
-            initAudio();
-            const container = document.getElementById('draw-balls');
-            container.innerHTML = '';
-            const set = getRandomSet(currentType);
-            await animateNumbersOnly(container, set, currentType, 200, 800);
-            if (currentUser) saveHistory(set);
-        }
-
-        // ============================================================
-        // 19. 分析中心
-        // ============================================================
-        function renderAnalysis(tab) {
-            const container = document.getElementById('analysis-content');
-            const freq = getFrequency(currentType);
-            const cfg = getConfig(currentType);
-            let html = '';
-            if (tab === 'hot') {
-                const hot = [...freq.front.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-                html =
-                    `<h4>🔥 热号TOP10</h4><div class="inline-balls">${hot.map(([n,c])=>`<span class="number-ball red-ball">${n}<span style="display:block;font-size:0.5rem;">${c}</span></span>`).join('')}</div>`;
-            } else if (tab === 'cold') {
-                const cold = [...freq.front.entries()].sort((a, b) => a[1] - b[1]).slice(0, 10);
-                html =
-                    `<h4>❄️ 冷号TOP10</h4><div class="inline-balls">${cold.map(([n,c])=>`<span class="number-ball blue-ball">${n}<span style="display:block;font-size:0.5rem;">${c}</span></span>`).join('')}</div>`;
-            } else if (tab === 'miss') {
-                const miss = Array.from({ length: 10 }, () => ({ n: rand(1, cfg.frontMax), v: rand(0, 20) }));
-                html =
-                    `<h4>⏳ 当前遗漏排行</h4><div class="inline-balls">${miss.sort((a,b)=>b.v-a.v).slice(0,10).map(({n,v})=>`<span class="number-ball" style="border-color:#FFD700;">${n}<span style="display:block;font-size:0.5rem;">${v}期</span></span>`).join('')}</div>`;
-            } else if (tab === 'sum') {
-                const sums = historyDB[currentType].map(d => d.front.reduce((a, b) => a + b, 0));
-                const dist = {};
-                sums.forEach(s => { const key = Math.floor(s / 10) * 10;
-                    dist[key] = (dist[key] || 0) + 1; });
-                html =
-                    `<h4>📐 和值分布</h4><div>${Object.entries(dist).sort((a,b)=>a[0]-b[0]).map(([k,v])=>`<span style="display:inline-block;margin:5px;padding:4px 12px;background:rgba(0,245,255,0.1);border-radius:12px;">${k}-${k+9}: ${v}次</span>`).join('')}</div>`;
-            } else if (tab === 'oe') {
-                const odd = historyDB[currentType].flatMap(d => d.front).filter(n => n % 2 === 1).length;
-                const even = historyDB[currentType].flatMap(d => d.front).filter(n => n % 2 === 0).length;
-                html =
-                    `<h4>⚖️ 奇偶比例</h4><div>奇数: ${odd} (${(odd/(odd+even)*100).toFixed(1)}%) &nbsp; 偶数: ${even} (${(even/(odd+even)*100).toFixed(1)}%)</div>`;
-            } else if (tab === 'size') {
-                const mid = cfg.frontMax / 2;
-                const big = historyDB[currentType].flatMap(d => d.front).filter(n => n > mid).length;
-                const small = historyDB[currentType].flatMap(d => d.front).filter(n => n <= mid).length;
-                html =
-                    `<h4>📏 大小比例 (大 > ${mid})</h4><div>大号: ${big} (${(big/(big+small)*100).toFixed(1)}%) &nbsp; 小号: ${small} (${(small/(big+small)*100).toFixed(1)}%)</div>`;
-            } else if (tab === 'consec') {
-                let consecCount = 0;
-                historyDB[currentType].forEach(d => {
-                    for (let i = 0; i < d.front.length - 1; i++) {
-                        if (d.front[i + 1] - d.front[i] === 1) { consecCount++; break; }
-                    }
-                });
-                html =
-                    `<h4>🔗 连号出现频率</h4><div>出现连号的期数: ${consecCount} / ${historyDB[currentType].length} (${(consecCount/historyDB[currentType].length*100).toFixed(1)}%)</div>`;
-            } else if (tab === 'repeat') {
-                let repeatTotal = 0;
-                for (let i = 0; i < historyDB[currentType].length - 1; i++) {
-                    const cur = historyDB[currentType][i].front;
-                    const next = historyDB[currentType][i + 1].front;
-                    const common = cur.filter(n => next.includes(n)).length;
-                    repeatTotal += common;
-                }
-                const avg = repeatTotal / (historyDB[currentType].length - 1) || 0;
-                html =
-                    `<h4>🔄 重号分析</h4><div>平均每期重号: ${avg.toFixed(2)} 个</div><div>重号概率: ${(avg/cfg.frontCount*100).toFixed(1)}%</div>`;
-            } else if (tab === 'ac') {
-                const acValues = historyDB[currentType].map(d => {
-                    const diffs = [];
-                    for (let i = 0; i < d.front.length; i++)
-                        for (let j = i + 1; j < d.front.length; j++) diffs.push(Math.abs(d.front[j] - d.front[i]));
-                    return new Set(diffs).size - (d.front.length - 1);
-                });
-                const dist2 = {};
-                acValues.forEach(v => { dist2[v] = (dist2[v] || 0) + 1; });
-                html =
-                    `<h4>🔢 AC值分布</h4><div>${Object.entries(dist2).sort((a,b)=>a[0]-b[0]).map(([k,v])=>`<span style="display:inline-block;margin:5px;padding:4px 12px;background:rgba(0,245,255,0.1);border-radius:12px;">AC=${k}: ${v}次</span>`).join('')}</div>`;
-            } else if (tab === 'span') {
-                const spans = historyDB[currentType].map(d => Math.max(...d.front) - Math.min(...d.front));
-                const dist3 = {};
-                spans.forEach(s => { const key = Math.floor(s / 5) * 5;
-                    dist3[key] = (dist3[key] || 0) + 1; });
-                html =
-                    `<h4>📏 跨度分布</h4><div>${Object.entries(dist3).sort((a,b)=>a[0]-b[0]).map(([k,v])=>`<span style="display:inline-block;margin:5px;padding:4px 12px;background:rgba(0,245,255,0.1);border-radius:12px;">${k}-${k+4}: ${v}次</span>`).join('')}</div>`;
-            }
-            container.innerHTML = html;
-            // 更新tab激活状态
-            document.querySelectorAll('#analysis-tabs .cyber-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`#analysis-tabs .cyber-btn[data-atab="${tab}"]`)?.classList.add('active');
-        }
-
-        // ============================================================
-        // 20. 高级引擎渲染
-        // ============================================================
-        function renderAdvanced(tab) {
-            const container = document.getElementById('advanced-content');
-            let html = '';
-            if (tab === 'monte') {
-                html = `
-                    <h4>🎲 蒙特卡洛模拟</h4>
-                    <button class="cyber-btn" onclick="runMonteCarloAdvanced(1000)">1,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloAdvanced(10000)">10,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloAdvanced(50000)">50,000次</button>
-                    <button class="cyber-btn" onclick="runMonteCarloAdvanced(100000)">100,000次</button>
-                    <div id="mc-result" class="adv-result-box">点击运行模拟</div>
-                `;
-            } else if (tab === 'markov') {
-                html = `
-                    <h4>🔗 马尔可夫链分析</h4>
-                    <button class="cyber-btn" onclick="runMarkov()">运行分析</button>
-                    <div id="markov-result" class="adv-result-box">点击运行</div>
-                `;
-            } else if (tab === 'bayes') {
-                html = `
-                    <h4>📊 贝叶斯分析</h4>
-                    <button class="cyber-btn" onclick="runBayes()">运行分析</button>
-                    <div id="bayes-result" class="adv-result-box">点击运行</div>
-                `;
-            } else if (tab === 'ensemble') {
-                html = `
-                    <h4>🧩 综合评分模型</h4>
-                    <button class="cyber-btn" onclick="runEnsemble()">运行综合评分</button>
-                    <div id="ensemble-result" class="adv-result-box">点击运行</div>
-                `;
-            }
-            container.innerHTML = html;
-            document.querySelectorAll('#adv-tabs .cyber-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`#adv-tabs .cyber-btn[data-adv="${tab}"]`)?.classList.add('active');
-        }
-
-        // ============================================================
-        // 21. ECharts 图表
-        // ============================================================
-        function renderChart(type) {
-            const container = document.getElementById('chart-container');
-            if (!chartInstance) chartInstance = echarts.init(container);
-            let option = { backgroundColor: 'transparent' };
-            if (type === 'hotTrend') {
-                const hot = [...getFrequency(currentType).front.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
-                option = {
-                    title: { text: '热号趋势', textStyle: { color: '#00F5FF' } },
-                    xAxis: { type: 'category', data: hot.map(([n]) => formatNum(n)), axisLabel: { color: '#aaa' } },
-                    yAxis: { type: 'value', axisLabel: { color: '#aaa' }, splitLine: { lineStyle: { color: 'rgba(0,245,255,0.1)' } } },
-                    series: [{ type: 'line', data: hot.map(([, c]) => c), smooth: true, lineStyle: { color: '#FF4D6D' },
-                        areaStyle: { color: 'rgba(255,77,109,0.2)' } }]
-                };
-            } else if (type === 'coldTrend') {
-                const cold = [...getFrequency(currentType).front.entries()].sort((a, b) => a[1] - b[1]).slice(0, 7);
-                option = {
-                    title: { text: '冷号趋势', textStyle: { color: '#6E00FF' } },
-                    xAxis: { type: 'category', data: cold.map(([n]) => formatNum(n)), axisLabel: { color: '#aaa' } },
-                    yAxis: { type: 'value', axisLabel: { color: '#aaa' }, splitLine: { lineStyle: { color: 'rgba(0,245,255,0.1)' } } },
-                    series: [{ type: 'line', data: cold.map(([, c]) => c), smooth: true, lineStyle: { color: '#00F5FF' },
-                        areaStyle: { color: 'rgba(0,245,255,0.2)' } }]
-                };
-            } else if (type === 'missTrend') {
-                option = {
-                    title: { text: '遗漏走势', textStyle: { color: '#FFD700' } },
-                    xAxis: { type: 'category', data: Array.from({ length: 20 }, (_, i) => `期${i+1}`),
-                        axisLabel: { color: '#aaa' } },
-                    yAxis: { type: 'value', axisLabel: { color: '#aaa' }, splitLine: { lineStyle: { color: 'rgba(0,245,255,0.1)' } } },
-                    series: [{ type: 'line', data: Array.from({ length: 20 }, () => rand(0, 20)), smooth: true,
-                        lineStyle: { color: '#FF4D6D' }, areaStyle: { color: 'rgba(255,77,109,0.2)' } }]
-                };
-            } else if (type === 'sumTrend') {
-                option = {
-                    title: { text: '和值走势', textStyle: { color: '#00FF9D' } },
-                    xAxis: { type: 'category', data: Array.from({ length: 30 }, (_, i) => `期${i+1}`),
-                        axisLabel: { color: '#aaa' } },
-                    yAxis: { type: 'value', axisLabel: { color: '#aaa' }, splitLine: { lineStyle: { color: 'rgba(0,245,255,0.1)' } } },
-                    series: [{ type: 'line', data: historyDB[currentType].slice(0, 30).map(d => d.front.reduce((a, b) =>
-                            a + b, 0)), smooth: true, lineStyle: { color: '#00FF9D' },
-                        areaStyle: { color: 'rgba(0,255,157,0.2)' } }]
-                };
-            } else if (type === 'oePie') {
-                const odd = historyDB[currentType].flatMap(d => d.front).filter(n => n % 2 === 1).length;
-                const even = historyDB[currentType].flatMap(d => d.front).filter(n => n % 2 === 0).length;
-                option = {
-                    title: { text: '奇偶比例', textStyle: { color: '#00F5FF' } },
-                    tooltip: { trigger: 'item' },
-                    series: [{ type: 'pie', radius: ['40%', '70%'], data: [{ value: odd, name: '奇数' }, { value: even,
-                            name: '偶数' }], color: ['#FF4D6D', '#00F5FF'], label: { color: '#aaa' } }]
-                };
-            } else if (type === 'sizePie') {
-                const mid = getConfig(currentType).frontMax / 2;
-                const big = historyDB[currentType].flatMap(d => d.front).filter(n => n > mid).length;
-                const small = historyDB[currentType].flatMap(d => d.front).filter(n => n <= mid).length;
-                option = {
-                    title: { text: '大小比例', textStyle: { color: '#00F5FF' } },
-                    tooltip: { trigger: 'item' },
-                    series: [{ type: 'pie', radius: ['40%', '70%'], data: [{ value: big, name: '大号' }, { value: small,
-                            name: '小号' }], color: ['#FFD700', '#6E00FF'], label: { color: '#aaa' } }]
-                };
-            } else if (type === 'scoreTrend') {
-                option = {
-                    title: { text: 'AI评分走势', textStyle: { color: '#FFD700' } },
-                    xAxis: { type: 'category', data: Array.from({ length: 20 }, (_, i) => `期${i+1}`),
-                        axisLabel: { color: '#aaa' } },
-                    yAxis: { type: 'value', min: 60, max: 100, axisLabel: { color: '#aaa' },
-                        splitLine: { lineStyle: { color: 'rgba(0,245,255,0.1)' } } },
-                    series: [{ type: 'line', data: Array.from({ length: 20 }, () => rand(70, 98)), smooth: true,
-                        lineStyle: { color: '#FFD700' }, areaStyle: { color: 'rgba(255,215,0,0.2)' } }]
-                };
-            }
-            chartInstance.setOption(option);
-            chartInstance.resize();
-            // 更新tab激活状态
-            document.querySelectorAll('#chart-tabs .cyber-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`#chart-tabs .cyber-btn[data-ctab="${type}"]`)?.classList.add('active');
-        }
-
-        // ============================================================
-        // 22. 收藏 & 历史
-        // ============================================================
-        async function loadFavorites() {
-            if (!currentUser) return;
-            let data = [];
-            if (useLocalMode) {
-                data = localFavorites.filter(f => f.user_id === currentUser.id);
-            } else {
-                const { data: d, error } = await supabase
-                    .from('favorites')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('time', { ascending: false });
-                if (error) return;
-                data = d || [];
-            }
-            const container = document.getElementById('favorites-list');
-            if (data.length === 0) { container.innerHTML = '<p>暂无收藏</p>'; return; }
-            container.innerHTML = data.map(f => `
-                <div class="favorite-item">
-                    <span>${f.type==='dlt'?'大乐透':'双色球'} | ${new Date(f.time).toLocaleString()}</span>
-                    <span class="inline-balls">
-                        ${f.front.map(n=>`<span class="number-ball red-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                        +
-                        ${f.back.map(n=>`<span class="number-ball blue-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                    </span>
-                    <button class="cyber-btn danger" onclick="removeFavorite('${f.id}')">删除</button>
-                </div>
-            `).join('');
-        }
-
-        async function removeFavorite(id) {
-            if (useLocalMode) {
-                localFavorites = localFavorites.filter(f => f.id !== id);
-                saveLocalFavorites();
-            } else {
-                await supabase.from('favorites').delete().eq('id', id);
-            }
-            loadFavorites();
-        }
-
-        async function clearFavorites() {
-            if (!confirm('确定清空所有收藏？')) return;
-            if (useLocalMode) {
-                localFavorites = localFavorites.filter(f => f.user_id !== currentUser.id);
-                saveLocalFavorites();
-            } else {
-                await supabase.from('favorites').delete().eq('user_id', currentUser.id);
-            }
-            loadFavorites();
-        }
-
-        async function exportFavorites() {
-            if (!currentUser) return;
-            let data = [];
-            if (useLocalMode) data = localFavorites.filter(f => f.user_id === currentUser.id);
-            else { const { data: d } = await supabase.from('favorites').select('*').eq('user_id', currentUser.id);
-                data = d || []; }
-            if (data.length) exportCSV(data, 'favorites.csv');
-            else alert('暂无收藏可导出');
-        }
-
-        async function loadHistory(limit = 0) {
-            if (!currentUser) return;
-            let data = [];
-            if (useLocalMode) {
-                data = localHistory.filter(h => h.user_id === currentUser.id);
-                if (limit > 0) data = data.slice(0, limit);
-            } else {
-                let query = supabase.from('history').select('*').eq('user_id', currentUser.id).order('time', { ascending: false });
-                if (limit > 0) query = query.limit(limit);
-                const { data: d, error } = await query;
-                if (error) return;
-                data = d || [];
-            }
-            const container = document.getElementById('history-list');
-            if (data.length === 0) { container.innerHTML = '<p>暂无历史</p>'; return; }
-            container.innerHTML = data.map(h => `
-                <div class="history-item">
-                    <span>${h.type==='dlt'?'大乐透':'双色球'} | ${new Date(h.time).toLocaleString()}</span>
-                    <span class="inline-balls">
-                        ${h.front.map(n=>`<span class="number-ball red-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                        +
-                        ${h.back.map(n=>`<span class="number-ball blue-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                    </span>
-                    <button class="cyber-btn danger" onclick="removeHistory('${h.id}')">删除</button>
-                </div>
-            `).join('');
-        }
-
-        async function removeHistory(id) {
-            if (useLocalMode) {
-                localHistory = localHistory.filter(h => h.id !== id);
-                saveLocalHistory();
-            } else {
-                await supabase.from('history').delete().eq('id', id);
-            }
-            loadHistory(0);
-        }
-
-        async function clearHistory() {
-            if (!confirm('确定清空所有历史？')) return;
-            if (useLocalMode) {
-                localHistory = localHistory.filter(h => h.user_id !== currentUser.id);
-                saveLocalHistory();
-            } else {
-                await supabase.from('history').delete().eq('user_id', currentUser.id);
-            }
-            loadHistory(0);
-        }
-
-        async function exportHistory() {
-            if (!currentUser) return;
-            let data = [];
-            if (useLocalMode) data = localHistory.filter(h => h.user_id === currentUser.id);
-            else { const { data: d } = await supabase.from('history').select('*').eq('user_id', currentUser.id);
-                data = d || []; }
-            if (data.length) exportCSV(data, 'history.csv');
-            else alert('暂无历史可导出');
-        }
-
-        function searchHistory() {
-            const q = document.getElementById('hist-search').value.trim().toLowerCase();
-            if (!q) { loadHistory(0); return; }
-            let data = [];
-            if (useLocalMode) data = localHistory.filter(h => h.user_id === currentUser.id);
-            else { /* 需要实现搜索逻辑，简化处理 */ data = localHistory.filter(h => h.user_id === currentUser.id); }
-            const filtered = data.filter(h => {
-                const str = [...h.front, ...h.back].join(' ');
-                return str.includes(q);
-            });
-            const container = document.getElementById('history-list');
-            if (filtered.length === 0) { container.innerHTML = '<p>无匹配结果</p>'; return; }
-            container.innerHTML = filtered.map(h => `
-                <div class="history-item">
-                    <span>${h.type==='dlt'?'大乐透':'双色球'} | ${new Date(h.time).toLocaleString()}</span>
-                    <span class="inline-balls">
-                        ${h.front.map(n=>`<span class="number-ball red-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                        +
-                        ${h.back.map(n=>`<span class="number-ball blue-ball" style="width:32px;height:32px;line-height:32px;font-size:0.8rem;">${n}</span>`).join('')}
-                    </span>
-                </div>
-            `).join('');
-        }
-
-        // ============================================================
-        // 23. 导出工具
-        // ============================================================
-        function exportJSON(data, filename) {
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            a.click();
-        }
-
-        function exportCSV(data, filename) {
-            let csv = '类型,前区,后区,时间,评分\n';
-            data.forEach(d => { csv +=
-                    `${d.type},${d.front.join('-')},${d.back.join('-')},${d.time},${d.score||'未开通'}\n`; });
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            a.click();
-        }
-
-        async function exportAllJSON() {
-            if (!currentUser) return;
-            let fav = [],
-                hist = [];
-            if (useLocalMode) { fav = localFavorites.filter(f => f.user_id === currentUser.id);
-                hist = localHistory.filter(h => h.user_id === currentUser.id); } else {
-                const { data: d1 } = await supabase.from('favorites').select('*').eq('user_id', currentUser.id);
-                const { data: d2 } = await supabase.from('history').select('*').eq('user_id', currentUser.id);
-                fav = d1 || [];
-                hist = d2 || [];
-            }
-            exportJSON({ favorites: fav, history: hist }, 'all_data.json');
-        }
-
-        async function exportAllExcel() {
-            if (!currentUser) return;
-            let fav = [],
-                hist = [];
-            if (useLocalMode) { fav = localFavorites.filter(f => f.user_id === currentUser.id);
-                hist = localHistory.filter(h => h.user_id === currentUser.id); } else {
-                const { data: d1 } = await supabase.from('favorites').select('*').eq('user_id', currentUser.id);
-                const { data: d2 } = await supabase.from('history').select('*').eq('user_id', currentUser.id);
-                fav = d1 || [];
-                hist = d2 || [];
-            }
-            const all = [...fav, ...hist];
-            if (all.length) exportCSV(all, 'all_data.csv');
-            else alert('暂无数据可导出');
-        }
-
-        // ============================================================
-        // 24. Tab 切换
-        // ============================================================
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-            if (tabName === 'favorites') loadFavorites();
-            if (tabName === 'history') loadHistory(0);
-            if (tabName === 'analysis') renderAnalysis('hot');
-            if (tabName === 'advanced') renderAdvanced('monte');
-            if (tabName === 'charts') renderChart('hotTrend');
-        }
-
-        // ============================================================
-        // 25. 彩种切换
-        // ============================================================
+        document.getElementById('navTabs').addEventListener('click', e => {
+            const tab = e.target.closest('.nav-tab');
+            if (tab) switchTab(tab.dataset.tab);
+        });
         function switchLottery(type) {
-            currentType = type;
-            document.getElementById('switch-dlt').classList.toggle('active', type === 'dlt');
-            document.getElementById('switch-ssq').classList.toggle('active', type === 'ssq');
-            // 刷新当前tab
-            const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab) {
-                const tabName = activeTab.id.replace('tab-', '');
-                if (tabName === 'analysis') renderAnalysis('hot');
-                if (tabName === 'advanced') renderAdvanced('monte');
-                if (tabName === 'charts') renderChart('hotTrend');
+            STATE.lottery = type;
+            document.getElementById('btnDLT').classList.toggle('active', type === 'dlt');
+            document.getElementById('btnSSQ').classList.toggle('active', type === 'ssq');
+            switchTab(STATE.currentTab);
+        }
+
+        // ================= 页面渲染函数 =================
+        function renderPredict() {
+            const cfg = getCfg();
+            const left = isVIP() ? '∞' : STATE.freePredictCount;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel" style="text-align:center;">
+                    <div class="panel-title">🤖 AI预测中心 - ${cfg.name} ${!isVIP() ? `<span style="color:var(--gold);">(剩余免费${left}次)</span>` : '(VIP无限)'}</div>
+                    <div id="predictResult" style="min-height:100px;"></div>
+                    <div class="flex-row" style="justify-content:center; margin-top:15px;">
+                        <button class="btn primary" onclick="doPredict(1)">🎯 AI预测1组</button>
+                        <button class="btn" onclick="doPredict(5)">📋 AI预测5组</button>
+                        <button class="btn" onclick="doPredict(10)">📋 AI预测10组</button>
+                        <button class="btn" onclick="randomPick()">🎲 随机选号</button>
+                    </div>
+                </div>`;
+        }
+        function doPredict(count) {
+            if (count === 1 && !isVIP() && STATE.freePredictCount <= 0) {
+                showToast('免费次数已用完，请升级VIP', '#FFD700'); showVIPModal(); return;
             }
-        }
-
-        // ============================================================
-        // 26. 设置相关
-        // ============================================================
-        function setTheme(theme) {
-            const root = document.documentElement;
-            if (theme === 'cyber') {
-                root.style.setProperty('--ai-blue', '#FF00FF');
-                root.style.setProperty('--tech-purple', '#00FFFF');
-            } else if (theme === 'purple') {
-                root.style.setProperty('--ai-blue', '#A855F7');
-                root.style.setProperty('--tech-purple', '#6E00FF');
-            } else if (theme === 'dark') {
-                root.style.setProperty('--ai-blue', '#3B82F6');
-                root.style.setProperty('--tech-purple', '#8B5CF6');
-            } else {
-                root.style.setProperty('--ai-blue', '#00F5FF');
-                root.style.setProperty('--tech-purple', '#6E00FF');
+            if (!isVIP() && count > 1) {
+                showToast('多组预测需要VIP', '#FFD700'); showVIPModal(); return;
             }
+            if (count === 1 && !isVIP()) STATE.freePredictCount--;
+            saveState();
+            const cfg = getCfg();
+            const container = document.getElementById('predictResult');
+            container.innerHTML = '';
+            const preds = [];
+            for (let i = 0; i < count; i++) {
+                const p = aiPredict(); preds.push(p);
+                STATE.predictions.unshift(p);
+                STATE.history.unshift({...p, id: Date.now()+i});
+                if (sb && STATE.user && STATE.user.id !== 'guest') savePredictionToSupabase(p);
+            }
+            saveState();
+            let idx = 0;
+            function showNext() {
+                if (idx >= preds.length) return;
+                const p = preds[idx];
+                const div = document.createElement('div'); div.style.margin = '10px 0';
+                div.innerHTML = `<strong>#${idx+1}</strong> <span class="ball-container" id="multiBalls${idx}"></span> <span style="color:var(--green);">${p.score}分</span> <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>`;
+                container.appendChild(div);
+                rollNumbersSequentially(`multiBalls${idx}`, p.numbers.fronts, p.numbers.backs, cfg, () => {
+                    idx++; setTimeout(showNext, 400);
+                });
+            }
+            showNext();
         }
-
-        function updateWeight(input) {
-            const key = input.dataset.w;
-            document.getElementById('w-' + key).textContent = input.value;
-        }
-
-        function applyWeights() {
-            const weights = {};
-            document.querySelectorAll('input[data-w]').forEach(inp => { weights[inp.dataset.w] = parseInt(inp.value); });
-            localStorage.setItem('lotto_weights', JSON.stringify(weights));
-            alert('✅ 权重已保存');
-        }
-
-        function applyStrategy() {
-            const val = document.getElementById('strategy-select').value;
-            let desc = '';
-            if (val === 'balanced') desc = '平衡模式：均衡各项指标';
-            else if (val === 'conservative') desc = '稳健模式：偏重热号和遗漏';
-            else if (val === 'aggressive') desc = '激进模式：偏重马尔可夫和蒙特卡洛';
-            else if (val === 'extreme') desc = '极限模式：追求高风险高回报';
-            document.getElementById('strategy-desc').textContent = '当前策略: ' + desc;
-            const map = {
-                balanced: { hot: 20, cold: 10, miss: 20, sum: 15, oe: 10, markov: 20, monte: 15 },
-                conservative: { hot: 30, cold: 15, miss: 25, sum: 10, oe: 5, markov: 10, monte: 5 },
-                aggressive: { hot: 10, cold: 5, miss: 10, sum: 20, oe: 5, markov: 25, monte: 25 },
-                extreme: { hot: 5, cold: 5, miss: 5, sum: 25, oe: 5, markov: 30, monte: 25 }
-            };
-            const w = map[val] || map.balanced;
-            Object.keys(w).forEach(key => {
-                const inp = document.querySelector(`input[data-w="${key}"]`);
-                if (inp) { inp.value = w[key];
-                    document.getElementById('w-' + key).textContent = w[key]; }
+        async function savePredictionToSupabase(pred) {
+            if (!sb || !STATE.user?.id || STATE.user.id === 'guest') return;
+            await sb.from('predictions').insert({
+                user_id: STATE.user.id,
+                lottery: pred.lottery,
+                fronts: pred.numbers.fronts.join(','),
+                backs: pred.numbers.backs.join(','),
+                score: pred.score,
+                rating: pred.rating
             });
         }
-
-        // ============================================================
-        // 27. BGM
-        // ============================================================
-        function loadBGM(input) {
-            const f = input.files[0];
-            if (f) { if (bgmAudio) bgmAudio.pause();
-                bgmAudio = new Audio(URL.createObjectURL(f));
-                bgmAudio.loop = true; }
+        function randomPick() {
+            const cfg = getCfg(); const nums = genRandom(cfg);
+            const score = (70 + Math.random()*20).toFixed(1);
+            document.getElementById('predictResult').innerHTML = `<div class="ball-container" id="randBalls"></div><p>随机评分: ${score}分</p>`;
+            rollNumbersSequentially('randBalls', nums.fronts, nums.backs, cfg);
         }
 
-        function playBGM() { if (bgmAudio) bgmAudio.play(); }
-
-        function stopBGM() { if (bgmAudio) bgmAudio.pause(); }
-
-        // ============================================================
-        // 28. 重置与清理
-        // ============================================================
+        function renderAnalysis() {
+            const cfg = getCfg();
+            const hot = Array.from({length:10}, ()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
+            const cold = Array.from({length:10}, ()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
+            document.getElementById('mainContent').innerHTML = `
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">🔥 热号TOP10 - ${cfg.fName}</div><div class="ball-container">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+                    <div class="panel"><div class="panel-title">❄️ 冷号TOP10 - ${cfg.fName}</div><div class="ball-container">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+                    <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
+                </div>`;
+        }
+        function renderLab() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="grid-2">
+                    <div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div>
+                        <button class="btn small" onclick="runMonteCarlo(1000)">1000次</button>
+                        <button class="btn small" onclick="runMonteCarlo(10000)">10000次</button>
+                        <div id="monteResult" class="ball-container" style="margin-top:10px;"></div>
+                    </div>
+                    <div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div>
+                        <button class="btn small primary" onclick="runMarkov()">生成推荐号码</button>
+                        <div id="markovResult" class="ball-container" style="margin-top:10px;"></div>
+                    </div>
+                </div>`;
+        }
+        function runMonteCarlo(times) {
+            const cfg = getCfg(); const ff={}, bf={};
+            for(let i=1;i<=cfg.fMax;i++) ff[i]=0; for(let i=1;i<=cfg.bMax;i++) bf[i]=0;
+            for(let i=0;i<times;i++) { const n=genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
+            const fronts = Object.entries(ff).sort((a,b)=>b[1]-a[1]).slice(0,cfg.fCnt).map(([n])=>+n).sort((a,b)=>a-b);
+            const backs = Object.entries(bf).sort((a,b)=>b[1]-a[1]).slice(0,cfg.bCnt).map(([n])=>+n).sort((a,b)=>a-b);
+            const el = document.getElementById('monteResult'); el.innerHTML = '';
+            rollNumbersSequentially('monteResult', fronts, backs, cfg);
+        }
+        function runMarkov() {
+            const cfg = getCfg();
+            const buildMatrix = (max) => {
+                const m = {}; for(let i=1;i<=max;i++) m[i]={};
+                for(let i=1;i<=max;i++) { let t=0; for(let j=1;j<=max;j++) if(i!==j) { m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; }
+                return m;
+            };
+            const fm = buildMatrix(cfg.fMax), bm = buildMatrix(cfg.bMax);
+            const generate = (mx, max, cnt) => {
+                const sel = new Set(); let cur = rInt(1,max); sel.add(cur);
+                while(sel.size < cnt) { let best=null, p=0; for(let j=1;j<=max;j++) if(!sel.has(j)) { const prob=mx[cur]?.[j]||0; if(prob>p){p=prob; best=j;} } if(!best) do{best=rInt(1,max);}while(sel.has(best)); sel.add(best); cur=best; }
+                return [...sel].sort((a,b)=>a-b);
+            };
+            const fronts = generate(fm, cfg.fMax, cfg.fCnt), backs = generate(bm, cfg.bMax, cfg.bCnt);
+            document.getElementById('markovResult').innerHTML = '';
+            rollNumbersSequentially('markovResult', fronts, backs, cfg);
+        }
+        function renderCharts() {
+            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📈 ECharts 图表</div><div class="chart-box" id="chartDemo"></div></div>`;
+            setTimeout(() => {
+                const el = document.getElementById('chartDemo'); if(!el) return;
+                const c = echarts.init(el);
+                c.setOption({ xAxis:{type:'category',data:['Mon','Tue','Wed']}, yAxis:{type:'value'}, series:[{data:[120,200,150], type:'line', lineStyle:{color:'#00F5FF'}}] });
+                window.addEventListener('resize', ()=>c.resize());
+            }, 300);
+        }
+        function renderSimulator() {
+            const cfg = getCfg(); const left = isVIP() ? '∞' : STATE.freeSimCount;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel" style="text-align:center;"><div class="panel-title">🎰 ${cfg.name}摇奖 (剩余${left}次)</div>
+                <div class="ball-container" id="simBalls"></div>
+                <button class="btn primary" onclick="startSim()">开始摇奖</button></div>`;
+        }
+        function startSim() {
+            if(!isVIP() && STATE.freeSimCount<=0) { showToast('免费次数用完','#FFD700'); showVIPModal(); return; }
+            if(!isVIP()) STATE.freeSimCount--; saveState();
+            const cfg = getCfg(); const nums = genRandom(cfg);
+            rollNumbersSequentially('simBalls', nums.fronts, nums.backs, cfg);
+        }
+        function renderResults() {
+            document.getElementById('mainContent').innerHTML = '<div class="panel"><div class="panel-title">📡 实时开奖</div><p>模拟开奖数据（可接入真实API）</p></div>';
+        }
+        function renderFavorites() {
+            const filtered = STATE.favorites.filter(f=>f.lottery===STATE.lottery);
+            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">⭐ 收藏 (${filtered.length}条)</div>${filtered.length?filtered.map(f=>`<p>${f.numsStr} 评分${f.score}</p>`).join(''):'暂无'}</div>`;
+        }
+        function renderHistory() {
+            const recent = STATE.history.slice(0,20);
+            document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📋 最近预测</div>${recent.map(h=>`<p>${new Date(h.timestamp).toLocaleString()} - ${h.numbers.fronts.join(' ')} | ${h.numbers.backs.join(' ')} (${h.score}分)</p>`).join('')}</div>`;
+        }
+        function renderSettings() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="panel">
+                    <div class="panel-title">⚙️ 系统设置</div>
+                    <p>当前 Supabase URL: <code style="color:var(--cyan);">${STATE.settings.supabaseUrl || '未配置'}</code></p>
+                    <p style="font-size:0.7em;color:#888;">如需更换数据库，请修改代码顶部常量或在此填写后保存并重新登录。</p>
+                    <button class="btn small danger" onclick="resetSystem()">⚠️ 重置本地数据</button>
+                    <hr style="border-color:var(--border);">
+                    <p style="color:var(--gold);">📋 数据库建表SQL (复制到 Supabase SQL Editor)</p>
+                    <textarea readonly style="width:100%;height:150px;background:#000;color:#0f0;border:1px solid var(--border);padding:8px;">CREATE TABLE predictions (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id UUID REFERENCES auth.users NOT NULL, lottery TEXT, fronts TEXT, backs TEXT, score FLOAT, rating TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
+CREATE TABLE profiles (id UUID REFERENCES auth.users PRIMARY KEY, vip BOOLEAN DEFAULT FALSE);
+ALTER TABLE predictions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own_pred" ON predictions FOR ALL USING (auth.uid()=user_id);
+CREATE POLICY "own_prof" ON profiles FOR ALL USING (auth.uid()=id);</textarea>
+                </div>`;
+        }
         function resetSystem() {
-            if (confirm('确定重置系统？所有本地数据将被清除。')) {
-                localStorage.clear();
-                location.reload();
-            }
+            if(confirm('确定重置所有本地数据吗？')) { STATE.favorites=[]; STATE.history=[]; STATE.freePredictCount=3; STATE.freeSimCount=10; saveState(); renderSettings(); }
         }
-
-        function clearCache() {
-            if (confirm('确定清理缓存？')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        // ============================================================
-        // 29. 粒子背景
-        // ============================================================
-        (function initParticles() {
-            const canvas = document.getElementById('particle-canvas');
-            const ctx = canvas.getContext('2d');
-            let w, h, particles = [];
-
-            function resize() { w = canvas.width = window.innerWidth;
-                h = canvas.height = window.innerHeight; }
-            window.addEventListener('resize', resize);
-            resize();
-
-            class Particle {
-                constructor() { this.x = Math.random() * w;
-                    this.y = Math.random() * h;
-                    this.vx = (Math.random() - 0.5) * 1.2;
-                    this.vy = (Math.random() - 0.5) * 1.2; }
-                update() { this.x += this.vx;
-                    this.y += this.vy; if (this.x < 0 || this.x > w) this.vx *= -1; if (this.y < 0 || this.y > h) this.vy *= -1; }
-                draw() { ctx.beginPath();
-                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = '#00F5FF';
-                    ctx.shadowBlur = 12;
-                    ctx.fill(); }
-            }
-            for (let i = 0; i < 90; i++) particles.push(new Particle());
-
-            function anim() { ctx.clearRect(0, 0, w, h);
-                particles.forEach(p => { p.update();
-                    p.draw(); });
-                requestAnimationFrame(anim); }
-            anim();
-        })();
-
-        // ============================================================
-        // 30. 初始化
-        // ============================================================
-        async function init() {
-            console.log('🚀 系统初始化...');
-
-            // 初始化历史数据
-            try {
-                await initHistory();
-                console.log('✅ 历史数据加载完成');
-            } catch (e) {
-                console.warn('⚠️ 历史数据加载失败，使用模拟数据', e);
-            }
-
-            // 检查是否有登录状态
-            // 默认显示登录界面
-            hideApp();
-
-            // 默认切换到登录视图
-            switchAuthView('login');
-
-            // 初始化默认渲染
-            renderAnalysis('hot');
-            renderAdvanced('monte');
-            renderChart('hotTrend');
-
-            console.log('✅ 系统初始化完成，等待用户登录');
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', init);
-
-        // 暴露全局函数供 onclick 调用
-        window.switchAuthView = switchAuthView;
-        window.handleLogin = handleLogin;
-        window.handleRegister = handleRegister;
-        window.handleLogout = handleLogout;
-        window.switchTab = switchTab;
-        window.switchLottery = switchLottery;
-        window.generatePrediction = generatePrediction;
-        window.randomPick = randomPick;
-        window.exportCurrent = exportCurrent;
-        window.saveFavorite = saveFavorite;
-        window.runMonteCarloPage = runMonteCarloPage;
-        window.runMonteCarloAdvanced = runMonteCarloAdvanced;
-        window.runMarkov = runMarkov;
-        window.runBayes = runBayes;
-        window.runEnsemble = runEnsemble;
-        window.startDraw = startDraw;
-        window.renderAnalysis = renderAnalysis;
-        window.renderAdvanced = renderAdvanced;
-        window.renderChart = renderChart;
-        window.loadFavorites = loadFavorites;
-        window.removeFavorite = removeFavorite;
-        window.clearFavorites = clearFavorites;
-        window.exportFavorites = exportFavorites;
-        window.loadHistory = loadHistory;
-        window.removeHistory = removeHistory;
-        window.clearHistory = clearHistory;
-        window.exportHistory = exportHistory;
-        window.searchHistory = searchHistory;
-        window.exportAllJSON = exportAllJSON;
-        window.exportAllExcel = exportAllExcel;
-        window.upgradeVIP = upgradeVIP;
-        window.setTheme = setTheme;
-        window.updateWeight = updateWeight;
-        window.applyWeights = applyWeights;
-        window.applyStrategy = applyStrategy;
-        window.loadBGM = loadBGM;
-        window.playBGM = playBGM;
-        window.stopBGM = stopBGM;
-        window.resetSystem = resetSystem;
-        window.clearCache = clearCache;
-
-        console.log('✅ 所有全局函数已暴露');
     </script>
 </body>
 </html>
