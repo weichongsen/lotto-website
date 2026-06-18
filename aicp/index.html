@@ -29,8 +29,10 @@
         .panel-title::before { content:'◆'; font-size:0.6em; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
         .ball { width:46px; height:46px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1em; color:#fff; margin:2px; }
-        .ball.front { background:radial-gradient(circle at 35% 30%,#ff6b8a,#c0392b 90%); box-shadow:0 0 20px rgba(255,77,109,0.6); }
-        .ball.back { background:radial-gradient(circle at 35% 30%,#5dade2,#1a5276 90%); box-shadow:0 0 20px rgba(0,180,255,0.6); }
+        /* 前区号码球：蓝色 */
+        .ball.front { background:radial-gradient(circle at 35% 30%,#5dade2,#1a5276 90%); box-shadow:0 0 20px rgba(0,180,255,0.6); }
+        /* 后区号码球：红色 */
+        .ball.back { background:radial-gradient(circle at 35% 30%,#ff6b8a,#c0392b 90%); box-shadow:0 0 20px rgba(255,77,109,0.6); }
         .ball.rolling { animation:ballRoll 0.08s infinite; }
         @keyframes ballRoll { 0%{transform:translateY(-3px);} 50%{transform:translateY(3px);} 100%{transform:translateY(-3px);} }
         .ball.stopped { animation:ballStop 0.5s ease-out; }
