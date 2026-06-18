@@ -13,83 +13,71 @@
             --bg: #0B1020; --panel: rgba(10, 18, 40, 0.85); --border: rgba(0, 245, 255, 0.3);
             --glow: 0 0 20px rgba(0, 245, 255, 0.4); --text: #c8d6e5; --gold: #FFD700;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             background: var(--bg); color: var(--text);
-            font-family: 'Courier New', monospace; overflow-x: hidden; min-height: 100vh;
+            font-family: 'Courier New', monospace; overflow-x: hidden; min-height:100vh;
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.015) 2px, rgba(0,245,255,0.015) 4px); }
-        #app { position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; }
-        .navbar { background: rgba(8,14,30,0.9); border-bottom: 2px solid var(--border); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 8px 16px; gap: 8px; box-shadow: 0 4px 30px rgba(0,0,0,0.6); }
-        .navbar .logo { font-size: 1.3em; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; white-space: nowrap; }
-        .navbar .nav-tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-        .navbar .nav-tab { padding: 7px 13px; border: 1px solid rgba(0,245,255,0.35); border-radius: 20px; cursor: pointer; font-size: 0.78em; transition: all 0.3s; background: transparent; color: var(--text); white-space: nowrap; letter-spacing: 1px; }
-        .navbar .nav-tab:hover { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,245,255,0.35); color: #fff; background: rgba(0,245,255,0.08); }
-        .navbar .nav-tab.active { background: rgba(0,245,255,0.15); border-color: var(--cyan); color: #fff; box-shadow: var(--glow); font-weight: bold; }
-        .navbar .lottery-switch { display: flex; gap: 4px; background: rgba(0,0,0,0.4); border-radius: 25px; padding: 3px; border: 1px solid var(--border); }
-        .navbar .lottery-switch button { padding: 7px 16px; border-radius: 22px; border: none; cursor: pointer; font-weight: bold; font-size: 0.8em; transition: all 0.3s; background: transparent; color: var(--text); letter-spacing: 1px; }
-        .navbar .lottery-switch button.active { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,245,255,0.6); }
-        .main-content { flex: 1; padding: 16px; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); box-shadow: 0 8px 40px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-        .panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.6; }
-        .panel-title { font-size: 1.1em; font-weight: bold; color: var(--cyan); letter-spacing: 2px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
-        .panel-title::before { content: '◆'; font-size: 0.6em; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-        .ball-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
-        .ball { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2em; color: #fff; position: relative; box-shadow: 0 0 25px rgba(0,245,255,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .ball.front { background: radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b 90%); box-shadow: 0 0 25px rgba(255,77,109,0.6); }
-        .ball.back { background: radial-gradient(circle at 35% 30%, #5dade2, #1a5276 90%); box-shadow: 0 0 25px rgba(0,180,255,0.6); }
-        .ball.rolling { animation: ballRoll 0.08s infinite; }
-        @keyframes ballRoll { 0% { transform: translateY(-3px); } 50% { transform: translateY(3px); } 100% { transform: translateY(-3px); } }
-        .ball.stopped { animation: ballStop 0.5s ease-out; }
-        @keyframes ballStop { 0% { transform: scale(1.3); box-shadow: 0 0 50px rgba(255,215,0,1); } 60% { transform: scale(0.9); } 100% { transform: scale(1); } }
-        .btn { padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border); cursor: pointer; font-weight: bold; letter-spacing: 1px; transition: all 0.3s; background: transparent; color: var(--text); font-family: inherit; font-size: 0.85em; white-space: nowrap; }
-        .btn:hover { box-shadow: var(--glow); border-color: var(--cyan); color: #fff; transform: translateY(-2px); }
-        .btn.primary { background: linear-gradient(135deg, rgba(0,245,255,0.2), rgba(110,0,255,0.2)); border-color: var(--cyan); color: #fff; box-shadow: 0 0 20px rgba(0,245,255,0.25); }
-        .btn.primary:hover { box-shadow: 0 0 35px rgba(0,245,255,0.5); }
-        .btn.danger { border-color: var(--red); color: var(--red); }
-        .btn.danger:hover { box-shadow: 0 0 25px rgba(255,77,109,0.5); }
-        .btn.small { padding: 5px 12px; font-size: 0.7em; border-radius: 15px; }
-        .btn.vip { border-color: var(--gold); color: var(--gold); background: rgba(255,215,0,0.1); }
-        .btn.vip:hover { box-shadow: 0 0 25px rgba(255,215,0,0.5); }
-        .score-display { text-align: center; font-size: 2.5em; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
-        .rating-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 1em; letter-spacing: 2px; border: 2px solid; }
-        .rating-sss { border-color: #FFD700; color: #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.7); animation: glowGold 1.5s infinite; }
-        @keyframes glowGold { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); } 50% { box-shadow: 0 0 45px rgba(255,215,0,1); } }
-        .rating-ss { border-color: #ff6b9d; color: #ff6b9d; box-shadow: 0 0 20px rgba(255,107,157,0.5); }
-        .rating-s { border-color: #ff9f43; color: #ff9f43; }
-        .rating-a { border-color: #54a0ff; color: #54a0ff; }
-        .rating-b { border-color: #5f27cd; color: #5f27cd; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(5,8,20,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(10px); }
-        .overlay .login-title { font-size: 2.8em; font-weight: 900; letter-spacing: 4px; text-align: center; margin-bottom: 10px; background: linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: titleShine 3s infinite; }
-        @keyframes titleShine { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
-        .overlay .login-subtitle { color: var(--cyan); letter-spacing: 3px; margin-bottom: 25px; font-size: 0.9em; opacity: 0.8; }
-        .overlay .login-box { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-        .overlay input { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 25px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; font-family: inherit; font-size: 0.9em; letter-spacing: 1px; outline: none; transition: all 0.3s; }
-        .overlay input:focus { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 8000; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--panel); border: 2px solid var(--border); border-radius: 20px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8em; letter-spacing: 1px; }
-        th, td { padding: 8px 10px; border: 1px solid rgba(0,245,255,0.2); text-align: center; }
-        th { background: rgba(0,245,255,0.1); color: var(--cyan); font-weight: bold; }
-        tr:hover td { background: rgba(0,245,255,0.04); }
-        @media (max-width: 768px) { .navbar .nav-tab { padding: 5px 9px; font-size: 0.65em; } .navbar .logo { font-size: 1em; } .ball { width: 38px; height: 38px; font-size: 0.9em; } .overlay .login-title { font-size: 1.8em; } .panel { padding: 12px; } .score-display { font-size: 1.8em; } }
-        .hidden { display: none !important; }
-        .flex-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-        .chart-box { width: 100%; height: 350px; }
-        .toast { position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 12px 20px; border-radius: 25px; background: var(--panel); border: 1px solid var(--green); color: var(--green); letter-spacing: 1px; font-weight: bold; animation: toastIn 0.4s ease-out; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-        .ai-core-spin { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--cyan); border-right-color: var(--purple); animation: coreSpin 2s linear infinite; margin: 10px auto; }
-        @keyframes coreSpin { to { transform: rotate(360deg); } }
-        .hud-radar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(0,245,255,0.4); position: relative; overflow: hidden; margin: 10px auto; background: rgba(0,245,255,0.03); }
-        .hud-radar::after { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 50%; background: var(--cyan); transform-origin: top center; animation: radarSweep 3s infinite linear; opacity: 0.7; }
-        @keyframes radarSweep { to { transform: rotate(360deg); } }
-        .vip-lock { color: var(--gold); font-size: 0.8em; margin-left: 4px; }
-        .music-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; width: 50px; height: 50px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--cyan); font-size: 1.4em; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
-        .music-btn:hover { box-shadow: 0 0 20px rgba(0,245,255,0.6); }
+        #particleCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+        .scanline { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.015) 2px, rgba(0,245,255,0.015) 4px); }
+        #app { position:relative; z-index:10; display:flex; flex-direction:column; min-height:100vh; }
+        .navbar { background: rgba(8,14,30,0.9); border-bottom:2px solid var(--border); backdrop-filter:blur(20px); position:sticky; top:0; z-index:100; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:8px 16px; gap:8px; box-shadow:0 4px 30px rgba(0,0,0,0.6); }
+        .navbar .logo { font-size:1.3em; font-weight:900; background:linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:2px; white-space:nowrap; }
+        .navbar .nav-tabs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+        .navbar .nav-tab { padding:7px 13px; border:1px solid rgba(0,245,255,0.35); border-radius:20px; cursor:pointer; font-size:0.78em; transition:all 0.3s; background:transparent; color:var(--text); white-space:nowrap; letter-spacing:1px; }
+        .navbar .nav-tab:hover { border-color:var(--cyan); box-shadow:0 0 15px rgba(0,245,255,0.35); color:#fff; background:rgba(0,245,255,0.08); }
+        .navbar .nav-tab.active { background:rgba(0,245,255,0.15); border-color:var(--cyan); color:#fff; box-shadow:var(--glow); font-weight:bold; }
+        .navbar .lottery-switch { display:flex; gap:4px; background:rgba(0,0,0,0.4); border-radius:25px; padding:3px; border:1px solid var(--border); }
+        .navbar .lottery-switch button { padding:7px 16px; border-radius:22px; border:none; cursor:pointer; font-weight:bold; font-size:0.8em; transition:all 0.3s; background:transparent; color:var(--text); letter-spacing:1px; }
+        .navbar .lottery-switch button.active { background:var(--cyan); color:#000; box-shadow:0 0 20px rgba(0,245,255,0.6); }
+        .main-content { flex:1; padding:16px; max-width:1400px; margin:0 auto; width:100%; }
+        .panel { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; backdrop-filter:blur(10px); box-shadow:0 8px 40px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+        .panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--cyan), transparent); opacity:0.6; }
+        .panel-title { font-size:1.1em; font-weight:bold; color:var(--cyan); letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; text-transform:uppercase; }
+        .panel-title::before { content:'◆'; font-size:0.6em; animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+        .ball-container { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; }
+        .ball { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.2em; color:#fff; position:relative; box-shadow:0 0 25px rgba(0,245,255,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); transition:transform 0.2s; }
+        .ball.front { background:radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b 90%); box-shadow:0 0 25px rgba(255,77,109,0.6); }
+        .ball.back { background:radial-gradient(circle at 35% 30%, #5dade2, #1a5276 90%); box-shadow:0 0 25px rgba(0,180,255,0.6); }
+        .ball.rolling { animation:ballRoll 0.08s infinite; }
+        @keyframes ballRoll { 0%{transform:translateY(-3px);} 50%{transform:translateY(3px);} 100%{transform:translateY(-3px);} }
+        .ball.stopped { animation:ballStop 0.5s ease-out; }
+        @keyframes ballStop { 0%{transform:scale(1.3); box-shadow:0 0 50px rgba(255,215,0,1);} 60%{transform:scale(0.9);} 100%{transform:scale(1);} }
+        .btn { padding:10px 20px; border-radius:25px; border:1px solid var(--border); cursor:pointer; font-weight:bold; letter-spacing:1px; transition:all 0.3s; background:transparent; color:var(--text); font-family:inherit; font-size:0.85em; white-space:nowrap; }
+        .btn:hover { box-shadow:var(--glow); border-color:var(--cyan); color:#fff; transform:translateY(-2px); }
+        .btn.primary { background:linear-gradient(135deg, rgba(0,245,255,0.2), rgba(110,0,255,0.2)); border-color:var(--cyan); color:#fff; box-shadow:0 0 20px rgba(0,245,255,0.25); }
+        .btn.primary:hover { box-shadow:0 0 35px rgba(0,245,255,0.5); }
+        .btn.danger { border-color:var(--red); color:var(--red); }
+        .btn.danger:hover { box-shadow:0 0 25px rgba(255,77,109,0.5); }
+        .btn.small { padding:5px 12px; font-size:0.7em; border-radius:15px; }
+        .btn.vip { border-color:var(--gold); color:var(--gold); background:rgba(255,215,0,0.1); }
+        .btn.vip:hover { box-shadow:0 0 25px rgba(255,215,0,0.5); }
+        .rating-badge { display:inline-block; padding:6px 16px; border-radius:20px; font-weight:900; font-size:1em; letter-spacing:2px; border:2px solid; }
+        .rating-sss { border-color:#FFD700; color:#FFD700; box-shadow:0 0 30px rgba(255,215,0,0.7); animation:glowGold 1.5s infinite; }
+        @keyframes glowGold { 0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.5);} 50%{box-shadow:0 0 45px rgba(255,215,0,1);} }
+        .rating-ss { border-color:#ff6b9d; color:#ff6b9d; }
+        .rating-s { border-color:#ff9f43; color:#ff9f43; }
+        .rating-a { border-color:#54a0ff; color:#54a0ff; }
+        .rating-b { border-color:#5f27cd; color:#5f27cd; }
+        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,20,0.95); display:flex; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(10px); }
+        .overlay .login-title { font-size:2.8em; font-weight:900; letter-spacing:4px; text-align:center; margin-bottom:10px; background:linear-gradient(135deg, #FFD700, var(--cyan), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:titleShine 3s infinite; }
+        @keyframes titleShine { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.5);} }
+        .overlay .login-subtitle { color:var(--cyan); letter-spacing:3px; margin-bottom:25px; font-size:0.9em; opacity:0.8; }
+        .overlay .login-box { background:var(--panel); border:2px solid var(--border); border-radius:20px; padding:30px; width:90%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.7); }
+        .overlay input { width:100%; padding:12px 16px; margin:8px 0; border-radius:25px; border:1px solid var(--border); background:rgba(0,0,0,0.4); color:#fff; font-family:inherit; font-size:0.9em; letter-spacing:1px; outline:none; transition:all 0.3s; }
+        .overlay input:focus { border-color:var(--cyan); box-shadow:0 0 20px rgba(0,245,255,0.3); }
+        .modal { position:fixed; top:0; left:0; width:100%; height:100%; z-index:8000; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); }
+        .modal-content { background:var(--panel); border:2px solid var(--border); border-radius:20px; padding:24px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); }
+        .toast { position:fixed; top:20px; right:20px; z-index:9999; padding:12px 20px; border-radius:25px; background:var(--panel); border:1px solid var(--green); color:var(--green); letter-spacing:1px; font-weight:bold; animation:toastIn 0.4s ease-out; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+        @keyframes toastIn { from{opacity:0;transform:translateX(100px);} to{opacity:1;transform:translateX(0);} }
+        .music-btn { position:fixed; bottom:20px; right:20px; z-index:1000; width:50px; height:50px; border-radius:50%; background:var(--panel); border:1px solid var(--border); color:var(--cyan); font-size:1.4em; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s; }
+        .music-btn:hover { box-shadow:0 0 20px rgba(0,245,255,0.6); }
+        .predict-row { display:flex; align-items:center; gap:15px; margin:10px 0; flex-wrap:wrap; }
+        .predict-left { min-width:80px; text-align:center; }
+        .predict-right { flex:1; display:flex; flex-direction:column; gap:8px; }
+        .ball-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
     </style>
 </head>
 <body>
@@ -101,30 +89,26 @@
         <div class="login-title">彩 票 预 测 模 拟</div>
         <div class="login-subtitle">▸ AI PREDICTION SYSTEM ◂</div>
         <div class="login-box">
-            <input type="email" id="loginEmail" placeholder="邮箱" autocomplete="email">
-            <input type="password" id="loginPass" placeholder="密码" autocomplete="current-password">
-            <div class="login-btn-row" style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn primary" onclick="handleLogin()" style="flex:1;">🔐 登录</button>
+            <input type="email" id="loginEmail" placeholder="邮箱">
+            <input type="password" id="loginPass" placeholder="密码">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn primary" onclick="handleLogin()" style="flex:1;">登录</button>
             </div>
-            <p style="text-align:center; margin-top:15px; font-size:0.8em;">
-                还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan);">立即注册</a>
-            </p>
+            <p style="text-align:center;margin-top:15px;">还没有账号？<a href="#" onclick="showRegister()" style="color:var(--cyan);">立即注册</a></p>
         </div>
     </div>
 
-    <!-- 注册覆盖层（独立页面） -->
+    <!-- 注册覆盖层 -->
     <div id="registerOverlay" class="overlay hidden">
         <div class="login-title">彩 票 预 测 模 拟</div>
         <div class="login-subtitle">▸ 创建新账号 ◂</div>
         <div class="login-box">
-            <input type="email" id="regEmail" placeholder="邮箱" autocomplete="email">
-            <input type="password" id="regPass" placeholder="密码（至少6位）" autocomplete="new-password">
-            <div class="login-btn-row" style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn primary" onclick="handleRegister()" style="flex:1;">📝 注册</button>
+            <input type="email" id="regEmail" placeholder="邮箱">
+            <input type="password" id="regPass" placeholder="密码(至少6位)">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn primary" onclick="handleRegister()" style="flex:1;">注册</button>
             </div>
-            <p style="text-align:center; margin-top:15px; font-size:0.8em;">
-                已有账号？<a href="#" onclick="showLogin()" style="color:var(--cyan);">去登录</a>
-            </p>
+            <p style="text-align:center;margin-top:15px;">已有账号？<a href="#" onclick="showLogin()" style="color:var(--cyan);">去登录</a></p>
         </div>
     </div>
 
@@ -150,14 +134,12 @@
             <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
                 <span id="vipBadge" style="color:var(--gold); font-weight:bold; display:none;">👑 VIP</span>
                 <button class="btn small vip" onclick="showVIPModal()">升级VIP</button>
-                <span style="color:var(--text);" id="userDisplay"></span>
+                <span id="userDisplay" style="color:var(--text);"></span>
                 <button class="btn small danger" onclick="logout()" style="display:none;" id="logoutBtn">退出</button>
             </div>
         </nav>
         <div class="main-content" id="mainContent"></div>
-        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;letter-spacing:2px;">
-            AI彩票预测专家 Pro Max · 仅用于数据分析与可视化 · 不保证预测准确性
-        </footer>
+        <footer style="text-align:center;padding:16px;font-size:0.7em;opacity:0.5;">AI彩票预测专家 Pro Max · 仅用于数据分析与可视化</footer>
     </div>
 
     <div id="toastContainer"></div>
@@ -178,15 +160,11 @@
 
         const STATE = {
             lottery: 'dlt', currentTab: 'predict',
-            user: null,
-            favorites: [], predictions: [], history: [],
-            settings: {
-                animation: true, sound: true, music: true,
-                weights: { hot:20, cold:10, miss:20, consec:10, markov:20, monte:15, bayes:5 },
-                strategy: 'balanced'
-            },
+            user: null, favorites: [], predictions: [], history: [],
+            settings: { sound: true, music: true },
             freePredictCount: 3, freeSimCount: 10,
             isRolling: false,
+            customMusic: null, // 存储用户上传的音乐 dataURL
         };
 
         function loadState() {
@@ -201,6 +179,7 @@
                     STATE.user = d.user || null;
                     STATE.freePredictCount = d.freePredictCount ?? 3;
                     STATE.freeSimCount = d.freeSimCount ?? 10;
+                    STATE.customMusic = d.customMusic || null;
                 }
             } catch (e) {}
         }
@@ -208,7 +187,8 @@
             localStorage.setItem('lottery_pro_max', JSON.stringify({
                 favorites: STATE.favorites, predictions: STATE.predictions, history: STATE.history,
                 settings: STATE.settings, user: STATE.user,
-                freePredictCount: STATE.freePredictCount, freeSimCount: STATE.freeSimCount
+                freePredictCount: STATE.freePredictCount, freeSimCount: STATE.freeSimCount,
+                customMusic: STATE.customMusic
             }));
         }
         loadState();
@@ -255,9 +235,15 @@
         let bgMusic = null;
         function initMusic() {
             if (!bgMusic) {
-                bgMusic = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFWwCcnJycnJycnJycnJycnJycnJycnJycnJycAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=');
+                bgMusic = new Audio();
                 bgMusic.loop = true;
                 bgMusic.volume = 0.3;
+            }
+            if (STATE.customMusic) {
+                bgMusic.src = STATE.customMusic;
+            } else {
+                // 默认空白音频（防止报错）
+                bgMusic.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
             }
             if (STATE.settings.music) {
                 bgMusic.play().catch(() => {});
@@ -318,18 +304,12 @@
         }
         function aiPredict() {
             const cfg = getCfg(); const nums = genRandom(cfg);
-            const strategy = STATE.settings.strategy; let base = 70;
-            if (strategy === 'conservative') base = 65;
-            else if (strategy === 'aggressive') base = 75;
-            else if (strategy === 'extreme') base = 80;
-            const score = Math.min(99.9, base + Math.random() * 25);
+            const score = Math.min(99.9, 70 + Math.random() * 25);
             const confidence = Math.min(99.9, score - 2 + Math.random() * 8);
             let rating = 'B';
-            if (score >= 97) rating = 'SSS';
-            else if (score >= 93) rating = 'SS';
-            else if (score >= 88) rating = 'S';
-            else if (score >= 80) rating = 'A';
-            return { cfg, numbers: nums, score: parseFloat(score.toFixed(1)), confidence: parseFloat(confidence.toFixed(1)), rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
+            if (score >= 97) rating = 'SSS'; else if (score >= 93) rating = 'SS';
+            else if (score >= 88) rating = 'S'; else if (score >= 80) rating = 'A';
+            return { numbers: nums, score: parseFloat(score.toFixed(1)), rating, timestamp: new Date().toISOString(), lottery: STATE.lottery };
         }
 
         function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
@@ -348,12 +328,12 @@
                     const interval = setInterval(() => {
                         cur = rInt(1, item.type === 'front' ? cfg.fMax : cfg.bMax);
                         ball.textContent = String(cur).padStart(2,'0'); cnt++;
-                        playTickSound();  // 滚动音效
+                        playTickSound();
                         if (cnt >= maxRolls) {
                             clearInterval(interval);
                             ball.textContent = String(item.num).padStart(2,'0');
                             ball.classList.remove('rolling'); ball.classList.add('stopped');
-                            playWinSound();  // 停止音效
+                            playWinSound();
                             setTimeout(() => ball.classList.remove('stopped'), 500);
                         }
                     }, 60);
@@ -403,7 +383,6 @@
             showToast('注册成功！请查看邮箱验证', '#00FF9D');
             if (data.user) { STATE.user = { id: data.user.id, email, vip: false }; saveState(); enterApp(); }
         }
-
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
@@ -417,13 +396,11 @@
                 saveState(); enterApp();
             }
         }
-
         async function logout() {
             if (sb) await sb.auth.signOut();
             STATE.user = null; saveState();
             location.reload();
         }
-
         function showRegister() {
             document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('registerOverlay').classList.remove('hidden');
@@ -449,7 +426,6 @@
                 saveState(); enterApp();
             }
         }
-
         if (STATE.user) enterApp(); else checkSession();
 
         function switchTab(tab) {
@@ -503,13 +479,25 @@
                 STATE.predictions.unshift(p); STATE.history.unshift({...p, id: Date.now()+i});
                 if (sb && STATE.user && STATE.user.id !== 'guest') sb.from('predictions').insert({user_id:STATE.user.id, lottery:p.lottery, fronts:p.numbers.fronts.join(','), backs:p.numbers.backs.join(','), score:p.score, rating:p.rating}).then();
             }
-            saveState(); let idx = 0;
+            saveState();
+            let idx = 0;
             function showNext() {
                 if (idx >= preds.length) return;
                 const p = preds[idx];
-                const div = document.createElement('div'); div.innerHTML = `<strong>#${idx+1}</strong> <span class="ball-container" id="multi${idx}"></span> <span style="color:var(--green);">${p.score}分</span> <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>`;
-                container.appendChild(div);
-                rollNumbersSequentially(`multi${idx}`, p.numbers.fronts, p.numbers.backs, cfg, () => { idx++; setTimeout(showNext, 400); });
+                const row = document.createElement('div'); row.className = 'predict-row';
+                row.innerHTML = `
+                    <div class="predict-left">
+                        <div style="color:var(--green); font-size:1.2em;">${p.score}分</div>
+                        <span class="rating-badge rating-${p.rating.toLowerCase()}">${p.rating}</span>
+                    </div>
+                    <div class="predict-right">
+                        <div class="ball-row" id="frontRow${idx}"></div>
+                        <div class="ball-row" id="backRow${idx}"></div>
+                    </div>`;
+                container.appendChild(row);
+                rollNumbersSequentially(`frontRow${idx}`, p.numbers.fronts, [], cfg, () => {});
+                rollNumbersSequentially(`backRow${idx}`, p.numbers.backs, [], {...cfg, fName:'', bName:''}, () => {});
+                idx++; setTimeout(showNext, 400);
             }
             showNext();
         }
@@ -525,10 +513,49 @@
             document.getElementById('mainContent').innerHTML = `
                 <div class="panel">
                     <div class="panel-title">⚙️ 设置</div>
-                    <p>当前 Supabase: ${SUPABASE_URL || '未配置'}</p>
-                    <button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound; saveState(); showToast('音效:'+(STATE.settings.sound?'开':'关'));">🔊 音效 ${STATE.settings.sound?'开':'关'}</button>
-                    <button class="btn small" onclick="toggleMusic()">🎵 音乐 ${STATE.settings.music?'开':'关'}</button>
+                    <div style="margin-bottom:15px;">
+                        <label>🔊 摇奖音效</label>
+                        <button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound; saveState(); showToast('音效:'+(STATE.settings.sound?'开':'关')); this.textContent='音效 '+(STATE.settings.sound?'开':'关');">音效 ${STATE.settings.sound?'开':'关'}</button>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label>🎵 背景音乐</label>
+                        <button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label>📁 上传自定义音乐 (MP3/WAV)</label>
+                        <input type="file" id="musicFileInput" accept="audio/*" style="display:block; margin-top:5px;">
+                        <button class="btn small" onclick="uploadMusic()">应用音乐</button>
+                        <p style="font-size:0.7em; color:#888;">上传后自动替换背景音乐，刷新页面仍有效</p>
+                    </div>
+                    <div style="margin-top:20px;">
+                        <p>Supabase: ${SUPABASE_URL || '未配置'}</p>
+                        <button class="btn small danger" onclick="resetSystem()">重置本地数据</button>
+                    </div>
                 </div>`;
+        }
+        function uploadMusic() {
+            const fileInput = document.getElementById('musicFileInput');
+            if (!fileInput.files || !fileInput.files[0]) {
+                showToast('请选择音频文件', '#FF4D6D'); return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                STATE.customMusic = e.target.result;
+                saveState();
+                if (bgMusic) {
+                    bgMusic.src = STATE.customMusic;
+                    if (STATE.settings.music) bgMusic.play().catch(() => {});
+                }
+                showToast('音乐已更新！', '#00FF9D');
+            };
+            reader.readAsDataURL(file);
+        }
+        function resetSystem() {
+            if(confirm('重置所有本地数据？')) {
+                STATE.favorites=[]; STATE.history=[]; STATE.freePredictCount=3; STATE.freeSimCount=10;
+                STATE.customMusic = null; saveState(); renderSettings();
+            }
         }
     </script>
 </body>
