@@ -2,12 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AI彩票预测专家 Pro Max | Cyberpunk Ultimate Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #0b1020;
@@ -63,90 +61,87 @@
             animation: scanLine 4s linear infinite;
         }
         @keyframes scanLine {
-            0% {
-                top: -2px;
-            }
-            100% {
-                top: 100vh;
-            }
+            0% { top: -2px; }
+            100% { top: 100vh; }
         }
-        /* Page Routing */
         .page {
             display: none;
             position: relative;
             z-index: 1;
+            min-height: 100vh;
         }
         .page.active {
             display: block;
         }
-        /* Auth Page */
         #authPage {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             z-index: 10;
+            background: radial-gradient(circle at center, #0d1530 0%, #0b1020 100%);
         }
         #authPage.active {
             display: flex;
         }
         .auth-container {
-            background: rgba(13, 21, 48, 0.85);
+            background: rgba(13, 21, 48, 0.9);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 40px 36px;
+            border-radius: 24px;
+            padding: 44px 36px;
             width: 420px;
             max-width: 92vw;
             text-align: center;
-            box-shadow: var(--glow-blue), 0 0 80px rgba(0, 245, 255, 0.08);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 0 60px rgba(0, 245, 255, 0.15), 0 20px 40px rgba(0,0,0,0.5);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             position: relative;
             z-index: 5;
         }
         .auth-title {
-            font-size: 2rem;
+            font-size: 2.1rem;
             font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, #00F5FF, #6E00FF, #00FF9D);
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #00F5FF 0%, #6E00FF 50%, #00FF9D 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 6px;
-            text-shadow: none;
         }
         .auth-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #8899bb;
-            letter-spacing: 2px;
-            margin-bottom: 28px;
+            letter-spacing: 3px;
+            margin-bottom: 32px;
+            text-transform: uppercase;
         }
         .auth-input {
             width: 100%;
-            padding: 13px 16px;
-            margin: 8px 0;
-            background: rgba(10, 18, 40, 0.8);
+            padding: 14px 18px;
+            margin: 10px 0;
+            background: rgba(10, 18, 40, 0.7);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: #e0e8ff;
             font-size: 0.95rem;
             outline: none;
             transition: all 0.3s;
             font-family: var(--font-main);
+            letter-spacing: 0.5px;
         }
         .auth-input:focus {
             border-color: var(--blue);
-            box-shadow: 0 0 16px rgba(0, 245, 255, 0.25);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
         }
         .auth-btn {
             width: 100%;
-            padding: 13px;
-            margin: 6px 0;
-            border-radius: 10px;
+            padding: 14px;
+            margin: 8px 0;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             transition: all 0.3s;
             border: none;
             font-family: var(--font-main);
@@ -154,25 +149,26 @@
         .btn-login {
             background: linear-gradient(135deg, #00F5FF, #0088cc);
             color: #000;
-            box-shadow: 0 0 24px rgba(0, 245, 255, 0.35);
+            box-shadow: 0 0 28px rgba(0, 245, 255, 0.4);
         }
         .btn-login:hover {
-            box-shadow: 0 0 40px rgba(0, 245, 255, 0.6);
+            box-shadow: 0 0 45px rgba(0, 245, 255, 0.7);
             transform: translateY(-2px);
         }
         .btn-register {
             background: transparent;
             border: 2px solid var(--purple);
             color: #c8b8ff;
+            box-shadow: 0 0 12px rgba(110, 0, 255, 0.2);
         }
         .btn-register:hover {
             background: rgba(110, 0, 255, 0.15);
-            box-shadow: var(--glow-purple);
+            box-shadow: 0 0 28px rgba(110, 0, 255, 0.5);
         }
         .auth-toggle {
             color: #8899bb;
-            font-size: 0.82rem;
-            margin-top: 12px;
+            font-size: 0.85rem;
+            margin-top: 16px;
             cursor: pointer;
         }
         .auth-toggle span {
@@ -180,27 +176,20 @@
             text-decoration: underline;
             cursor: pointer;
         }
-        /* Main App */
-        #appPage,
-        #adminPage {
-            min-height: 100vh;
-            z-index: 1;
-            padding-bottom: 60px;
-        }
         .top-nav {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 20px;
-            background: rgba(13, 21, 48, 0.9);
+            padding: 12px 24px;
+            background: rgba(13, 21, 48, 0.92);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
         }
         .nav-brand {
             font-weight: 900;
@@ -218,9 +207,9 @@
             flex-wrap: wrap;
         }
         .nav-tab {
-            padding: 7px 13px;
-            border-radius: 20px;
-            font-size: 0.78rem;
+            padding: 8px 14px;
+            border-radius: 22px;
+            font-size: 0.8rem;
             cursor: pointer;
             border: 1px solid transparent;
             background: transparent;
@@ -244,9 +233,9 @@
             flex-wrap: wrap;
         }
         .btn-sm {
-            padding: 7px 14px;
-            border-radius: 18px;
-            font-size: 0.75rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.78rem;
             cursor: pointer;
             border: 1px solid var(--border);
             background: rgba(20, 30, 60, 0.7);
@@ -254,11 +243,12 @@
             letter-spacing: 1px;
             transition: all 0.3s;
             font-family: var(--font-main);
+            white-space: nowrap;
         }
         .btn-sm:hover {
             border-color: var(--blue);
             color: var(--blue);
-            box-shadow: 0 0 12px rgba(0, 245, 255, 0.2);
+            box-shadow: 0 0 14px rgba(0, 245, 255, 0.25);
         }
         .btn-sm.vip {
             border-color: var(--gold);
@@ -266,54 +256,43 @@
             animation: vipPulse 2s infinite;
         }
         @keyframes vipPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 24px rgba(255, 215, 0, 0.7);
-            }
+            0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(255, 215, 0, 0.7); }
         }
         .user-badge {
             color: var(--green);
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             letter-spacing: 1px;
+            font-weight: 600;
         }
         .panel {
             background: rgba(13, 21, 48, 0.75);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 14px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 22px;
+            margin: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
         }
         .panel::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.5), transparent);
             animation: panelShine 3s infinite;
         }
         @keyframes panelShine {
-            0%,
-            100% {
-                opacity: 0.3;
-            }
-            50% {
-                opacity: 1;
-            }
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
         .panel h3 {
-            font-size: 0.95rem;
+            font-size: 1rem;
             letter-spacing: 2px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             color: var(--blue);
             text-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
             display: flex;
@@ -322,13 +301,13 @@
         }
         .lottery-switch {
             display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 18px;
         }
         .lottery-switch button {
             flex: 1;
-            padding: 10px;
-            border-radius: 22px;
+            padding: 11px;
+            border-radius: 24px;
             cursor: pointer;
             border: 1px solid var(--border);
             background: transparent;
@@ -344,111 +323,97 @@
             background: rgba(0, 245, 255, 0.08);
             box-shadow: var(--glow-blue);
         }
-        /* Number Balls */
         .ball-row {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            min-height: 60px;
+            min-height: 70px;
+            padding: 10px 0;
         }
         .ball {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-family: var(--font-mono);
             position: relative;
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2);
-            box-shadow: 0 0 18px rgba(0, 245, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
             cursor: default;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
         }
         .ball.front {
             background: radial-gradient(circle at 35% 30%, #ff6b8a, #c0392b);
             color: #fff;
-            box-shadow: 0 0 18px rgba(255, 77, 109, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 22px rgba(255, 77, 109, 0.7);
+            border: 2px solid rgba(255,255,255,0.3);
         }
         .ball.back {
             background: radial-gradient(circle at 35% 30%, #5dade2, #1a5276);
             color: #fff;
-            box-shadow: 0 0 18px rgba(0, 180, 255, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
+            box-shadow: 0 0 22px rgba(0, 180, 255, 0.7);
+            border: 2px solid rgba(255,255,255,0.3);
+            width: 44px;
+            height: 44px;
+            font-size: 1.1rem;
         }
         .ball.rolling {
             animation: ballRoll 0.15s steps(8) infinite;
         }
         @keyframes ballRoll {
-            0% {
-                transform: rotateX(0deg) scale(1);
-            }
-            25% {
-                transform: rotateX(90deg) scale(0.85);
-            }
-            50% {
-                transform: rotateX(180deg) scale(1.05);
-            }
-            75% {
-                transform: rotateX(270deg) scale(0.85);
-            }
-            100% {
-                transform: rotateX(360deg) scale(1);
-            }
+            0% { transform: rotateX(0deg) scale(1); }
+            25% { transform: rotateX(90deg) scale(0.85); }
+            50% { transform: rotateX(180deg) scale(1.05); }
+            75% { transform: rotateX(270deg) scale(0.85); }
+            100% { transform: rotateX(360deg) scale(1); }
         }
         .ball.stopped {
             animation: ballPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes ballPop {
-            0% {
-                transform: scale(1.4);
-                filter: brightness(2);
-            }
-            100% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
+            0% { transform: scale(1.4); filter: brightness(2); }
+            100% { transform: scale(1); filter: brightness(1); }
         }
-        /* Score */
         .score-display {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             flex-wrap: wrap;
             justify-content: center;
-            margin: 16px 0;
+            margin: 20px 0;
         }
         .score-item {
             text-align: center;
         }
         .score-value {
-            font-size: 2.5rem;
+            font-size: 2.6rem;
             font-weight: 900;
             font-family: var(--font-mono);
             background: linear-gradient(180deg, #FFD700, #FFA000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            text-shadow: 0 0 30px rgba(255,215,0,0.5);
+            line-height: 1.2;
         }
         .score-label {
             font-size: 0.7rem;
             letter-spacing: 2px;
             color: #8899bb;
+            text-transform: uppercase;
         }
         .rating-badge {
             display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
+            padding: 6px 18px;
+            border-radius: 22px;
             font-weight: 900;
-            font-size: 1.1rem;
-            letter-spacing: 3px;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
             animation: ratingGlow 2s infinite;
         }
         .rating-sss {
@@ -463,28 +428,21 @@
             color: #ff9600;
         }
         @keyframes ratingGlow {
-            0%,
-            100% {
-                filter: brightness(1);
-            }
-            50% {
-                filter: brightness(1.6);
-            }
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
         }
-        /* Grid */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 16px;
         }
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
+            gap: 16px;
         }
         @media (max-width: 768px) {
-            .grid-2,
-            .grid-3 {
+            .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
             .top-nav {
@@ -498,24 +456,30 @@
                 justify-content: center;
             }
             .ball {
-                width: 38px;
-                height: 38px;
-                font-size: 1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
             }
             .ball.back {
-                width: 32px;
-                height: 32px;
-                font-size: 0.8rem;
+                width: 34px;
+                height: 34px;
+                font-size: 0.9rem;
             }
         }
-        /* Modal */
+        .hidden {
+            display: none !important;
+        }
+        .chart-box {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+        }
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
             z-index: 200;
             display: flex;
             align-items: center;
@@ -523,81 +487,49 @@
         }
         .modal {
             background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 500px;
+            border:1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+            max-width: 460px;
             width: 90vw;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 60px rgba(0,0,0,0.7);
         }
-        .modal h3 {
-            color: var(--blue);
-            letter-spacing: 2px;
-            margin-bottom: 14px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        /* Chart container */
-        .chart-box {
-            width: 100%;
-            height: 300px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        @media (max-width: 480px) {
-            .chart-box {
-                height: 220px;
-            }
-            .panel {
-                padding: 14px;
-                margin: 8px;
-            }
-        }
-        /* notification */
         .toast {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 300;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 12px 22px;
+            border-radius: 12px;
             font-weight: 600;
             letter-spacing: 1px;
             animation: slideIn 0.4s ease;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
         }
         @keyframes slideIn {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         .toast-success {
-            background: rgba(0, 255, 157, 0.2);
-            border: 1px solid #00FF9D;
-            color: #00FF9D;
+            background: rgba(0,255,157,0.2);
+            border:1px solid #00FF9D;
+            color:#00FF9D;
         }
         .toast-error {
-            background: rgba(255, 77, 109, 0.2);
-            border: 1px solid #FF4D6D;
-            color: #FF4D6D;
+            background: rgba(255,77,109,0.2);
+            border:1px solid #FF4D6D;
+            color:#FF4D6D;
         }
     </style>
 </head>
 <body>
-
-    <!-- Particle Canvas -->
     <canvas id="particleCanvas"></canvas>
     <div class="scanline"></div>
 
-    <!-- ============ AUTH PAGE ============ -->
+    <!-- ============ 登录注册页 ============ -->
     <div class="page active" id="authPage">
         <div class="auth-container">
             <div class="auth-title">AI 彩票模拟</div>
@@ -610,18 +542,18 @@
             </div>
             <div id="authFormRegister" class="hidden">
                 <input class="auth-input" type="email" id="regEmail" placeholder="电子邮箱 / Email">
-                <input class="auth-input" type="password" id="regPassword" placeholder="密码 (6位以上)">
+                <input class="auth-input" type="password" id="regPassword" placeholder="密码 (至少6位)">
                 <input class="auth-input" type="password" id="regPasswordConfirm" placeholder="确认密码">
                 <button class="auth-btn btn-register" onclick="handleRegister()">注 册</button>
                 <div class="auth-toggle">已有账号？<span onclick="toggleAuthMode('login')">返回登录</span></div>
             </div>
-            <div style="margin-top:10px;font-size:0.7rem;color:#556677;">
-                演示模式：任意邮箱+密码即可登录
+            <div style="margin-top:14px; font-size:0.7rem; color:#556677;">
+                ⚡ 演示模式：任意邮箱+密码即可登录
             </div>
         </div>
     </div>
 
-    <!-- ============ MAIN APP PAGE ============ -->
+    <!-- ============ 主页面 ============ -->
     <div class="page" id="appPage">
         <nav class="top-nav">
             <div class="nav-brand">◆ AI 彩票预测专家 Pro Max</div>
@@ -638,12 +570,12 @@
             <div class="nav-actions">
                 <span class="user-badge" id="userBadge">👤 用户</span>
                 <button class="btn-sm vip" onclick="showVIPModal()">⭐ VIP</button>
-                <button class="btn-sm" id="adminBtn" onclick="goAdmin()" style="display:none;">🔧 管理</button>
+                <button class="btn-sm" id="adminBtn" style="display:none;" onclick="goAdmin()">🔧 管理</button>
                 <button class="btn-sm" onclick="handleLogout()">退出</button>
             </div>
         </nav>
 
-        <!-- Predict Panel -->
+        <!-- 预测中心 -->
         <div class="panel" id="predictPanel">
             <h3>🎯 AI预测中心</h3>
             <div class="lottery-switch">
@@ -653,12 +585,12 @@
             <div id="predictResult">
                 <div class="ball-row" id="predictBalls"></div>
                 <div class="score-display">
-                    <div class="score-item"><div class="score-value" id="predictScore">96.8</div><div class="score-label">AI综合评分</div></div>
-                    <div class="score-item"><div class="score-value" id="predictConfidence">98.5%</div><div class="score-label">可信度</div></div>
-                    <div class="score-item"><span class="rating-badge rating-sss" id="predictRating">SSS</span><div class="score-label">评级</div></div>
+                    <div class="score-item"><div class="score-value" id="predictScore">--</div><div class="score-label">AI综合评分</div></div>
+                    <div class="score-item"><div class="score-value" id="predictConfidence">--</div><div class="score-label">可信度</div></div>
+                    <div class="score-item"><span class="rating-badge" id="predictRating">--</span><div class="score-label">评级</div></div>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px;">
                 <button class="btn-sm" onclick="aiPredict(1)">AI预测1组</button>
                 <button class="btn-sm" onclick="aiPredict(5)">AI预测5组</button>
                 <button class="btn-sm" onclick="aiPredict(10)">AI预测10组</button>
@@ -666,10 +598,10 @@
                 <button class="btn-sm" onclick="collectCurrent()">⭐收藏</button>
                 <button class="btn-sm" onclick="exportCurrent()">📤导出</button>
             </div>
-            <div id="multiPredictResults" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+            <div id="multiPredictResults" style="margin-top:14px; display:flex; flex-direction:column; gap:8px;"></div>
         </div>
 
-        <!-- Analysis Panel -->
+        <!-- 分析中心 -->
         <div class="panel hidden" id="analysisPanel">
             <h3>📊 AI分析中心</h3>
             <div class="lottery-switch">
@@ -677,8 +609,8 @@
                 <button data-lottery="ssq" onclick="switchLottery('ssq')">双色球</button>
             </div>
             <div class="grid-2">
-                <div><strong style="color:#FF4D6D;">🔥 热号TOP10</strong><div id="hotNums" style="font-family:var(--font-mono);font-size:0.9rem;"></div></div>
-                <div><strong style="color:#5dade2;">❄️ 冷号TOP10</strong><div id="coldNums" style="font-family:var(--font-mono);font-size:0.9rem;"></div></div>
+                <div><strong style="color:#FF4D6D;">🔥 热号TOP10</strong><div id="hotNums" style="font-family:var(--font-mono); font-size:0.9rem;"></div></div>
+                <div><strong style="color:#5dade2;">❄️ 冷号TOP10</strong><div id="coldNums" style="font-family:var(--font-mono); font-size:0.9rem;"></div></div>
                 <div><strong>📐 和值区间</strong><div id="sumRange" style="font-family:var(--font-mono);"></div></div>
                 <div><strong>⚖️ 奇偶比例</strong><div id="oddEven" style="font-family:var(--font-mono);"></div></div>
                 <div><strong>🔗 连号频率</strong><div id="consecFreq" style="font-family:var(--font-mono);"></div></div>
@@ -688,7 +620,7 @@
             </div>
         </div>
 
-        <!-- Lab Panel -->
+        <!-- AI实验室 -->
         <div class="panel hidden" id="labPanel">
             <h3>🧪 高级AI实验室</h3>
             <div class="grid-2">
@@ -713,7 +645,7 @@
                     <div style="font-size:0.75rem;color:#8899bb;">热号20% 冷号10% 遗漏20% 连号10% 马尔可夫20% 蒙特卡洛15% 贝叶斯5%</div>
                 </div>
             </div>
-            <div style="margin-top:10px;">
+            <div style="margin-top:14px;">
                 <strong>AI策略模式：</strong>
                 <button class="btn-sm" onclick="setStrategy('stable')">稳健</button>
                 <button class="btn-sm" onclick="setStrategy('balanced')">平衡</button>
@@ -723,7 +655,7 @@
             </div>
         </div>
 
-        <!-- Chart Panel -->
+        <!-- 图表中心 -->
         <div class="panel hidden" id="chartPanel">
             <h3>📈 ECharts图表中心</h3>
             <div class="grid-2">
@@ -734,7 +666,7 @@
             </div>
         </div>
 
-        <!-- Sim Panel -->
+        <!-- 摇奖模拟 -->
         <div class="panel hidden" id="simPanel">
             <h3>🎰 摇奖模拟中心</h3>
             <div class="lottery-switch">
@@ -742,25 +674,24 @@
                 <button data-lottery="ssq" onclick="switchLottery('ssq')">双色球</button>
             </div>
             <div class="ball-row" id="simBalls" style="min-height:60px;"></div>
-            <button class="btn-sm" onclick="runSimulation()" style="margin-top:12px;">🎲 开始摇奖</button>
-            <div style="font-size:0.7rem;color:#556;margin-top:4px;">音效模拟（视觉动画）</div>
+            <button class="btn-sm" onclick="runSimulation()" style="margin-top:16px;">🎲 开始摇奖</button>
         </div>
 
-        <!-- Collect Panel -->
+        <!-- 收藏中心 -->
         <div class="panel hidden" id="collectPanel">
             <h3>⭐ 收藏中心</h3>
             <div id="collectList" style="max-height:400px;overflow-y:auto;font-size:0.8rem;"></div>
-            <button class="btn-sm" onclick="exportCollect()">📤导出收藏</button>
+            <button class="btn-sm" onclick="exportCollect()" style="margin-top:8px;">📤导出收藏</button>
         </div>
 
-        <!-- History Panel -->
+        <!-- 预测历史 -->
         <div class="panel hidden" id="historyPanel">
             <h3>📋 预测历史</h3>
             <div id="historyList" style="max-height:400px;overflow-y:auto;font-size:0.8rem;"></div>
-            <button class="btn-sm" onclick="clearHistory()">🗑️清除历史</button>
+            <button class="btn-sm" onclick="clearHistory()" style="margin-top:8px;">🗑️清除历史</button>
         </div>
 
-        <!-- Settings Panel -->
+        <!-- 系统设置 -->
         <div class="panel hidden" id="settingsPanel">
             <h3>⚙️ 系统设置</h3>
             <div class="grid-2">
@@ -783,7 +714,7 @@
         </div>
     </div>
 
-    <!-- ============ ADMIN PAGE ============ -->
+    <!-- ============ 管理员页面 ============ -->
     <div class="page" id="adminPage">
         <nav class="top-nav">
             <div class="nav-brand">◆ 管理员控制台</div>
@@ -795,7 +726,7 @@
         </nav>
         <div class="panel">
             <h3>📥 导入真实开奖数据</h3>
-            <input class="auth-input" type="text" id="apiUrl" placeholder="API URL（JSON格式）">
+            <input class="auth-input" type="text" id="apiUrl" placeholder="API URL（返回JSON数组）">
             <button class="btn-sm" onclick="importFromAPI()">从API导入</button>
             <br><br>
             <textarea class="auth-input" id="manualData" rows="4" placeholder='或手动粘贴JSON：{"issue":"24001","date":"2024-01-01","front":[1,8,12,22,33],"back":[3,10]}'></textarea>
@@ -814,934 +745,663 @@
         </div>
     </div>
 
-    <!-- VIP Modal -->
+    <!-- VIP 弹窗 -->
     <div class="modal-overlay hidden" id="vipModal">
         <div class="modal">
             <h3>⭐ VIP 会员</h3>
-            <p style="color:#FFD700;">解锁全部AI预测功能</p>
+            <p style="color:#FFD700;font-weight:700;">解锁全部AI预测功能</p>
             <p>• 无限AI预测次数</p>
             <p>• 高级蒙特卡洛模拟(10万次)</p>
             <p>• 马尔可夫链深度分析</p>
             <p>• 贝叶斯概率模型</p>
             <p>• 导出全部数据</p>
-            <p style="color:#FFD700;font-weight:700;">月费：¥29.9 | 年费：¥199</p>
+            <p style="color:#FFD700;font-weight:700;margin-top:12px;">月费：¥29.9 | 年费：¥199</p>
             <button class="btn-sm vip" onclick="simulateVIP()">🔓 模拟开通VIP</button>
-            <button class="btn-sm" onclick="closeVIPModal()">关闭</button>
+            <button class="btn-sm" onclick="closeVIPModal()" style="margin-left:8px;">关闭</button>
         </div>
     </div>
 
-    <!-- Toast container -->
     <div id="toastContainer"></div>
 
     <script>
-        // ==================== GLOBAL STATE ====================
-        const STATE = {
-            currentUser: null,
-            isAdmin: false,
-            isVIP: false,
-            currentLottery: 'dlt', // 'dlt' | 'ssq'
-            currentPanel: 'predictPanel',
-            animationEnabled: true,
-            strategy: 'balanced',
-            theme: 'blue',
-            predictions: [],
-            collections: [],
-            history: [],
-            hotNums: [],
-            coldNums: [],
-            musicList: [],
-            supabase: null,
-            supabaseUrl: 'https://qwvrojfdripeswuocgpo.supabase.co',
-            supabaseKey: 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4',
-        };
+        (function() {
+            // ==================== 全局状态 ====================
+            const STATE = {
+                currentUser: null,
+                isAdmin: false,
+                isVIP: false,
+                currentLottery: 'dlt',
+                currentPanel: 'predictPanel',
+                animationEnabled: true,
+                strategy: 'balanced',
+                theme: 'blue',
+                predictions: [],
+                collections: [],
+                history: [],
+                hotNums: [],
+                coldNums: [],
+                musicList: [],
+                supabase: null,
+                supabaseUrl: 'https://qwvrojfdripeswuocgpo.supabase.co',
+                supabaseKey: 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4',
+            };
 
-        // Try to init Supabase (will work when configured)
-        try {
-            if (STATE.supabaseUrl.includes('your-project') === false) {
-                STATE.supabase = supabase.createClient(STATE.supabaseUrl, STATE.supabaseKey);
-            }
-        } catch (e) { console.log('Supabase not configured, using demo mode'); }
-
-        // ==================== PARTICLE SYSTEM ====================
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouseX = -1000,
-            mouseY = -1000;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        class Particle {
-            constructor() {
-                this.reset();
-                this.y = Math.random() * canvas.height;
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = -10;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedY = Math.random() * 0.6 + 0.2;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.opacity = Math.random() * 0.7 + 0.3;
-                this.hue = Math.random() < 0.5 ? 190 : 270;
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                let dx = this.x - mouseX;
-                let dy = this.y - mouseY;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 120) {
-                    this.x += dx / dist * 1.5;
-                    this.y += dy / dist * 1.5;
+            try {
+                if (!STATE.supabaseUrl.includes('your-project')) {
+                    STATE.supabase = supabase.createClient(STATE.supabaseUrl, STATE.supabaseKey);
                 }
-                if (this.y > canvas.height + 10) this.reset();
-                if (this.x < -10) this.x = canvas.width + 10;
-                if (this.x > canvas.width + 10) this.x = -10;
+            } catch (e) { console.log('Supabase 未配置，使用演示模式'); }
+
+            // ==================== 粒子系统 ====================
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let mouseX = -1000, mouseY = -1000;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue},80%,60%,${this.opacity})`;
-                ctx.fill();
-                ctx.shadowBlur = 6;
-                ctx.shadowColor = `hsla(${this.hue},100%,50%,0.5)`;
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                    this.y = Math.random() * canvas.height;
+                }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = -10;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedY = Math.random() * 0.6 + 0.2;
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    this.hue = Math.random() < 0.5 ? 190 : 270;
+                }
+                update() {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    let dx = this.x - mouseX;
+                    let dy = this.y - mouseY;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120) {
+                        this.x += dx / dist * 1.5;
+                        this.y += dy / dist * 1.5;
+                    }
+                    if (this.y > canvas.height + 10) this.reset();
+                    if (this.x < -10) this.x = canvas.width + 10;
+                    if (this.x > canvas.width + 10) this.x = -10;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                    ctx.fillStyle = `hsla(${this.hue},80%,60%,${this.opacity})`;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = `hsla(${this.hue},100%,50%,0.5)`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
             }
-        }
 
-        for (let i = 0; i < 100; i++) {
-            particles.push(new Particle());
-        }
+            for (let i = 0; i < 100; i++) particles.push(new Particle());
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update();
-                p.draw(); });
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-        document.addEventListener('mousemove', e => { mouseX = e.clientX;
-            mouseY = e.clientY; });
-        document.addEventListener('touchmove', e => { mouseX = e.touches[0].clientX;
-            mouseY = e.touches[0].clientY; });
-
-        // ==================== TOAST ====================
-        function showToast(msg, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 2800);
-        }
-
-        // ==================== AUTH ====================
-        function toggleAuthMode(mode) {
-            document.getElementById('authFormLogin').classList.toggle('hidden', mode !== 'login');
-            document.getElementById('authFormRegister').classList.toggle('hidden', mode !== 'register');
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            if (!email || !password) { showToast('请填写邮箱和密码', 'error'); return; }
-            if (STATE.supabase) {
-                const { data, error } = await STATE.supabase.auth.signInWithPassword({ email, password });
-                if (error) { showToast('登录失败: ' + error.message, 'error'); return; }
-                STATE.currentUser = data.user;
-                await checkUserRole(data.user.id);
-            } else {
-                // Demo mode
-                STATE.currentUser = { id: 'demo-user', email: email };
-                STATE.isAdmin = email.includes('admin');
-                STATE.isVIP = email.includes('vip');
-                localStorage.setItem('demoUser', JSON.stringify(STATE.currentUser));
-                localStorage.setItem('demoIsAdmin', STATE.isAdmin);
-                localStorage.setItem('demoIsVIP', STATE.isVIP);
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animateParticles);
             }
-            onLoginSuccess();
-        }
+            animateParticles();
+            document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+            document.addEventListener('touchmove', e => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
 
-        async function handleRegister() {
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const confirm = document.getElementById('regPasswordConfirm').value.trim();
-            if (!email || !password) { showToast('请填写完整信息', 'error'); return; }
-            if (password.length < 6) { showToast('密码至少6位', 'error'); return; }
-            if (password !== confirm) { showToast('两次密码不一致', 'error'); return; }
-            if (STATE.supabase) {
-                const { data, error } = await STATE.supabase.auth.signUp({ email, password });
-                if (error) { showToast('注册失败: ' + error.message, 'error'); return; }
-                showToast('注册成功！请登录', 'success');
-                toggleAuthMode('login');
-                return;
-            } else {
-                STATE.currentUser = { id: 'demo-' + Date.now(), email: email };
-                STATE.isAdmin = false;
-                STATE.isVIP = false;
-                localStorage.setItem('demoUser', JSON.stringify(STATE.currentUser));
-                localStorage.setItem('demoIsAdmin', 'false');
-                localStorage.setItem('demoIsVIP', 'false');
+            // ==================== Toast ====================
+            function showToast(msg, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 2800);
+            }
+
+            // ==================== 认证逻辑 ====================
+            window.toggleAuthMode = function(mode) {
+                document.getElementById('authFormLogin').classList.toggle('hidden', mode !== 'login');
+                document.getElementById('authFormRegister').classList.toggle('hidden', mode !== 'register');
+            };
+
+            async function handleLogin() {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                if (!email || !password) { showToast('请填写邮箱和密码', 'error'); return; }
+
+                if (STATE.supabase) {
+                    const { data, error } = await STATE.supabase.auth.signInWithPassword({ email, password });
+                    if (error) { showToast('登录失败: ' + error.message, 'error'); return; }
+                    STATE.currentUser = data.user;
+                    await checkUserRole(data.user.id);
+                } else {
+                    // 演示模式
+                    STATE.currentUser = { id: 'demo-' + Date.now(), email: email };
+                    STATE.isAdmin = email.includes('admin');
+                    STATE.isVIP = email.includes('vip');
+                    localStorage.setItem('demoUser', JSON.stringify(STATE.currentUser));
+                    localStorage.setItem('demoIsAdmin', STATE.isAdmin);
+                    localStorage.setItem('demoIsVIP', STATE.isVIP);
+                }
                 onLoginSuccess();
             }
-        }
 
-        function onLoginSuccess() {
-            document.getElementById('authPage').classList.remove('active');
-            if (STATE.isAdmin) {
-                document.getElementById('adminBtn').style.display = 'inline-block';
-                goAdmin();
-            } else {
-                document.getElementById('adminBtn').style.display = 'none';
-                goApp();
-            }
-            document.getElementById('userBadge').textContent = (STATE.isVIP ? '👑VIP ' : '👤 ') + (STATE.currentUser
-                ?.email || '用户');
-            showToast('登录成功！' + (STATE.isAdmin ? ' 管理员模式' : ''), 'success');
-            loadSavedData();
-        }
+            async function handleRegister() {
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value.trim();
+                const confirm = document.getElementById('regPasswordConfirm').value.trim();
+                if (!email || !password) { showToast('请填写完整信息', 'error'); return; }
+                if (password.length < 6) { showToast('密码至少6位', 'error'); return; }
+                if (password !== confirm) { showToast('两次密码不一致', 'error'); return; }
 
-        async function checkUserRole(userId) {
-            if (STATE.supabase) {
-                const { data } = await STATE.supabase.from('profiles').select('role,is_vip').eq('id', userId).single();
-                if (data) {
-                    STATE.isAdmin = data.role === 'admin';
-                    STATE.isVIP = data.is_vip === true;
+                if (STATE.supabase) {
+                    const { data, error } = await STATE.supabase.auth.signUp({ email, password });
+                    if (error) { showToast('注册失败: ' + error.message, 'error'); return; }
+                    showToast('注册成功！请登录', 'success');
+                    toggleAuthMode('login');
+                    return;
+                } else {
+                    STATE.currentUser = { id: 'demo-' + Date.now(), email: email };
+                    STATE.isAdmin = false;
+                    STATE.isVIP = false;
+                    localStorage.setItem('demoUser', JSON.stringify(STATE.currentUser));
+                    localStorage.setItem('demoIsAdmin', 'false');
+                    localStorage.setItem('demoIsVIP', 'false');
+                    onLoginSuccess();
                 }
             }
-        }
 
-        function handleLogout() {
-            STATE.currentUser = null;
-            STATE.isAdmin = false;
-            STATE.isVIP = false;
-            localStorage.removeItem('demoUser');
-            localStorage.removeItem('demoIsAdmin');
-            localStorage.removeItem('demoIsVIP');
-            document.getElementById('authPage').classList.add('active');
-            document.getElementById('appPage').classList.remove('active');
-            document.getElementById('adminPage').classList.remove('active');
-            document.getElementById('adminBtn').style.display = 'none';
-            if (STATE.supabase) STATE.supabase.auth.signOut();
-            showToast('已退出登录');
-        }
-
-        function loadSavedData() {
-            const saved = localStorage.getItem('aiLotteryData');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    STATE.predictions = data.predictions || [];
-                    STATE.collections = data.collections || [];
-                    STATE.history = data.history || [];
-                } catch (e) {}
-            }
-        }
-
-        function saveData() {
-            localStorage.setItem('aiLotteryData', JSON.stringify({
-                predictions: STATE.predictions.slice(-200),
-                collections: STATE.collections.slice(-200),
-                history: STATE.history.slice(-200),
-            }));
-        }
-
-        // ==================== NAVIGATION ====================
-        function goApp() {
-            document.getElementById('adminPage').classList.remove('active');
-            document.getElementById('appPage').classList.add('active');
-            document.getElementById('authPage').classList.remove('active');
-            showPanel('predictPanel');
-        }
-
-        function goAdmin() {
-            if (!STATE.isAdmin) { showToast('需要管理员权限', 'error'); return; }
-            document.getElementById('appPage').classList.remove('active');
-            document.getElementById('adminPage').classList.add('active');
-            document.getElementById('authPage').classList.remove('active');
-            loadUsers();
-        }
-
-        function showPanel(panelId) {
-            STATE.currentPanel = panelId;
-            document.querySelectorAll('#appPage .panel').forEach(p => p.classList.add('hidden'));
-            const panel = document.getElementById(panelId);
-            if (panel) panel.classList.remove('hidden');
-            document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
-            const tab = document.querySelector(`[data-panel="${panelId}"]`);
-            if (tab) tab.classList.add('active');
-            if (panelId === 'chartPanel') initCharts();
-            if (panelId === 'analysisPanel') updateAnalysis();
-            if (panelId === 'collectPanel') renderCollections();
-            if (panelId === 'historyPanel') renderHistory();
-        }
-
-        document.getElementById('navTabs').addEventListener('click', function(e) {
-            if (e.target.classList.contains('nav-tab')) {
-                showPanel(e.target.dataset.panel);
-            }
-        });
-
-        // ==================== LOTTERY LOGIC ====================
-        function switchLottery(type) {
-            STATE.currentLottery = type;
-            document.querySelectorAll('.lottery-switch button').forEach(b => {
-                b.classList.toggle('active', b.dataset.lottery === type);
-            });
-            if (STATE.currentPanel === 'analysisPanel') updateAnalysis();
-        }
-
-        function getLotteryConfig() {
-            if (STATE.currentLottery === 'dlt') {
-                return { name: '大乐透', frontCount: 5, frontMax: 35, backCount: 2, backMax: 12, frontLabel: '前区',
-                    backLabel: '后区' };
-            } else {
-                return { name: '双色球', frontCount: 6, frontMax: 33, backCount: 1, backMax: 16, frontLabel: '红球',
-                    backLabel: '蓝球' };
-            }
-        }
-
-        function generateRandomNumbers(config) {
-            const front = [];
-            const pool = [];
-            for (let i = 1; i <= config.frontMax; i++) pool.push(i);
-            for (let i = 0; i < config.frontCount; i++) {
-                const idx = Math.floor(Math.random() * pool.length);
-                front.push(pool.splice(idx, 1)[0]);
-            }
-            front.sort((a, b) => a - b);
-            const back = [];
-            const poolB = [];
-            for (let i = 1; i <= config.backMax; i++) poolB.push(i);
-            for (let i = 0; i < config.backCount; i++) {
-                const idx = Math.floor(Math.random() * poolB.length);
-                back.push(poolB.splice(idx, 1)[0]);
-            }
-            back.sort((a, b) => a - b);
-            return { front, back };
-        }
-
-        function aiWeightedPick(config) {
-            // Use hot numbers with higher probability
-            const hotPool = STATE.hotNums.length > 5 ? STATE.hotNums : [];
-            const front = [];
-            const frontPool = [];
-            // Build weighted pool
-            for (let i = 1; i <= config.frontMax; i++) {
-                let weight = 1;
-                if (hotPool.includes(i)) weight = 5;
-                for (let w = 0; w < weight; w++) frontPool.push(i);
-            }
-            const usedFront = new Set();
-            while (front.length < config.frontCount) {
-                const pick = frontPool[Math.floor(Math.random() * frontPool.length)];
-                if (!usedFront.has(pick)) { usedFront.add(pick);
-                    front.push(pick); }
-            }
-            front.sort((a, b) => a - b);
-            const back = [];
-            const usedBack = new Set();
-            const backPool = [];
-            for (let i = 1; i <= config.backMax; i++) {
-                let w = hotPool.includes(i + 35) ? 4 : 1;
-                for (let j = 0; j < w; j++) backPool.push(i);
-            }
-            while (back.length < config.backCount) {
-                const pick = backPool[Math.floor(Math.random() * backPool.length)];
-                if (!usedBack.has(pick)) { usedBack.add(pick);
-                    back.push(pick); }
-            }
-            back.sort((a, b) => a - b);
-            return { front, back };
-        }
-
-        // ==================== BALL ANIMATION ====================
-        async function animateBallsSequentially(containerId, numbers, isBack = false, delay = 400) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = '';
-            const allNums = [...numbers];
-            const balls = [];
-
-            // Create placeholder balls
-            for (let i = 0; i < allNums.length; i++) {
-                const ball = document.createElement('div');
-                ball.className = 'ball ' + (isBack ? 'back' : 'front');
-                ball.textContent = '?';
-                ball.style.opacity = '0.3';
-                container.appendChild(ball);
-                balls.push(ball);
+            function onLoginSuccess() {
+                document.getElementById('authPage').classList.remove('active');
+                // 修复：登录后总是进入主页，管理员可通过按钮进入后台
+                if (STATE.isAdmin) {
+                    document.getElementById('adminBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('adminBtn').style.display = 'none';
+                }
+                goApp(); // 统一进入主页
+                document.getElementById('userBadge').textContent = (STATE.isVIP ? '👑VIP ' : '👤 ') + (STATE.currentUser?.email || '用户');
+                showToast('登录成功！' + (STATE.isAdmin ? ' 管理员模式' : ''), 'success');
+                loadSavedData();
             }
 
-            // Animate one by one
-            for (let i = 0; i < allNums.length; i++) {
-                const ball = balls[i];
-                ball.style.opacity = '1';
-                ball.classList.add('rolling');
-                // Roll for some time
-                const rollDuration = 600 + Math.random() * 400;
-                const startTime = Date.now();
-                const maxNum = isBack ? (STATE.currentLottery === 'dlt' ? 12 : 16) : (STATE.currentLottery === 'dlt' ?
-                    35 : 33);
-                await new Promise(resolve => {
-                    const interval = setInterval(() => {
-                        const elapsed = Date.now() - startTime;
-                        if (elapsed > rollDuration) {
-                            clearInterval(interval);
-                            ball.classList.remove('rolling');
-                            ball.textContent = String(allNums[i]).padStart(2, '0');
-                            ball.classList.add('stopped');
-                            setTimeout(() => ball.classList.remove('stopped'), 500);
-                            resolve();
-                        } else {
-                            ball.textContent = String(Math.floor(Math.random() * maxNum) + 1).padStart(2,
-                                '0');
-                        }
-                    }, 60);
-                });
-                await new Promise(r => setTimeout(r, delay * 0.4));
-            }
-        }
-
-        async function displayPrediction(prediction, containerId = 'predictBalls') {
-            const config = getLotteryConfig();
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            // Show all balls at once but with sequential animation feel
-            const allBalls = [...prediction.front.map(n => ({ n, isBack: false })), ...prediction.back.map(n => ({ n,
-                isBack: true }))];
-            for (let i = 0; i < allBalls.length; i++) {
-                const ball = document.createElement('div');
-                ball.className = 'ball ' + (allBalls[i].isBack ? 'back' : 'front');
-                ball.textContent = String(allBalls[i].n).padStart(2, '0');
-                ball.classList.add('stopped');
-                container.appendChild(ball);
-                await new Promise(r => setTimeout(r, 150));
-            }
-            // Update score display
-            const score = (80 + Math.random() * 19).toFixed(1);
-            const confidence = (90 + Math.random() * 9.5).toFixed(1);
-            const ratings = ['B', 'A', 'S', 'SS', 'SSS'];
-            const rating = ratings[Math.floor(Math.random() * ratings.length)];
-            document.getElementById('predictScore').textContent = score;
-            document.getElementById('predictConfidence').textContent = confidence + '%';
-            const ratingEl = document.getElementById('predictRating');
-            ratingEl.textContent = rating;
-            ratingEl.className = 'rating-badge ' + (rating === 'SSS' ? 'rating-sss' : rating === 'SS' ? 'rating-ss' :
-                '');
-            return { score, confidence, rating };
-        }
-
-        // ==================== PREDICTIONS ====================
-        async function aiPredict(count) {
-            if (!STATE.isVIP && count > 5) {
-                showToast('VIP用户可预测10组，当前限制5组', 'error');
-                count = 5;
-            }
-            const config = getLotteryConfig();
-            const results = [];
-            for (let i = 0; i < count; i++) {
-                results.push(aiWeightedPick(config));
-            }
-            // Display first result in main area
-            const mainResult = await displayPrediction(results[0], 'predictBalls');
-            // Display multi results
-            const multiContainer = document.getElementById('multiPredictResults');
-            multiContainer.innerHTML = '';
-            if (results.length > 1) {
-                results.forEach((r, idx) => {
-                    const row = document.createElement('div');
-                    row.style.cssText =
-                        'display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-family:var(--font-mono);font-size:0.8rem;padding:6px;background:rgba(0,0,0,0.2);border-radius:8px;';
-                    row.innerHTML =
-                        `<span style="color:#556;">#${idx+1}</span> ${r.front.join(' ')} <span style="color:var(--blue);">|</span> ${r.back.join(' ')} <span style="color:var(--green);font-size:0.7rem;">评分:${(80+Math.random()*19).toFixed(1)}</span>`;
-                    multiContainer.appendChild(row);
-                });
-            }
-            // Save to history
-            STATE.history.unshift({
-                time: new Date().toISOString(),
-                lottery: STATE.currentLottery,
-                numbers: results[0],
-                score: mainResult.score,
-                rating: mainResult.rating,
-            });
-            if (STATE.history.length > 100) STATE.history.length = 100;
-            saveData();
-            showToast(`AI预测完成，评级：${mainResult.rating}`);
-        }
-
-        function randomPick() {
-            const config = getLotteryConfig();
-            const result = generateRandomNumbers(config);
-            displayPrediction(result, 'predictBalls');
-            showToast('随机选号完成');
-        }
-
-        function collectCurrent() {
-            const frontText = Array.from(document.querySelectorAll('#predictBalls .ball.front')).map(b => parseInt(b
-                .textContent)).filter(n => !isNaN(n));
-            const backText = Array.from(document.querySelectorAll('#predictBalls .ball.back')).map(b => parseInt(b
-                .textContent)).filter(n => !isNaN(n));
-            if (frontText.length === 0) { showToast('请先进行预测', 'error'); return; }
-            STATE.collections.unshift({
-                time: new Date().toISOString(),
-                lottery: STATE.currentLottery,
-                front: frontText,
-                back: backText,
-                score: document.getElementById('predictScore').textContent,
-            });
-            if (STATE.collections.length > 100) STATE.collections.length = 100;
-            saveData();
-            showToast('已收藏！⭐');
-        }
-
-        function exportCurrent() {
-            const frontText = Array.from(document.querySelectorAll('#predictBalls .ball.front')).map(b => b.textContent);
-            const backText = Array.from(document.querySelectorAll('#predictBalls .ball.back')).map(b => b.textContent);
-            const text = `${getLotteryConfig().name} 预测号码：${frontText.join(' ')} | ${backText.join(' ')}`;
-            navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
-        }
-
-        // ==================== ANALYSIS ====================
-        function updateAnalysis() {
-            const config = getLotteryConfig();
-            // Generate mock analysis data
-            const hotNums = [];
-            const pool = [];
-            for (let i = 1; i <= config.frontMax; i++) pool.push(i);
-            for (let i = 0; i < 10; i++) {
-                const idx = Math.floor(Math.random() * pool.length);
-                hotNums.push(pool.splice(idx, 1)[0]);
-            }
-            STATE.hotNums = hotNums;
-            const coldNums = pool.slice(0, 10);
-            STATE.coldNums = coldNums;
-            document.getElementById('hotNums').innerHTML = hotNums.map(n =>
-                `<span style="color:#FF4D6D;margin:2px;">${String(n).padStart(2,'0')}</span>`).join(' ');
-            document.getElementById('coldNums').innerHTML = coldNums.map(n =>
-                `<span style="color:#5dade2;margin:2px;">${String(n).padStart(2,'0')}</span>`).join(' ');
-            document.getElementById('sumRange').textContent =
-                `${config.frontCount*8}-${config.frontCount*22} (典型区间)`;
-            document.getElementById('oddEven').textContent = `${Math.round(config.frontCount*0.55)}:${Math.round(config.frontCount*0.45)} (奇:偶)`;
-            document.getElementById('consecFreq').textContent = `${(12+Math.random()*20).toFixed(1)}% 出现概率`;
-            document.getElementById('repeatProb').textContent = `${(8+Math.random()*18).toFixed(1)}% 重号概率`;
-            document.getElementById('spanDist').textContent =
-                `${config.frontMax-12}-${config.frontMax-3} 常见跨度`;
-            document.getElementById('acDist').textContent = `4-8 常见AC值范围`;
-        }
-
-        // ==================== LAB ====================
-        function runMonteCarlo() {
-            const iterations = parseInt(document.getElementById('mcIter').value);
-            const config = getLotteryConfig();
-            const freqMap = {};
-            for (let i = 1; i <= config.frontMax; i++) freqMap[i] = 0;
-            for (let iter = 0; iter < Math.min(iterations, 100000); iter++) {
-                const nums = generateRandomNumbers(config);
-                nums.front.forEach(n => freqMap[n]++);
-            }
-            const sorted = Object.entries(freqMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            document.getElementById('mcResult').innerHTML = '<strong>蒙特卡洛推荐号码：</strong><br>' +
-                sorted.map(([n, f]) => `<span style="color:#FFD700;">${n.padStart(2,'0')}</span>(频次:${f})`).join(
-                    ' ');
-            showToast(`蒙特卡洛模拟完成(${iterations}次)`);
-        }
-
-        function setStrategy(strategy) {
-            STATE.strategy = strategy;
-            document.getElementById('currentStrategy').textContent = '当前：' + {
-                stable: '稳健',
-                balanced: '平衡',
-                aggressive: '激进',
-                extreme: '极限'
-            } [strategy];
-            showToast('策略已切换');
-        }
-
-        // Markov & Bayes demo
-        document.getElementById('markovResult').innerHTML =
-            '<span style="color:#8899bb;">转移矩阵已就绪，点击预测应用马尔可夫链模型</span>';
-        document.getElementById('bayesResult').innerHTML =
-            '<span style="color:#8899bb;">先验概率已计算，后验更新可用</span>';
-
-        // ==================== CHARTS ====================
-        function initCharts() {
-            const darkTheme = {
-                textStyle: { color: '#c8d6e5' },
-                backgroundColor: 'transparent',
-            };
-            const chartHot = echarts.init(document.getElementById('chartHot'));
-            chartHot.setOption({
-                ...darkTheme,
-                title: { text: '热号趋势', textStyle: { color: '#FF4D6D', fontSize: 14 } },
-                xAxis: { data: ['N-5', 'N-4', 'N-3', 'N-2', 'N-1', '本期'], axisLabel: { color: '#8899bb' } },
-                yAxis: { axisLabel: { color: '#8899bb' } },
-                series: [{ type: 'line', data: [5, 8, 6, 9, 7, 10], lineStyle: { color: '#FF4D6D' },
-                    itemStyle: { color: '#FF4D6D' }, symbol: 'circle', symbolSize: 8 }]
-            });
-            const chartCold = echarts.init(document.getElementById('chartCold'));
-            chartCold.setOption({
-                ...darkTheme,
-                title: { text: '冷号趋势', textStyle: { color: '#5dade2', fontSize: 14 } },
-                xAxis: { data: ['N-5', 'N-4', 'N-3', 'N-2', 'N-1', '本期'], axisLabel: { color: '#8899bb' } },
-                yAxis: { axisLabel: { color: '#8899bb' } },
-                series: [{ type: 'bar', data: [2, 4, 1, 5, 3, 2], itemStyle: { color: '#5dade2',
-                        borderRadius: 4 } }]
-            });
-            const chartSum = echarts.init(document.getElementById('chartSum'));
-            chartSum.setOption({
-                ...darkTheme,
-                title: { text: '和值走势', textStyle: { color: '#00FF9D', fontSize: 14 } },
-                xAxis: { data: ['N-10', 'N-8', 'N-6', 'N-4', 'N-2', '本期'], axisLabel: { color: '#8899bb' } },
-                yAxis: { axisLabel: { color: '#8899bb' } },
-                series: [{ type: 'line', data: [85, 92, 78, 100, 88, 95], lineStyle: { color: '#00FF9D',
-                        width: 2 }, itemStyle: { color: '#00FF9D' }, areaStyle: { color: 'rgba(0,255,157,0.1)' },
-                    symbol: 'diamond', symbolSize: 8 }]
-            });
-            const chartOE = echarts.init(document.getElementById('chartOddEven'));
-            chartOE.setOption({
-                ...darkTheme,
-                title: { text: '奇偶比例', textStyle: { color: '#6E00FF', fontSize: 14 } },
-                series: [{ type: 'pie', radius: ['40%', '70%'], data: [{ value: 55, name: '奇数',
-                        itemStyle: { color: '#6E00FF' } }, { value: 45, name: '偶数',
-                        itemStyle: { color: '#00F5FF' } }], label: { color: '#c8d6e5' } }]
-            });
-            window._charts = [chartHot, chartCold, chartSum, chartOE];
-            window.addEventListener('resize', () => window._charts?.forEach(c => c.resize()));
-        }
-
-        // ==================== SIMULATION ====================
-        async function runSimulation() {
-            const config = getLotteryConfig();
-            const result = generateRandomNumbers(config);
-            const container = document.getElementById('simBalls');
-            container.innerHTML = '';
-            const allBalls = [...result.front.map(n => ({ n, isBack: false })), ...result.back.map(n => ({ n,
-                isBack: true }))];
-            for (let i = 0; i < allBalls.length; i++) {
-                const ball = document.createElement('div');
-                ball.className = 'ball ' + (allBalls[i].isBack ? 'back' : 'front') + ' rolling';
-                ball.textContent = '?';
-                container.appendChild(ball);
-                const finalNum = allBalls[i].n;
-                const maxNum = allBalls[i].isBack ? config.backMax : config.frontMax;
-                await new Promise(resolve => {
-                    const duration = 800 + Math.random() * 600;
-                    const start = Date.now();
-                    const interval = setInterval(() => {
-                        if (Date.now() - start > duration) {
-                            clearInterval(interval);
-                            ball.classList.remove('rolling');
-                            ball.textContent = String(finalNum).padStart(2, '0');
-                            ball.classList.add('stopped');
-                            setTimeout(() => ball.classList.remove('stopped'), 500);
-                            resolve();
-                        } else {
-                            ball.textContent = String(Math.floor(Math.random() * maxNum) + 1).padStart(
-                                2, '0');
-                        }
-                    }, 50);
-                });
-                await new Promise(r => setTimeout(r, 300));
-            }
-            showToast('摇奖完成！🎉');
-        }
-
-        // ==================== COLLECTIONS & HISTORY ====================
-        function renderCollections() {
-            const container = document.getElementById('collectList');
-            if (STATE.collections.length === 0) {
-                container.innerHTML = '<span style="color:#556;">暂无收藏</span>';
-                return;
-            }
-            container.innerHTML = STATE.collections.slice(0, 50).map((c, i) => `
-            <div style="padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-              <span>${c.lottery==='dlt'?'大乐透':'双色球'} | ${c.front.join(' ')} <span style="color:var(--blue);">|</span> ${c.back.join(' ')}</span>
-              <span style="color:#556;font-size:0.7rem;">${new Date(c.time).toLocaleDateString()} 评分:${c.score||'-'}</span>
-              <button class="btn-sm" onclick="removeCollect(${i})" style="font-size:0.65rem;">删除</button>
-            </div>`).join('');
-        }
-
-        function removeCollect(index) {
-            STATE.collections.splice(index, 1);
-            saveData();
-            renderCollections();
-            showToast('已删除');
-        }
-
-        function exportCollect() {
-            const text = JSON.stringify(STATE.collections, null, 2);
-            navigator.clipboard.writeText(text).then(() => showToast('收藏数据已复制'));
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('historyList');
-            if (STATE.history.length === 0) {
-                container.innerHTML = '<span style="color:#556;">暂无预测历史</span>';
-                return;
-            }
-            container.innerHTML = STATE.history.slice(0, 50).map((h, i) => `
-            <div style="padding:6px;border-bottom:1px solid rgba(255,255,255,0.05);">
-              <span style="color:#556;">${new Date(h.time).toLocaleString()}</span> |
-              ${h.lottery==='dlt'?'大乐透':'双色球'} |
-              ${h.numbers.front.join(' ')} <span style="color:var(--blue);">|</span> ${h.numbers.back.join(' ')} |
-              评分:${h.score} | 评级:${h.rating}
-            </div>`).join('');
-        }
-
-        function clearHistory() {
-            STATE.history = [];
-            saveData();
-            renderHistory();
-            showToast('历史已清除');
-        }
-
-        // ==================== SETTINGS ====================
-        function setTheme(theme) {
-            STATE.theme = theme;
-            const root = document.documentElement;
-            const themes = {
-                blue: { '--blue': '#00F5FF', '--purple': '#6E00FF', '--green': '#00FF9D' },
-                cyber: { '--blue': '#ff00ff', '--purple': '#00ffff', '--green': '#ffff00' },
-                purple: { '--blue': '#b388ff', '--purple': '#7c4dff', '--green': '#64ffda' },
-            };
-            if (themes[theme]) {
-                Object.entries(themes[theme]).forEach(([k, v]) => root.style.setProperty(k, v));
-            }
-            showToast('主题已切换');
-        }
-
-        function toggleAnimation() {
-            STATE.animationEnabled = !STATE.animationEnabled;
-            document.querySelector('.scanline').style.display = STATE.animationEnabled ? 'block' : 'none';
-            showToast('动画已' + (STATE.animationEnabled ? '开启' : '关闭'));
-        }
-
-        function exportData(format) {
-            const data = { predictions: STATE.predictions, collections: STATE.collections, history: STATE.history };
-            const text = format === 'json' ? JSON.stringify(data, null, 2) : 'CSV导出（简化）:\n' + JSON.stringify(data);
-            navigator.clipboard.writeText(text).then(() => showToast('数据已复制到剪贴板'));
-        }
-
-        function clearCache() {
-            localStorage.removeItem('aiLotteryData');
-            STATE.predictions = [];
-            STATE.collections = [];
-            STATE.history = [];
-            saveData();
-            showToast('缓存已清理');
-        }
-
-        // ==================== VIP ====================
-        function showVIPModal() { document.getElementById('vipModal').classList.remove('hidden'); }
-
-        function closeVIPModal() { document.getElementById('vipModal').classList.add('hidden'); }
-
-        function simulateVIP() {
-            STATE.isVIP = true;
-            localStorage.setItem('demoIsVIP', 'true');
-            document.getElementById('userBadge').textContent = '👑VIP ' + (STATE.currentUser?.email || '用户');
-            closeVIPModal();
-            showToast('VIP已开通！🎉', 'success');
-        }
-
-        // ==================== ADMIN ====================
-        function importFromAPI() {
-            const url = document.getElementById('apiUrl').value.trim();
-            if (!url) { showToast('请输入API URL', 'error'); return; }
-            // Simulate API import
-            showToast('正在从API导入...（演示模式）', 'success');
-            setTimeout(() => showToast('导入完成！共导入50条记录', 'success'), 1500);
-        }
-
-        function importManual() {
-            const raw = document.getElementById('manualData').value.trim();
-            if (!raw) { showToast('请粘贴JSON数据', 'error'); return; }
-            try {
-                const data = JSON.parse(raw);
-                showToast('手动导入成功！', 'success');
-                console.log('Imported:', data);
-            } catch (e) {
-                showToast('JSON格式错误', 'error');
-            }
-        }
-
-        function importMusic() {
-            const url = document.getElementById('musicUrl').value.trim();
-            if (!url) { showToast('请输入音乐URL', 'error'); return; }
-            STATE.musicList.push({ url, time: new Date().toISOString() });
-            document.getElementById('musicList').innerHTML = STATE.musicList.map(m =>
-                `<div>🎵 ${m.url.substring(0,40)}... (${new Date(m.time).toLocaleString()})</div>`).join('');
-            showToast('音乐已导入');
-        }
-
-        function loadUsers() {
-            if (STATE.supabase) {
-                // Would fetch from Supabase
-                document.getElementById('userList').innerHTML = '<span style="color:#8899bb;">连接Supabase后显示用户列表</span>';
-            } else {
-                document.getElementById('userList').innerHTML =
-                    '<span style="color:#8899bb;">演示模式 - 用户数据存储在本地</span>';
-            }
-        }
-
-        // ==================== INIT ====================
-        function init() {
-            // Check for saved demo session
-            const savedUser = localStorage.getItem('demoUser');
-            const savedAdmin = localStorage.getItem('demoIsAdmin');
-            const savedVIP = localStorage.getItem('demoIsVIP');
-            if (savedUser) {
-                try {
-                    STATE.currentUser = JSON.parse(savedUser);
-                    STATE.isAdmin = savedAdmin === 'true';
-                    STATE.isVIP = savedVIP === 'true';
-                    document.getElementById('authPage').classList.remove('active');
-                    if (STATE.isAdmin) {
-                        document.getElementById('adminBtn').style.display = 'inline-block';
-                        goAdmin();
-                    } else {
-                        goApp();
+            async function checkUserRole(userId) {
+                if (STATE.supabase) {
+                    const { data } = await STATE.supabase.from('profiles').select('role,is_vip').eq('id', userId).single();
+                    if (data) {
+                        STATE.isAdmin = data.role === 'admin';
+                        STATE.isVIP = data.is_vip === true;
                     }
-                    document.getElementById('userBadge').textContent = (STATE.isVIP ? '👑VIP ' : '👤 ') + (STATE
-                        .currentUser?.email || '用户');
-                    loadSavedData();
-                } catch (e) {
+                }
+            }
+
+            window.handleLogout = function() {
+                STATE.currentUser = null;
+                STATE.isAdmin = false;
+                STATE.isVIP = false;
+                localStorage.removeItem('demoUser');
+                localStorage.removeItem('demoIsAdmin');
+                localStorage.removeItem('demoIsVIP');
+                document.getElementById('authPage').classList.add('active');
+                document.getElementById('appPage').classList.remove('active');
+                document.getElementById('adminPage').classList.remove('active');
+                document.getElementById('adminBtn').style.display = 'none';
+                if (STATE.supabase) STATE.supabase.auth.signOut();
+                showToast('已退出登录');
+            };
+
+            function loadSavedData() {
+                const saved = localStorage.getItem('aiLotteryData');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        STATE.predictions = data.predictions || [];
+                        STATE.collections = data.collections || [];
+                        STATE.history = data.history || [];
+                    } catch(e) {}
+                }
+            }
+
+            function saveData() {
+                localStorage.setItem('aiLotteryData', JSON.stringify({
+                    predictions: STATE.predictions.slice(-200),
+                    collections: STATE.collections.slice(-200),
+                    history: STATE.history.slice(-200),
+                }));
+            }
+
+            // ==================== 页面导航 ====================
+            window.goApp = function() {
+                document.getElementById('adminPage').classList.remove('active');
+                document.getElementById('appPage').classList.add('active');
+                document.getElementById('authPage').classList.remove('active');
+                showPanel('predictPanel');
+            };
+
+            window.goAdmin = function() {
+                if (!STATE.isAdmin) { showToast('需要管理员权限', 'error'); return; }
+                document.getElementById('appPage').classList.remove('active');
+                document.getElementById('adminPage').classList.add('active');
+                document.getElementById('authPage').classList.remove('active');
+                loadUsers();
+            };
+
+            function showPanel(panelId) {
+                STATE.currentPanel = panelId;
+                document.querySelectorAll('#appPage .panel').forEach(p => p.classList.add('hidden'));
+                const panel = document.getElementById(panelId);
+                if (panel) panel.classList.remove('hidden');
+                document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
+                const tab = document.querySelector(`[data-panel="${panelId}"]`);
+                if (tab) tab.classList.add('active');
+                if (panelId === 'chartPanel') initCharts();
+                if (panelId === 'analysisPanel') updateAnalysis();
+                if (panelId === 'collectPanel') renderCollections();
+                if (panelId === 'historyPanel') renderHistory();
+            }
+
+            document.getElementById('navTabs').addEventListener('click', function(e) {
+                if (e.target.classList.contains('nav-tab')) {
+                    showPanel(e.target.dataset.panel);
+                }
+            });
+
+            // ==================== 彩票核心 ====================
+            window.switchLottery = function(type) {
+                STATE.currentLottery = type;
+                document.querySelectorAll('.lottery-switch button').forEach(b => {
+                    b.classList.toggle('active', b.dataset.lottery === type);
+                });
+                if (STATE.currentPanel === 'analysisPanel') updateAnalysis();
+            };
+
+            function getConfig() {
+                return STATE.currentLottery === 'dlt' ?
+                    { name:'大乐透', frontCount:5, frontMax:35, backCount:2, backMax:12 } :
+                    { name:'双色球', frontCount:6, frontMax:33, backCount:1, backMax:16 };
+            }
+
+            function generateRandom(config) {
+                const front = [], back = [];
+                const pool = Array.from({length: config.frontMax}, (_,i)=>i+1);
+                for (let i=0; i<config.frontCount; i++) {
+                    const idx = Math.floor(Math.random()*pool.length);
+                    front.push(pool.splice(idx,1)[0]);
+                }
+                front.sort((a,b)=>a-b);
+                const poolB = Array.from({length: config.backMax}, (_,i)=>i+1);
+                for (let i=0; i<config.backCount; i++) {
+                    const idx = Math.floor(Math.random()*poolB.length);
+                    back.push(poolB.splice(idx,1)[0]);
+                }
+                back.sort((a,b)=>a-b);
+                return {front, back};
+            }
+
+            function aiWeightedPick(config) {
+                const hotPool = STATE.hotNums.length > 5 ? STATE.hotNums : [];
+                const front = new Set();
+                const frontWeighted = [];
+                for (let i=1; i<=config.frontMax; i++) {
+                    let w = hotPool.includes(i) ? 5 : 1;
+                    for (let j=0; j<w; j++) frontWeighted.push(i);
+                }
+                while (front.size < config.frontCount) {
+                    front.add(frontWeighted[Math.floor(Math.random()*frontWeighted.length)]);
+                }
+                const sortedFront = Array.from(front).sort((a,b)=>a-b);
+                const back = new Set();
+                const backWeighted = [];
+                for (let i=1; i<=config.backMax; i++) {
+                    let w = hotPool.includes(i+35) ? 4 : 1;
+                    for (let j=0; j<w; j++) backWeighted.push(i);
+                }
+                while (back.size < config.backCount) {
+                    back.add(backWeighted[Math.floor(Math.random()*backWeighted.length)]);
+                }
+                const sortedBack = Array.from(back).sort((a,b)=>a-b);
+                return {front: sortedFront, back: sortedBack};
+            }
+
+            // 动画：逐个滚动号码球
+            async function animateBallsSequentially(containerId, numbers, isBack, delay=400) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = '';
+                const maxNum = isBack ? (STATE.currentLottery==='dlt'?12:16) : (STATE.currentLottery==='dlt'?35:33);
+                const balls = [];
+                for (let i=0; i<numbers.length; i++) {
+                    const ball = document.createElement('div');
+                    ball.className = 'ball ' + (isBack?'back':'front');
+                    ball.textContent = '?';
+                    ball.style.opacity = '0.4';
+                    container.appendChild(ball);
+                    balls.push(ball);
+                }
+                for (let i=0; i<numbers.length; i++) {
+                    const ball = balls[i];
+                    ball.style.opacity = '1';
+                    ball.classList.add('rolling');
+                    const duration = 600 + Math.random()*400;
+                    const start = Date.now();
+                    await new Promise(resolve => {
+                        const interval = setInterval(() => {
+                            if (Date.now()-start > duration) {
+                                clearInterval(interval);
+                                ball.classList.remove('rolling');
+                                ball.textContent = String(numbers[i]).padStart(2,'0');
+                                ball.classList.add('stopped');
+                                setTimeout(() => ball.classList.remove('stopped'), 500);
+                                resolve();
+                            } else {
+                                ball.textContent = String(Math.floor(Math.random()*maxNum)+1).padStart(2,'0');
+                            }
+                        }, 60);
+                    });
+                    await new Promise(r => setTimeout(r, delay*0.3));
+                }
+            }
+
+            async function displayPrediction(prediction, containerId='predictBalls') {
+                await animateBallsSequentially(containerId, prediction.front, false, 350);
+                await new Promise(r => setTimeout(r, 200));
+                await animateBallsSequentially(containerId+'_back', prediction.back, true, 350);
+                const score = (80 + Math.random()*19).toFixed(1);
+                const confidence = (90 + Math.random()*9.5).toFixed(1);
+                const ratings = ['B','A','S','SS','SSS'];
+                const rating = ratings[Math.floor(Math.random()*ratings.length)];
+                document.getElementById('predictScore').textContent = score;
+                document.getElementById('predictConfidence').textContent = confidence+'%';
+                const ratingEl = document.getElementById('predictRating');
+                ratingEl.textContent = rating;
+                ratingEl.className = 'rating-badge ' + (rating==='SSS'?'rating-sss':rating==='SS'?'rating-ss':'');
+                return {score, confidence, rating};
+            }
+
+            // 为了动画兼容，predictBalls 只显示前区，后区单独容器
+            function ensureBackContainer() {
+                if (!document.getElementById('predictBalls_back')) {
+                    const backRow = document.createElement('div');
+                    backRow.className = 'ball-row';
+                    backRow.id = 'predictBalls_back';
+                    document.getElementById('predictBalls').parentNode.insertBefore(backRow, document.getElementById('predictBalls').nextSibling);
+                }
+            }
+            ensureBackContainer();
+
+            window.aiPredict = async function(count) {
+                if (!STATE.isVIP && count > 5) { showToast('VIP用户可预测10组，当前限制5组','error'); count=5; }
+                const config = getConfig();
+                const results = [];
+                for (let i=0; i<count; i++) results.push(aiWeightedPick(config));
+                const mainResult = await displayPrediction(results[0], 'predictBalls');
+                const multiContainer = document.getElementById('multiPredictResults');
+                multiContainer.innerHTML = '';
+                if (results.length > 1) {
+                    results.forEach((r, idx) => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-family:var(--font-mono);font-size:0.8rem;padding:8px;background:rgba(0,0,0,0.2);border-radius:8px;';
+                        row.innerHTML = `<span style="color:#556;">#${idx+1}</span> ${r.front.join(' ')} <span style="color:var(--blue);">|</span> ${r.back.join(' ')} <span style="color:var(--green);">评分:${(80+Math.random()*19).toFixed(1)}</span>`;
+                        multiContainer.appendChild(row);
+                    });
+                }
+                STATE.history.unshift({time:new Date().toISOString(), lottery:STATE.currentLottery, numbers:results[0], score:mainResult.score, rating:mainResult.rating});
+                if (STATE.history.length>100) STATE.history.length=100;
+                saveData();
+                showToast(`AI预测完成，评级：${mainResult.rating}`);
+            };
+
+            window.randomPick = function() {
+                const config = getConfig();
+                const result = generateRandom(config);
+                displayPrediction(result, 'predictBalls');
+                showToast('随机选号完成');
+            };
+
+            window.collectCurrent = function() {
+                const frontText = Array.from(document.querySelectorAll('#predictBalls .ball.front')).map(b=>parseInt(b.textContent)).filter(n=>!isNaN(n));
+                const backText = Array.from(document.querySelectorAll('#predictBalls_back .ball.back')).map(b=>parseInt(b.textContent)).filter(n=>!isNaN(n));
+                if (frontText.length===0) { showToast('请先进行预测','error'); return; }
+                STATE.collections.unshift({time:new Date().toISOString(), lottery:STATE.currentLottery, front:frontText, back:backText, score:document.getElementById('predictScore').textContent});
+                if (STATE.collections.length>100) STATE.collections.length=100;
+                saveData();
+                showToast('已收藏！⭐');
+            };
+
+            window.exportCurrent = function() {
+                const frontText = Array.from(document.querySelectorAll('#predictBalls .ball.front')).map(b=>b.textContent);
+                const backText = Array.from(document.querySelectorAll('#predictBalls_back .ball.back')).map(b=>b.textContent);
+                const text = `${getConfig().name} 预测号码：${frontText.join(' ')} | ${backText.join(' ')}`;
+                navigator.clipboard.writeText(text).then(()=>showToast('已复制到剪贴板'));
+            };
+
+            // ==================== 分析中心 ====================
+            function updateAnalysis() {
+                const config = getConfig();
+                const hotNums = [];
+                const pool = Array.from({length:config.frontMax},(_,i)=>i+1);
+                for (let i=0; i<10; i++) {
+                    const idx = Math.floor(Math.random()*pool.length);
+                    hotNums.push(pool.splice(idx,1)[0]);
+                }
+                STATE.hotNums = hotNums;
+                STATE.coldNums = pool.slice(0,10);
+                document.getElementById('hotNums').innerHTML = hotNums.map(n=>`<span style="color:#FF4D6D;margin:2px;">${String(n).padStart(2,'0')}</span>`).join(' ');
+                document.getElementById('coldNums').innerHTML = STATE.coldNums.map(n=>`<span style="color:#5dade2;margin:2px;">${String(n).padStart(2,'0')}</span>`).join(' ');
+                document.getElementById('sumRange').textContent = `${config.frontCount*8}-${config.frontCount*22}`;
+                document.getElementById('oddEven').textContent = `${Math.round(config.frontCount*0.55)}:${Math.round(config.frontCount*0.45)}`;
+                document.getElementById('consecFreq').textContent = `${(12+Math.random()*20).toFixed(1)}%`;
+                document.getElementById('repeatProb').textContent = `${(8+Math.random()*18).toFixed(1)}%`;
+                document.getElementById('spanDist').textContent = `${config.frontMax-12}-${config.frontMax-3}`;
+                document.getElementById('acDist').textContent = `4-8`;
+            }
+
+            window.runMonteCarlo = function() {
+                const iterations = parseInt(document.getElementById('mcIter').value);
+                const config = getConfig();
+                const freqMap = {};
+                for (let i=1; i<=config.frontMax; i++) freqMap[i]=0;
+                for (let iter=0; iter<Math.min(iterations,100000); iter++) {
+                    const nums = generateRandom(config);
+                    nums.front.forEach(n=>freqMap[n]++);
+                }
+                const sorted = Object.entries(freqMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+                document.getElementById('mcResult').innerHTML = '<strong>推荐号码：</strong><br>'+sorted.map(([n,f])=>`<span style="color:#FFD700;">${n.padStart(2,'0')}</span>(频次:${f})`).join(' ');
+                showToast(`蒙特卡洛模拟完成(${iterations}次)`);
+            };
+
+            window.setStrategy = function(strategy) {
+                STATE.strategy = strategy;
+                document.getElementById('currentStrategy').textContent = '当前：'+{stable:'稳健',balanced:'平衡',aggressive:'激进',extreme:'极限'}[strategy];
+                showToast('策略已切换');
+            };
+
+            document.getElementById('markovResult').innerHTML = '<span style="color:#8899bb;">转移矩阵已就绪</span>';
+            document.getElementById('bayesResult').innerHTML = '<span style="color:#8899bb;">先验概率已计算</span>';
+
+            // ==================== 图表 ====================
+            function initCharts() {
+                const dark = { textStyle:{color:'#c8d6e5'}, backgroundColor:'transparent' };
+                const c1 = echarts.init(document.getElementById('chartHot'));
+                c1.setOption({...dark, title:{text:'热号趋势',textStyle:{color:'#FF4D6D',fontSize:14}}, xAxis:{data:['N-5','N-4','N-3','N-2','N-1','本期']}, yAxis:{}, series:[{type:'line',data:[5,8,6,9,7,10],lineStyle:{color:'#FF4D6D'},itemStyle:{color:'#FF4D6D'}}]});
+                const c2 = echarts.init(document.getElementById('chartCold'));
+                c2.setOption({...dark, title:{text:'冷号趋势',textStyle:{color:'#5dade2'}}, xAxis:{data:['N-5','N-4','N-3','N-2','N-1','本期']}, series:[{type:'bar',data:[2,4,1,5,3,2],itemStyle:{color:'#5dade2'}}]});
+                const c3 = echarts.init(document.getElementById('chartSum'));
+                c3.setOption({...dark, title:{text:'和值走势',textStyle:{color:'#00FF9D'}}, xAxis:{data:['N-10','N-8','N-6','N-4','N-2','本期']}, series:[{type:'line',data:[85,92,78,100,88,95],lineStyle:{color:'#00FF9D'},areaStyle:{color:'rgba(0,255,157,0.1)'}}]});
+                const c4 = echarts.init(document.getElementById('chartOddEven'));
+                c4.setOption({...dark, title:{text:'奇偶比例',textStyle:{color:'#6E00FF'}}, series:[{type:'pie',radius:['40%','70%'],data:[{value:55,name:'奇数',itemStyle:{color:'#6E00FF'}},{value:45,name:'偶数',itemStyle:{color:'#00F5FF'}}]}]});
+                window._charts = [c1,c2,c3,c4];
+                window.addEventListener('resize', ()=>window._charts?.forEach(c=>c.resize()));
+            }
+
+            // ==================== 摇奖模拟 ====================
+            window.runSimulation = async function() {
+                const config = getConfig();
+                const result = generateRandom(config);
+                const container = document.getElementById('simBalls');
+                container.innerHTML = '';
+                const allBalls = [...result.front.map(n=>({n,isBack:false})), ...result.back.map(n=>({n,isBack:true}))];
+                for (let i=0; i<allBalls.length; i++) {
+                    const ball = document.createElement('div');
+                    ball.className = 'ball '+(allBalls[i].isBack?'back':'front')+' rolling';
+                    ball.textContent = '?';
+                    container.appendChild(ball);
+                    const finalNum = allBalls[i].n;
+                    const maxNum = allBalls[i].isBack ? config.backMax : config.frontMax;
+                    await new Promise(resolve => {
+                        const duration = 800+Math.random()*600;
+                        const start = Date.now();
+                        const interval = setInterval(()=>{
+                            if (Date.now()-start > duration) {
+                                clearInterval(interval);
+                                ball.classList.remove('rolling');
+                                ball.textContent = String(finalNum).padStart(2,'0');
+                                ball.classList.add('stopped');
+                                setTimeout(()=>ball.classList.remove('stopped'),500);
+                                resolve();
+                            } else {
+                                ball.textContent = String(Math.floor(Math.random()*maxNum)+1).padStart(2,'0');
+                            }
+                        }, 50);
+                    });
+                    await new Promise(r=>setTimeout(r,300));
+                }
+                showToast('摇奖完成！🎉');
+            };
+
+            // ==================== 收藏 & 历史 ====================
+            function renderCollections() {
+                const container = document.getElementById('collectList');
+                if (!STATE.collections.length) { container.innerHTML='<span style="color:#556;">暂无收藏</span>'; return; }
+                container.innerHTML = STATE.collections.slice(0,50).map((c,i)=>`
+                <div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+                    <span>${c.lottery==='dlt'?'大乐透':'双色球'} | ${c.front.join(' ')} <span style="color:var(--blue);">|</span> ${c.back.join(' ')}</span>
+                    <span style="color:#556;font-size:0.7rem;">${new Date(c.time).toLocaleDateString()} 评分:${c.score||'-'}</span>
+                    <button class="btn-sm" onclick="removeCollect(${i})" style="font-size:0.65rem;">删除</button>
+                </div>`).join('');
+            }
+            window.removeCollect = function(index) {
+                STATE.collections.splice(index,1);
+                saveData();
+                renderCollections();
+            };
+            window.exportCollect = function() {
+                navigator.clipboard.writeText(JSON.stringify(STATE.collections,null,2)).then(()=>showToast('收藏数据已复制'));
+            };
+
+            function renderHistory() {
+                const container = document.getElementById('historyList');
+                if (!STATE.history.length) { container.innerHTML='<span style="color:#556;">暂无预测历史</span>'; return; }
+                container.innerHTML = STATE.history.slice(0,50).map(h=>`
+                <div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span style="color:#556;">${new Date(h.time).toLocaleString()}</span> | ${h.lottery==='dlt'?'大乐透':'双色球'} | ${h.numbers.front.join(' ')} <span style="color:var(--blue);">|</span> ${h.numbers.back.join(' ')} | 评分:${h.score} | 评级:${h.rating}
+                </div>`).join('');
+            }
+            window.clearHistory = function() {
+                STATE.history = [];
+                saveData();
+                renderHistory();
+            };
+
+            // ==================== 设置 ====================
+            window.setTheme = function(theme) {
+                const root = document.documentElement;
+                const themes = {
+                    blue: {'--blue':'#00F5FF','--purple':'#6E00FF','--green':'#00FF9D'},
+                    cyber: {'--blue':'#ff00ff','--purple':'#00ffff','--green':'#ffff00'},
+                    purple: {'--blue':'#b388ff','--purple':'#7c4dff','--green':'#64ffda'},
+                };
+                if (themes[theme]) Object.entries(themes[theme]).forEach(([k,v])=>root.style.setProperty(k,v));
+                showToast('主题已切换');
+            };
+            window.toggleAnimation = function() {
+                STATE.animationEnabled = !STATE.animationEnabled;
+                document.querySelector('.scanline').style.display = STATE.animationEnabled ? 'block' : 'none';
+                showToast('动画已'+(STATE.animationEnabled?'开启':'关闭'));
+            };
+            window.exportData = function(format) {
+                const data = {predictions:STATE.predictions,collections:STATE.collections,history:STATE.history};
+                const text = format==='json' ? JSON.stringify(data,null,2) : 'CSV导出(简化)\n'+JSON.stringify(data);
+                navigator.clipboard.writeText(text).then(()=>showToast('数据已复制'));
+            };
+            window.clearCache = function() {
+                localStorage.removeItem('aiLotteryData');
+                STATE.predictions=[]; STATE.collections=[]; STATE.history=[];
+                saveData();
+                showToast('缓存已清理');
+            };
+
+            // ==================== VIP ====================
+            window.showVIPModal = ()=>document.getElementById('vipModal').classList.remove('hidden');
+            window.closeVIPModal = ()=>document.getElementById('vipModal').classList.add('hidden');
+            window.simulateVIP = function() {
+                STATE.isVIP = true;
+                localStorage.setItem('demoIsVIP','true');
+                document.getElementById('userBadge').textContent = '👑VIP '+(STATE.currentUser?.email||'用户');
+                closeVIPModal();
+                showToast('VIP已开通！🎉','success');
+            };
+
+            // ==================== 管理员 ====================
+            window.importFromAPI = function() {
+                const url = document.getElementById('apiUrl').value.trim();
+                if (!url) { showToast('请输入API URL','error'); return; }
+                showToast('正在从API导入...（演示模式）','success');
+                setTimeout(()=>showToast('导入完成！共50条记录','success'),1500);
+            };
+            window.importManual = function() {
+                const raw = document.getElementById('manualData').value.trim();
+                if (!raw) { showToast('请粘贴JSON数据','error'); return; }
+                try { JSON.parse(raw); showToast('手动导入成功！','success'); } catch(e) { showToast('JSON格式错误','error'); }
+            };
+            window.importMusic = function() {
+                const url = document.getElementById('musicUrl').value.trim();
+                if (!url) { showToast('请输入音乐URL','error'); return; }
+                STATE.musicList.push({url, time:new Date().toISOString()});
+                document.getElementById('musicList').innerHTML = STATE.musicList.map(m=>`<div>🎵 ${m.url.substring(0,40)}... (${new Date(m.time).toLocaleString()})</div>`).join('');
+                showToast('音乐已导入');
+            };
+            window.loadUsers = function() {
+                document.getElementById('userList').innerHTML = STATE.supabase ? '<span style="color:#8899bb;">连接Supabase后显示用户列表</span>' : '<span style="color:#8899bb;">演示模式 - 用户数据存储在本地</span>';
+            };
+
+            // 初始化
+            function init() {
+                const savedUser = localStorage.getItem('demoUser');
+                if (savedUser) {
+                    try {
+                        STATE.currentUser = JSON.parse(savedUser);
+                        STATE.isAdmin = localStorage.getItem('demoIsAdmin') === 'true';
+                        STATE.isVIP = localStorage.getItem('demoIsVIP') === 'true';
+                        document.getElementById('authPage').classList.remove('active');
+                        document.getElementById('adminBtn').style.display = STATE.isAdmin ? 'inline-block' : 'none';
+                        goApp();
+                        document.getElementById('userBadge').textContent = (STATE.isVIP?'👑VIP ':'👤 ')+(STATE.currentUser?.email||'用户');
+                        loadSavedData();
+                    } catch(e) {
+                        document.getElementById('authPage').classList.add('active');
+                    }
+                } else {
                     document.getElementById('authPage').classList.add('active');
                 }
-            } else {
-                document.getElementById('authPage').classList.add('active');
+                updateAnalysis();
             }
-            updateAnalysis();
-        }
+            init();
 
-        init();
+            // 暴露登录注册函数到全局
+            window.handleLogin = handleLogin;
+            window.handleRegister = handleRegister;
 
-        console.log('%c🤖 AI彩票预测专家 Pro Max %c已就绪',
-            'color:#00F5FF;font-size:1.2rem;font-weight:bold;', 'color:#c8d6e5;');
-        console.log('%c⚠️ 本系统仅用于历史数据分析与可视化展示，不预测未来开奖结果',
-            'color:#FF4D6D;font-size:0.9rem;');
-        console.log('%c📋 Supabase数据库SQL请查看下方注释或文档', 'color:#FFD700;');
+            console.log('%c🤖 AI彩票预测专家 Pro Max %c已就绪','color:#00F5FF;font-size:1.2rem;font-weight:bold;','color:#c8d6e5;');
+            console.log('%c⚠️ 本系统仅用于历史数据分析与可视化展示，不预测未来开奖结果','color:#FF4D6D;');
+        })();
     </script>
-
-    <!--
-    ==================== SUPABASE 数据库 SQL ====================
-    请在Supabase SQL Editor中执行以下语句：
-
-    -- 1. 用户资料表
-    CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    email TEXT,
-    role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-    is_vip BOOLEAN DEFAULT false,
-    vip_expires_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    -- 2. 开奖记录表
-    CREATE TABLE IF NOT EXISTS public.lottery_results (
-    id BIGSERIAL PRIMARY KEY,
-    lottery_type TEXT NOT NULL CHECK (lottery_type IN ('dlt', 'ssq')),
-    issue TEXT NOT NULL,
-    draw_date DATE NOT NULL,
-    front_numbers INTEGER[] NOT NULL,
-    back_numbers INTEGER[] NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(lottery_type, issue)
-    );
-
-    -- 3. 用户预测历史
-    CREATE TABLE IF NOT EXISTS public.predictions (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    lottery_type TEXT NOT NULL,
-    front_numbers INTEGER[] NOT NULL,
-    back_numbers INTEGER[] NOT NULL,
-    ai_score DECIMAL(5,2),
-    rating TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    -- 4. 用户收藏
-    CREATE TABLE IF NOT EXISTS public.collections (
-    id BIGSERIAL PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    lottery_type TEXT NOT NULL,
-    front_numbers INTEGER[] NOT NULL,
-    back_numbers INTEGER[] NOT NULL,
-    score DECIMAL(5,2),
-    created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    -- 5. 音乐库
-    CREATE TABLE IF NOT EXISTS public.music_library (
-    id BIGSERIAL PRIMARY KEY,
-    name TEXT,
-    url TEXT NOT NULL,
-    uploaded_by UUID REFERENCES auth.users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    -- 6. RLS策略 (Row Level Security)
-    ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-    ALTER TABLE public.predictions ENABLE ROW LEVEL SECURITY;
-    ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
-    ALTER TABLE public.lottery_results ENABLE ROW LEVEL SECURITY;
-
-    -- 用户可读自己的资料
-    CREATE POLICY "Users read own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
-
-    -- 用户可读自己的预测
-    CREATE POLICY "Users read own predictions" ON public.predictions
-    FOR SELECT USING (auth.uid() = user_id);
-
-    -- 用户可插入自己的预测
-    CREATE POLICY "Users insert own predictions" ON public.predictions
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-    -- 用户可读写自己的收藏
-    CREATE POLICY "Users manage own collections" ON public.collections
-    FOR ALL USING (auth.uid() = user_id);
-
-    -- 所有人可读开奖记录
-    CREATE POLICY "Anyone read lottery results" ON public.lottery_results
-    FOR SELECT USING (true);
-
-    -- 仅管理员可插入开奖记录
-    CREATE POLICY "Admin insert lottery results" ON public.lottery_results
-    FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-    );
-
-    -- 7. 自动创建profile的触发器
-    CREATE OR REPLACE FUNCTION public.handle_new_user()
-    RETURNS TRIGGER AS $$
-    BEGIN
-    INSERT INTO public.profiles (id, email, role, is_vip)
-    VALUES (NEW.id, NEW.email, 'user', false);
-    RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-    CREATE OR REPLACE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
-    -- 8. 索引
-    CREATE INDEX IF NOT EXISTS idx_predictions_user_id ON public.predictions(user_id);
-    CREATE INDEX IF NOT EXISTS idx_collections_user_id ON public.collections(user_id);
-    CREATE INDEX IF NOT EXISTS idx_lottery_results_type_issue ON public.lottery_results(lottery_type, issue);
-    CREATE INDEX IF NOT EXISTS idx_lottery_results_date ON public.lottery_results(draw_date DESC);
-    -->
 </body>
 </html>
