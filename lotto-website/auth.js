@@ -1,6 +1,6 @@
 // ==================== Supabase 配置（务必修改） ====================
-const SUPABASE_URL = 'https://你的项目ID.supabase.co';
-const SUPABASE_ANON_KEY = '你的anon key';
+const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 // =================================================================
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
