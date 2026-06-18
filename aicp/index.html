@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI彩票预测专家 Pro Max | 跑马灯数据大屏版</title>
+    <title>AI彩票预测专家 Pro Max | 完整版</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -65,35 +65,16 @@
         .pred-col { display:flex; flex-direction:column; gap:12px; align-items:center; }
         .flex-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
         .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+        .chart-box { width:100%; height:320px; }
         .result-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
         .hidden { display:none !important; }
         .avatar-img { width:80px; height:80px; border-radius:50%; border:2px solid var(--cyan); object-fit:cover; cursor:pointer; }
-
-        /* 跑马灯样式 */
-        .marquee-box {
-            width:100%; height:100%; overflow:hidden; position:relative;
-            background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:12px;
-            display:flex; align-items:center;
-        }
-        .marquee-content {
-            display:flex; gap:30px; white-space:nowrap;
-            animation: marqueeScroll 20s linear infinite;
-            padding:0 20px; align-items:center; height:100%;
-        }
-        .marquee-content:hover { animation-play-state:paused; }
-        @keyframes marqueeScroll {
-            0% { transform:translateX(100%); }
-            100% { transform:translateX(-100%); }
-        }
-        .marquee-item { display:flex; align-items:center; gap:10px; font-size:0.9em; }
-        .marquee-item .ball { width:36px; height:36px; font-size:0.8em; }
     </style>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
 <div class="scanline"></div>
 
-<!-- 登录 -->
 <div id="loginOverlay" class="overlay">
     <div class="login-title">AI 预测终端</div>
     <div class="login-box">
@@ -113,7 +94,6 @@
     </div>
 </div>
 
-<!-- 主应用 -->
 <div id="app" class="hidden">
     <nav class="navbar">
         <span class="logo">⚡ AI预测 Pro Max</span>
@@ -142,199 +122,159 @@
     </nav>
     <div class="main-content" id="mainContent"></div>
 </div>
-
 <div id="toastContainer"></div>
 <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
 <script>
-// ========== Supabase 配置 ==========
 const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
+const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const STATE = {
-    lottery: 'dlt', currentTab: 'predict', user: null,
-    freeSimCount: 10, isRolling: false, customMusicUrl: null
-};
+const STATE = { lottery:'dlt', currentTab:'predict', user:null, freeSimCount:10, isRolling:false, customMusicUrl:null };
 
-// 粒子背景
-(function() {
-    const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d');
-    let particles = [];
-    function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
-    window.addEventListener('resize', () => { resize(); init(); });
-    function init() { particles = []; for (let i = 0; i < 70; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4, r: Math.random()*2+1, alpha: Math.random()*0.5+0.3 }); }
+// 粒子
+(function(){
+    const canvas=document.getElementById('particleCanvas'),ctx=canvas.getContext('2d');
+    let particles=[];
+    function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
+    window.addEventListener('resize',()=>{ resize(); init(); });
+    function init(){ particles=[]; for(let i=0;i<70;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2+1,alpha:Math.random()*0.5+0.3}); }
     init(); resize();
-    function loop() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { p.x += p.vx; p.y += p.vy; if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0; if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fillStyle = 'rgba(0,245,255,'+p.alpha+')'; ctx.fill(); }); requestAnimationFrame(loop); }
+    function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0; if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(0,245,255,'+p.alpha+')'; ctx.fill(); }); requestAnimationFrame(loop); }
     loop();
 })();
 
-// 音效与音乐
-let bgMusic = new Audio(); bgMusic.loop = true; bgMusic.volume = 0.2;
-function initMusic() {
-    if(STATE.customMusicUrl) bgMusic.src = STATE.customMusicUrl;
-    else bgMusic.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-    if(!bgMusic.paused) bgMusic.play().catch(()=>{});
-}
-function toggleMusic() {
-    if(bgMusic.paused) { bgMusic.play().catch(()=>{}); showToast('音乐开启'); }
-    else { bgMusic.pause(); showToast('音乐关闭'); }
-    document.getElementById('musicToggle').textContent = bgMusic.paused ? '🔇' : '🎵';
-}
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playTick() { try { const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value = 800+Math.random()*400; g.gain.value = 0.04; o.start(); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); o.stop(audioCtx.currentTime+0.08); } catch(e){} }
-function playWin() { try { const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value = 1100; g.gain.value = 0.07; o.start(); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.stop(audioCtx.currentTime+0.25); } catch(e){} }
+let bgMusic = new Audio(); bgMusic.loop=true; bgMusic.volume=0.2;
+function initMusic(){ if(STATE.customMusicUrl) bgMusic.src=STATE.customMusicUrl; else bgMusic.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='; if(!bgMusic.paused) bgMusic.play().catch(()=>{}); }
+function toggleMusic(){ if(bgMusic.paused){ bgMusic.play().catch(()=>{}); showToast('音乐开启'); } else { bgMusic.pause(); showToast('音乐关闭'); } document.getElementById('musicToggle').textContent = bgMusic.paused?'🔇':'🎵'; }
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function playTick(){ try{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=800+Math.random()*400; g.gain.value=0.04; o.start(); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.08); o.stop(audioCtx.currentTime+0.08); }catch(e){} }
+function playWin(){ try{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=1100; g.gain.value=0.07; o.start(); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.25); o.stop(audioCtx.currentTime+0.25); }catch(e){} }
 
-function showToast(msg, color='#00FF9D') {
-    const c = document.getElementById('toastContainer');
-    const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-    t.style.borderColor = color; t.style.color = color; c.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; t.style.transition = '0.5s'; setTimeout(() => t.remove(), 500); }, 2000);
-}
+function showToast(msg,color='#00FF9D'){ const c=document.getElementById('toastContainer'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; t.style.borderColor=color; t.style.color=color; c.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='0.5s'; setTimeout(()=>t.remove(),500); },2000); }
+function getCfg(){ return STATE.lottery==='dlt'?{name:'大乐透',fMax:35,fCnt:5,bMax:12,bCnt:2}:{name:'双色球',fMax:33,fCnt:6,bMax:16,bCnt:1}; }
+function rInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function genRandom(cfg){ const f=new Set(); while(f.size<cfg.fCnt)f.add(rInt(1,cfg.fMax)); const b=new Set(); while(b.size<cfg.bCnt)b.add(rInt(1,cfg.bMax)); return {fronts:[...f].sort((a,b)=>a-b),backs:[...b].sort((a,b)=>a-b)}; }
+function aiPredict(){ const cfg=getCfg(); const nums=genRandom(cfg); const score=Math.min(99.9,70+Math.random()*25); let r='B'; if(score>=97)r='SSS'; else if(score>=93)r='SS'; else if(score>=88)r='S'; else if(score>=80)r='A'; return {numbers:nums,score:parseFloat(score.toFixed(1)),rating:r,timestamp:new Date().toISOString(),lottery:STATE.lottery}; }
 
-function getCfg() { return STATE.lottery === 'dlt' ? { name:'大乐透', fMax:35, fCnt:5, bMax:12, bCnt:2 } : { name:'双色球', fMax:33, fCnt:6, bMax:16, bCnt:1 }; }
-function rInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
-function genRandom(cfg) { const f=new Set(); while(f.size<cfg.fCnt) f.add(rInt(1,cfg.fMax)); const b=new Set(); while(b.size<cfg.bCnt) b.add(rInt(1,cfg.bMax)); return { fronts:[...f].sort((a,b)=>a-b), backs:[...b].sort((a,b)=>a-b) }; }
-function aiPredict() { const cfg=getCfg(); const nums=genRandom(cfg); const score=Math.min(99.9, 70+Math.random()*25); let r='B'; if(score>=97)r='SSS'; else if(score>=93)r='SS'; else if(score>=88)r='S'; else if(score>=80)r='A'; return { numbers:nums, score:parseFloat(score.toFixed(1)), rating:r, timestamp:new Date().toISOString(), lottery:STATE.lottery }; }
-
-function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
-    const container = document.getElementById(containerId); if(!container) return;
-    STATE.isRolling = true; container.innerHTML = '';
-    const all = []; fronts.forEach((n,i) => all.push({ num:n, type:'front', delay:i*500 }));
-    backs.forEach((n,i) => all.push({ num:n, type:'back', delay:(fronts.length+i)*500 }));
-    all.forEach(item => {
-        const ball = document.createElement('span'); ball.className = 'ball rolling '+item.type; ball.textContent='?'; ball.style.opacity='0.4'; container.appendChild(ball);
-        setTimeout(() => { ball.style.opacity='1'; let cur=rInt(1, item.type==='front'?cfg.fMax:cfg.bMax), cnt=0; const maxR=12+Math.floor(Math.random()*8); const iv = setInterval(() => { cur=rInt(1, item.type==='front'?cfg.fMax:cfg.bMax); ball.textContent=String(cur).padStart(2,'0'); cnt++; playTick(); if(cnt>=maxR) { clearInterval(iv); ball.textContent=String(item.num).padStart(2,'0'); ball.classList.remove('rolling'); ball.classList.add('stopped'); playWin(); setTimeout(()=>ball.classList.remove('stopped'),400); } }, 70); }, item.delay);
+function rollNumbersSequentially(containerId,fronts,backs,cfg,callback){
+    const container=document.getElementById(containerId); if(!container)return;
+    STATE.isRolling=true; container.innerHTML='';
+    const all=[]; fronts.forEach((n,i)=>all.push({num:n,type:'front',delay:i*500})); backs.forEach((n,i)=>all.push({num:n,type:'back',delay:(fronts.length+i)*500}));
+    all.forEach(item=>{
+        const ball=document.createElement('span'); ball.className='ball rolling '+item.type; ball.textContent='?'; ball.style.opacity='0.4'; container.appendChild(ball);
+        setTimeout(()=>{ ball.style.opacity='1'; let cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax),cnt=0; const maxR=12+Math.floor(Math.random()*8); const iv=setInterval(()=>{ cur=rInt(1,item.type==='front'?cfg.fMax:cfg.bMax); ball.textContent=String(cur).padStart(2,'0'); cnt++; playTick(); if(cnt>=maxR){ clearInterval(iv); ball.textContent=String(item.num).padStart(2,'0'); ball.classList.remove('rolling'); ball.classList.add('stopped'); playWin(); setTimeout(()=>ball.classList.remove('stopped'),400); } },70); },item.delay);
     });
-    setTimeout(() => { STATE.isRolling = false; if(callback) callback(); }, all.length*500+800);
+    setTimeout(()=>{ STATE.isRolling=false; if(callback)callback(); },all.length*500+800);
 }
 
-function animateExistingBalls(containerId, cfg) {
-    const container = document.getElementById(containerId); if(!container) return;
-    const balls = container.querySelectorAll('.ball');
-    balls.forEach((ball, idx) => {
-        const num = ball.getAttribute('data-num'); if(!num) return;
+function animateExistingBalls(containerId,cfg){
+    const container=document.getElementById(containerId); if(!container)return;
+    const balls=container.querySelectorAll('.ball');
+    balls.forEach((ball,idx)=>{
+        const num=ball.getAttribute('data-num'); if(!num)return;
         ball.classList.add('rolling');
-        let cur = rInt(1, ball.classList.contains('front')?cfg.fMax:cfg.bMax), cnt = 0;
-        const iv = setInterval(() => { cur = rInt(1, ball.classList.contains('front')?cfg.fMax:cfg.bMax); ball.textContent=String(cur).padStart(2,'0'); cnt++; if(cnt>=10) { clearInterval(iv); ball.textContent=String(num).padStart(2,'0'); ball.classList.remove('rolling'); ball.classList.add('stopped'); setTimeout(()=>ball.classList.remove('stopped'),400); } }, 70*(idx+1));
+        let cur=rInt(1,ball.classList.contains('front')?cfg.fMax:cfg.bMax),cnt=0;
+        const iv=setInterval(()=>{ cur=rInt(1,ball.classList.contains('front')?cfg.fMax:cfg.bMax); ball.textContent=String(cur).padStart(2,'0'); cnt++; if(cnt>=10){ clearInterval(iv); ball.textContent=String(num).padStart(2,'0'); ball.classList.remove('rolling'); ball.classList.add('stopped'); setTimeout(()=>ball.classList.remove('stopped'),400); } },70*(idx+1));
     });
 }
 
-// VIP/权限
-function isVIP() { return STATE.user?.vip; }
-function isAdmin() { return STATE.user?.role === 'admin'; }
-function updateVIPUI() {
-    document.getElementById('vipBadge').style.display = isVIP() ? 'inline' : 'none';
-    document.querySelectorAll('.vip-lock').forEach(l => l.style.display = isVIP() ? 'none' : 'inline');
+function isVIP(){ return STATE.user?.vip; }
+function isAdmin(){ return STATE.user?.role==='admin'; }
+function updateVIPUI(){
+    document.getElementById('vipBadge').style.display = isVIP()?'inline':'none';
+    document.querySelectorAll('.vip-lock').forEach(l=>l.style.display=isVIP()?'none':'inline');
     document.getElementById('userDisplay').textContent = STATE.user?.display_name || STATE.user?.email || '';
-    document.getElementById('logoutBtn').style.display = STATE.user ? 'inline-block' : 'none';
-    document.getElementById('adminTab').style.display = isAdmin() ? 'inline-block' : 'none';
-    document.getElementById('settingsTab').style.display = isAdmin() ? 'inline-block' : 'none';
+    document.getElementById('logoutBtn').style.display = STATE.user?'inline-block':'none';
+    document.getElementById('adminTab').style.display = isAdmin()?'inline-block':'none';
+    document.getElementById('settingsTab').style.display = isAdmin()?'inline-block':'none';
 }
-function showVIPModal() {
-    const m = document.createElement('div'); m.className = 'modal';
-    m.innerHTML = `<div class="modal-content"><h3 style="color:var(--gold);">Pro 会员</h3><p style="color:var(--cyan);">¥9.9/月</p><button class="btn primary" id="btnPay">去支付</button><button class="btn" id="btnVerify" style="display:none;" onclick="verifyPayment(this)">验证支付</button><button class="btn small" onclick="this.closest('.modal').remove()">取消</button><p id="payHint"></p></div>`;
+function showVIPModal(){
+    const m=document.createElement('div'); m.className='modal';
+    m.innerHTML=`<div class="modal-content"><h3 style="color:var(--gold);">Pro 会员</h3><p style="color:var(--cyan);">¥9.9/月</p><button class="btn primary" id="btnPay">去支付</button><button class="btn" id="btnVerify" style="display:none;" onclick="verifyPayment(this)">验证支付</button><button class="btn small" onclick="this.closest('.modal').remove()">取消</button><p id="payHint"></p></div>`;
     document.body.appendChild(m);
-    document.getElementById('btnPay').onclick = () => {
-        showToast('模拟支付中...','#FFD700');
-        document.getElementById('btnPay').style.display = 'none';
-        document.getElementById('btnVerify').style.display = 'inline-block';
-    };
+    document.getElementById('btnPay').onclick=()=>{ showToast('模拟支付中...','#FFD700'); document.getElementById('btnPay').style.display='none'; document.getElementById('btnVerify').style.display='inline-block'; };
 }
-async function verifyPayment(btn) {
-    btn.disabled = true; btn.textContent = '验证中...';
-    const { error } = await sb.from('payments').insert({ user_id: STATE.user.id, amount: 9.9, status: 'success' });
-    if(error) { showToast('验证失败','#FF4D6D'); btn.disabled = false; btn.textContent = '验证支付'; return; }
-    await sb.from('profiles').update({ vip: true }).eq('id', STATE.user.id);
-    STATE.user.vip = true; updateVIPUI(); document.querySelector('.modal')?.remove(); showToast('VIP已激活','#FFD700');
+async function verifyPayment(btn){
+    btn.disabled=true; btn.textContent='验证中...';
+    const {error}=await sb.from('payments').insert({user_id:STATE.user.id,amount:9.9,status:'success'});
+    if(error){ showToast('验证失败','#FF4D6D'); btn.disabled=false; btn.textContent='验证支付'; return; }
+    await sb.from('profiles').update({vip:true}).eq('id',STATE.user.id);
+    STATE.user.vip=true; updateVIPUI(); document.querySelector('.modal')?.remove(); showToast('VIP已激活','#FFD700');
 }
 
-// 认证
-async function handleRegister() {
-    const email = document.getElementById('regEmail').value.trim(), password = document.getElementById('regPass').value.trim();
-    if(!email || password.length<6) { showToast('邮箱和密码至少6位','#FF4D6D'); return; }
-    const { data, error } = await sb.auth.signUp({ email, password });
-    if(error) { showToast('注册失败: '+error.message,'#FF4D6D'); return; }
-    if(data.user) {
-        await sb.from('profiles').upsert({ id: data.user.id, email, role:'user', vip:false, display_name: email.split('@')[0] }, { onConflict: 'id' });
-        STATE.user = { id: data.user.id, email, role:'user', vip:false, display_name: email.split('@')[0] };
+async function handleRegister(){
+    const email=document.getElementById('regEmail').value.trim(), password=document.getElementById('regPass').value.trim();
+    if(!email||password.length<6){ showToast('邮箱和密码至少6位','#FF4D6D'); return; }
+    const {data,error}=await sb.auth.signUp({email,password});
+    if(error){ showToast('注册失败: '+error.message,'#FF4D6D'); return; }
+    if(data.user){
+        await sb.from('profiles').upsert({id:data.user.id,email,role:'user',vip:false,display_name:email.split('@')[0]},{onConflict:'id'});
+        STATE.user={id:data.user.id,email,role:'user',vip:false,display_name:email.split('@')[0]};
         enterApp();
     }
 }
-async function handleLogin() {
-    const email = document.getElementById('loginEmail').value.trim(), password = document.getElementById('loginPass').value.trim();
-    if(!email || !password) { showToast('请输入邮箱和密码','#FF4D6D'); return; }
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if(error) { showToast('登录失败: '+error.message,'#FF4D6D'); return; }
-    if(data.user) { await loadProfile(data.user); enterApp(); }
+async function handleLogin(){
+    const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPass').value.trim();
+    if(!email||!password){ showToast('请输入邮箱和密码','#FF4D6D'); return; }
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){ showToast('登录失败: '+error.message,'#FF4D6D'); return; }
+    if(data.user){ await loadProfile(data.user); enterApp(); }
 }
-async function loadProfile(authUser) {
-    const { data: profile } = await sb.from('profiles').select('*').eq('id', authUser.id).single();
-    STATE.user = { id: authUser.id, email: authUser.email, role: profile?.role||'user', vip: profile?.vip||false, display_name: profile?.display_name||authUser.email.split('@')[0], avatar_url: profile?.avatar_url };
-    STATE.customMusicUrl = profile?.custom_music_url || null;
+async function loadProfile(authUser){
+    const {data:profile}=await sb.from('profiles').select('*').eq('id',authUser.id).single();
+    STATE.user={id:authUser.id,email:authUser.email,role:profile?.role||'user',vip:profile?.vip||false,display_name:profile?.display_name||authUser.email.split('@')[0],avatar_url:profile?.avatar_url};
+    STATE.customMusicUrl=profile?.custom_music_url||null;
 }
-async function logout() { await sb.auth.signOut(); STATE.user = null; location.reload(); }
-function showRegister() { document.getElementById('loginOverlay').classList.add('hidden'); document.getElementById('registerOverlay').classList.remove('hidden'); }
-function showLogin() { document.getElementById('registerOverlay').classList.add('hidden'); document.getElementById('loginOverlay').classList.remove('hidden'); }
-function enterApp() { document.getElementById('loginOverlay').classList.add('hidden'); document.getElementById('registerOverlay').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); updateVIPUI(); switchTab('predict'); initMusic(); }
-(async function initSession() { const { data: { session } } = await sb.auth.getSession(); if(session?.user) { await loadProfile(session.user); enterApp(); } })();
+async function logout(){ await sb.auth.signOut(); STATE.user=null; location.reload(); }
+function showRegister(){ document.getElementById('loginOverlay').classList.add('hidden'); document.getElementById('registerOverlay').classList.remove('hidden'); }
+function showLogin(){ document.getElementById('registerOverlay').classList.add('hidden'); document.getElementById('loginOverlay').classList.remove('hidden'); }
+function enterApp(){ document.getElementById('loginOverlay').classList.add('hidden'); document.getElementById('registerOverlay').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); updateVIPUI(); switchTab('predict'); initMusic(); }
+(async function initSession(){ const {data:{session}}=await sb.auth.getSession(); if(session?.user){ await loadProfile(session.user); enterApp(); } })();
 
-// 每日次数
-async function getTodayUsage() { const today = new Date().toISOString().slice(0,10); const { data } = await sb.from('daily_usage').select('count').eq('user_id', STATE.user.id).eq('date', today).single(); return data?.count||0; }
-async function checkLimit() { if(isVIP()) return true; const used = await getTodayUsage(); if(used >= 3) { showVIPModal(); return false; } return true; }
-async function incUsage() { if(isVIP()) return; const today = new Date().toISOString().slice(0,10); const { data: row } = await sb.from('daily_usage').select('count').eq('user_id', STATE.user.id).eq('date', today).single(); if(row) { await sb.from('daily_usage').update({ count: row.count+1 }).eq('user_id', STATE.user.id).eq('date', today); } else { await sb.from('daily_usage').insert({ user_id: STATE.user.id, date: today, count: 1 }); } }
+async function getTodayUsage(){ const today=new Date().toISOString().slice(0,10); const {data}=await sb.from('daily_usage').select('count').eq('user_id',STATE.user.id).eq('date',today).single(); return data?.count||0; }
+async function checkLimit(){ if(isVIP())return true; const used=await getTodayUsage(); if(used>=3){ showVIPModal(); return false; } return true; }
+async function incUsage(){ if(isVIP())return; const today=new Date().toISOString().slice(0,10); const {data:row}=await sb.from('daily_usage').select('count').eq('user_id',STATE.user.id).eq('date',today).single(); if(row){ await sb.from('daily_usage').update({count:row.count+1}).eq('user_id',STATE.user.id).eq('date',today); }else{ await sb.from('daily_usage').insert({user_id:STATE.user.id,date:today,count:1}); } }
 
-// 导航
-function switchTab(tab) {
-    STATE.currentTab = tab;
-    document.querySelectorAll('#navTabs .nav-tab').forEach(t => t.classList.remove('active'));
-    const el = document.querySelector(`#navTabs .nav-tab[data-tab="${tab}"]`); if(el) el.classList.add('active');
-    switch(tab) {
-        case 'predict': renderPredict(); break;
-        case 'analysis': if(!requireVIP('分析中心')) return; renderAnalysis(); break;
-        case 'lab': if(!requireVIP('实验室')) return; renderLab(); break;
-        case 'simulator': renderSimulator(); break;
-        case 'results': renderResults(); break;
-        case 'favorites': if(!requireVIP('收藏中心')) return; renderFavorites(); break;
-        case 'history': if(!requireVIP('历史轨迹')) return; renderHistory(); break;
-        case 'profile': renderProfile(); break;
-        case 'admin': if(!isAdmin()){ showToast('权限不足'); return; } renderAdmin(); break;
-        case 'settings': if(!isAdmin()){ showToast('仅管理员可访问'); return; } renderSettings(); break;
+function switchTab(tab){
+    STATE.currentTab=tab;
+    document.querySelectorAll('#navTabs .nav-tab').forEach(t=>t.classList.remove('active'));
+    const el=document.querySelector(`#navTabs .nav-tab[data-tab="${tab}"]`); if(el)el.classList.add('active');
+    switch(tab){
+        case'predict':renderPredict();break;
+        case'analysis':if(!isVIP()){showToast('🔒 需要VIP');showVIPModal();return;}renderAnalysis();break;
+        case'lab':if(!isVIP()){showToast('🔒 需要VIP');showVIPModal();return;}renderLab();break;
+        case'simulator':renderSimulator();break;
+        case'results':renderResults();break;
+        case'favorites':if(!isVIP()){showToast('🔒 需要VIP');showVIPModal();return;}renderFavorites();break;
+        case'history':if(!isVIP()){showToast('🔒 需要VIP');showVIPModal();return;}renderHistory();break;
+        case'profile':renderProfile();break;
+        case'admin':if(!isAdmin()){showToast('权限不足');return;}renderAdmin();break;
+        case'settings':if(!isAdmin()){showToast('仅管理员可访问');return;}renderSettings();break;
     }
 }
-document.getElementById('navTabs').addEventListener('click', e => { const tab = e.target.closest('.nav-tab'); if(tab) switchTab(tab.dataset.tab); });
-function switchLottery(type) { STATE.lottery = type; document.getElementById('btnDLT').classList.toggle('active', type==='dlt'); document.getElementById('btnSSQ').classList.toggle('active', type==='ssq'); switchTab(STATE.currentTab); }
+document.getElementById('navTabs').addEventListener('click',e=>{ const tab=e.target.closest('.nav-tab'); if(tab)switchTab(tab.dataset.tab); });
+function switchLottery(type){ STATE.lottery=type; document.getElementById('btnDLT').classList.toggle('active',type==='dlt'); document.getElementById('btnSSQ').classList.toggle('active',type==='ssq'); switchTab(STATE.currentTab); }
 
-// 跑马灯更新（替代地图）
-function updateMarquee() {
-    const marqueeContent = document.getElementById('marqueeContent');
-    if(!marqueeContent) return;
-    // 获取最新预测数据构建跑马灯项
-    sb.from('predictions').select('*').order('created_at',{ascending:false}).limit(10).then(({data}) => {
-        if(!data || !data.length) {
-            marqueeContent.innerHTML = '<span style="color:var(--text);">暂无数据，开始预测吧</span>';
-            return;
-        }
-        let items = '';
-        data.forEach(p => {
-            items += `<div class="marquee-item">
-                <span style="color:var(--green);">${p.score}分</span>
-                <span class="rating-badge rating-${(p.rating||'b').toLowerCase()}">${p.rating}</span>
-                ${p.fronts.split(',').map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}
-                <span style="margin:0 4px;">+</span>
-                ${p.backs.split(',').map(n=>`<span class="ball back">${String(n).padStart(2,'0')}</span>`).join('')}
-                <span style="color:var(--text);font-size:0.7em;">${new Date(p.created_at).toLocaleDateString()}</span>
-            </div>`;
-        });
-        marqueeContent.innerHTML = items;
+let dashboardChart=null;
+function initDashboardChart(scores){
+    const dom=document.getElementById('dashboardChart'); if(!dom)return;
+    if(dashboardChart)dashboardChart.dispose();
+    dashboardChart=echarts.init(dom);
+    const labels=scores.map((_,i)=>`第${i+1}次`);
+    dashboardChart.setOption({
+        backgroundColor:'transparent', textStyle:{color:'#c8d6e5'},
+        xAxis:{type:'category',data:labels,axisLine:{lineStyle:{color:'#00F5FF'}}},
+        yAxis:{type:'value',min:70,max:100,axisLine:{lineStyle:{color:'#00F5FF'}}},
+        series:[{data:scores,type:'bar',itemStyle:{color:'#00F5FF'}}]
     });
+    window.addEventListener('resize',()=>dashboardChart?.resize());
 }
 
-// 预测页面（跑马灯替代地图）
-async function renderPredict() {
-    const used = isVIP() ? 0 : await getTodayUsage();
-    const left = isVIP() ? '∞' : Math.max(0, 3 - used);
-    document.getElementById('mainContent').innerHTML = `
+async function renderPredict(){
+    const used=isVIP()?0:await getTodayUsage();
+    const left=isVIP()?'∞':Math.max(0,3-used);
+    document.getElementById('mainContent').innerHTML=`
         <div class="panel"><div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
         <div id="predictResult"></div>
         <div class="flex-row" style="justify-content:center;margin-top:15px;">
@@ -345,7 +285,7 @@ async function renderPredict() {
         </div>
         <p style="text-align:center;font-size:0.7em;color:var(--gold);">🔒 5组/10组需VIP</p></div>
         <div class="panel" id="dashboardPanel">
-            <div class="panel-title">📡 实时数据大屏</div>
+            <div class="panel-title">📡 数据大屏</div>
             <div class="grid-2">
                 <div>
                     <div class="dashboard-grid">
@@ -355,77 +295,71 @@ async function renderPredict() {
                     </div>
                     <div style="margin-top:10px;">🔥 热号前区：<span id="hotNumbers"></span></div>
                 </div>
-                <div class="marquee-box" style="height:200px;">
-                    <div class="marquee-content" id="marqueeContent"></div>
-                </div>
+                <div class="chart-box" id="dashboardChart"></div>
             </div>
         </div>`;
     updateDashboardData();
-    updateMarquee();
 }
 
-function updateDashboardData() {
-    if(!sb || !STATE.user) return;
-    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(50).then(({data})=>{
-        if(!data) return;
-        const total = data.length, scores = data.map(d=>d.score);
-        const avg = total>0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
-        const max = total>0 ? Math.max(...scores).toFixed(1) : '-';
-        document.getElementById('statTotal').textContent = total;
-        document.getElementById('statAvg').textContent = avg;
-        document.getElementById('statMax').textContent = max;
-        const freq = {}; data.forEach(d=>{ d.fronts.split(',').forEach(n=>freq[n]=(freq[n]||0)+1); });
-        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
-        document.getElementById('hotNumbers').innerHTML = hot.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
-    });
+async function updateDashboardData(){
+    if(!sb||!STATE.user)return;
+    const {data}=await sb.from('predictions').select('score,fronts').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(50);
+    if(!data)return;
+    const total=data.length, scores=data.map(d=>d.score);
+    const avg=total>0?(scores.reduce((a,b)=>a+b,0)/total).toFixed(1):'-';
+    const max=total>0?Math.max(...scores).toFixed(1):'-';
+    document.getElementById('statTotal').textContent=total;
+    document.getElementById('statAvg').textContent=avg;
+    document.getElementById('statMax').textContent=max;
+    const freq={}; data.forEach(d=>{ d.fronts.split(',').forEach(n=>freq[n]=(freq[n]||0)+1); });
+    const hot=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
+    document.getElementById('hotNumbers').innerHTML=hot.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
+    initDashboardChart(scores.slice(0,10).reverse());
 }
 
-async function doPredict(count) {
-    if(STATE.isRolling) return;
-    if(count > 1 && !isVIP()) { showVIPModal(); return; }
-    if(count === 1 && !isVIP()) { if(!await checkLimit()) return; await incUsage(); }
+async function doPredict(count){
+    if(STATE.isRolling)return;
+    if(count>1&&!isVIP()){ showVIPModal(); return; }
+    if(count===1&&!isVIP()){ if(!await checkLimit())return; await incUsage(); }
     document.querySelectorAll('#btnPred1,#btnPred5,#btnPred10').forEach(b=>b.disabled=true);
     const cfg=getCfg(); const container=document.getElementById('predictResult'); container.innerHTML='';
-    const preds = []; for(let i=0;i<count;i++) { const p=aiPredict(); preds.push(p); if(sb&&STATE.user) sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then(); }
-    const cols = count===10?2:1;
-    const grid = document.createElement('div'); grid.className='pred-grid'; grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-    for(let c=0;c<cols;c++) {
-        const colDiv = document.createElement('div'); colDiv.className='pred-col';
-        for(let i=c*5;i<Math.min((c+1)*5,preds.length);i++) {
-            const item = document.createElement('div'); item.className='pred-item';
-            item.innerHTML = `<span style="color:var(--green);font-weight:bold;">${preds[i].score}分</span><span class="rating-badge rating-${preds[i].rating.toLowerCase()}">${preds[i].rating}</span><span class="ball-row" id="balls${i}"></span>`;
+    const preds=[]; for(let i=0;i<count;i++){ const p=aiPredict(); preds.push(p); if(sb&&STATE.user) sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then(); }
+    const cols=count===10?2:1;
+    const grid=document.createElement('div'); grid.className='pred-grid'; grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+    for(let c=0;c<cols;c++){
+        const colDiv=document.createElement('div'); colDiv.className='pred-col';
+        for(let i=c*5;i<Math.min((c+1)*5,preds.length);i++){
+            const item=document.createElement('div'); item.className='pred-item';
+            item.innerHTML=`<span style="color:var(--green);font-weight:bold;">${preds[i].score}分</span><span class="rating-badge rating-${preds[i].rating.toLowerCase()}">${preds[i].rating}</span><span class="ball-row" id="balls${i}"></span>`;
             colDiv.appendChild(item);
         }
         grid.appendChild(colDiv);
     }
     container.appendChild(grid);
-    let idx = 0;
-    function showNext() {
-        if(idx >= preds.length) {
+    let idx=0;
+    function showNext(){
+        if(idx>=preds.length){
             document.querySelectorAll('#btnPred1,#btnPred5,#btnPred10').forEach(b=>b.disabled=false);
-            getTodayUsage().then(used=>{ const left=isVIP()?'∞':Math.max(0,3-used); const el=document.getElementById('freeCount'); if(el) el.textContent=left; });
-            updateDashboardData(); updateMarquee(); return;
+            getTodayUsage().then(used=>{ const left=isVIP()?'∞':Math.max(0,3-used); const el=document.getElementById('freeCount'); if(el)el.textContent=left; });
+            updateDashboardData(); return;
         }
-        const p = preds[idx];
+        const p=preds[idx];
         const frontId=`front${idx}`, backId=`back${idx}`;
-        document.getElementById(`balls${idx}`).innerHTML = `<span id="${frontId}" class="ball-row"></span><span id="${backId}" class="ball-row"></span>`;
-        rollNumbersSequentially(frontId, p.numbers.fronts, [], cfg, () => {
-            rollNumbersSequentially(backId, p.numbers.backs, [], cfg, () => { idx++; setTimeout(showNext,300); });
+        document.getElementById(`balls${idx}`).innerHTML=`<span id="${frontId}" class="ball-row"></span><span id="${backId}" class="ball-row"></span>`;
+        rollNumbersSequentially(frontId, p.numbers.fronts, [], cfg, ()=>{
+            rollNumbersSequentially(backId, p.numbers.backs, [], cfg, ()=>{ idx++; setTimeout(showNext,300); });
         });
     }
     showNext();
 }
-function randomPick() {
+function randomPick(){
     const cfg=getCfg(); const nums=genRandom(cfg); const score=(70+Math.random()*20).toFixed(1); const rating=score>=85?'S':score>=75?'A':'B';
-    document.getElementById('predictResult').innerHTML = `<div class="pred-item"><span style="color:var(--green);">${score}分</span><span class="rating-badge rating-${rating.toLowerCase()}">${rating}</span><span class="ball-row">${nums.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}${nums.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</span></div>`;
+    document.getElementById('predictResult').innerHTML=`<div class="pred-item"><span style="color:var(--green);">${score}分</span><span class="rating-badge rating-${rating.toLowerCase()}">${rating}</span><span class="ball-row">${nums.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}${nums.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</span></div>`;
 }
 
-// 分析
-function renderAnalysis() {
-    const cfg = getCfg();
-    const hot = Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
-    const cold = Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
-    document.getElementById('mainContent').innerHTML = `
+function renderAnalysis(){
+    const cfg=getCfg(); const hot=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b); const cold=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);
+    document.getElementById('mainContent').innerHTML=`
         <div class="grid-2">
             <div class="panel"><div class="panel-title">🔥 热号TOP10 · ${cfg.name}前区</div><div class="ball-row">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
             <div class="panel"><div class="panel-title">❄️ 冷号TOP10</div><div class="ball-row">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
@@ -433,119 +367,112 @@ function renderAnalysis() {
         </div>`;
 }
 
-// 实验室
-function renderLab() {
-    document.getElementById('mainContent').innerHTML = `
+function renderLab(){
+    document.getElementById('mainContent').innerHTML=`
         <div class="grid-2">
             <div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div><button class="btn" onclick="runMonteCarlo(1000)">1000次</button><button class="btn" onclick="runMonteCarlo(10000)">10000次</button><div id="monteResult" style="margin-top:10px;"></div></div>
             <div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div><button class="btn" onclick="runMarkov()">生成5组推荐</button><div id="markovResult" style="margin-top:10px;"></div></div>
         </div>`;
 }
-function runMonteCarlo(times) {
-    const cfg = getCfg(); const ff={}, bf={};
-    for(let i=1;i<=cfg.fMax;i++)ff[i]=0; for(let i=1;i<=cfg.bMax;i++)bf[i]=0;
-    for(let i=0;i<times;i++){ const n = genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
+function runMonteCarlo(times){
+    const cfg=getCfg(); const ff={},bf={}; for(let i=1;i<=cfg.fMax;i++)ff[i]=0; for(let i=1;i<=cfg.bMax;i++)bf[i]=0;
+    for(let i=0;i<times;i++){ const n=genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
     const sf=Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n), sb2=Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n);
-    const groups=[]; for(let i=0;i<5;i++){ const fs=sf.slice(i*cfg.fCnt,i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b); const bs=sb2.slice(i*cfg.bCnt,i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b); if(fs.length===cfg.fCnt&&bs.length===cfg.bCnt) groups.push({fronts:fs,backs:bs}); }
-    const container = document.getElementById('monteResult');
-    container.innerHTML = groups.map((g,i)=>`<div class="result-row" id="monteGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
-    for(let i=0;i<groups.length;i++) animateExistingBalls(`monteGroup${i}`, cfg);
+    const groups=[]; for(let i=0;i<5;i++){ const fs=sf.slice(i*cfg.fCnt,i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b); const bs=sb2.slice(i*cfg.bCnt,i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b); if(fs.length===cfg.fCnt&&bs.length===cfg.bCnt)groups.push({fronts:fs,backs:bs}); }
+    const c=document.getElementById('monteResult'); if(c)c.innerHTML=groups.map((g,i)=>`<div class="result-row" id="monteGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    for(let i=0;i<groups.length;i++)animateExistingBalls(`monteGroup${i}`,cfg);
 }
-function runMarkov() {
-    const cfg=getCfg(); const bm=(max)=>{ const m={}; for(let i=1;i<=max;i++)m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++) if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; } return m; };
-    const fm=bm(cfg.fMax), bm2=bm(cfg.bMax); const g=(mx,max,cnt)=>{ const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++) if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){ p=pr; b=j; } } if(!b) do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
-    const groups=[]; for(let i=0;i<5;i++) groups.push({fronts:g(fm,cfg.fMax,cfg.fCnt), backs:g(bm2,cfg.bMax,cfg.bCnt)});
-    const container = document.getElementById('markovResult');
-    container.innerHTML = groups.map((g,i)=>`<div class="result-row" id="markovGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
-    for(let i=0;i<groups.length;i++) animateExistingBalls(`markovGroup${i}`, cfg);
+function runMarkov(){
+    const cfg=getCfg(); const bm=(max)=>{ const m={}; for(let i=1;i<=max;i++)m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++)if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++)if(i!==j)m[i][j]/=t; } return m; };
+    const fm=bm(cfg.fMax),bm2=bm(cfg.bMax); const g=(mx,max,cnt)=>{ const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++)if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){p=pr;b=j;} } if(!b)do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
+    const groups=[]; for(let i=0;i<5;i++)groups.push({fronts:g(fm,cfg.fMax,cfg.fCnt),backs:g(bm2,cfg.bMax,cfg.bCnt)});
+    const c=document.getElementById('markovResult'); if(c)c.innerHTML=groups.map((g,i)=>`<div class="result-row" id="markovGroup${i}"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" data-num="${n}">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    for(let i=0;i<groups.length;i++)animateExistingBalls(`markovGroup${i}`,cfg);
 }
 
-// 摇奖
-function renderSimulator() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟 · ${getCfg().name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始</button></div>`; }
-function startSim() { const cfg=getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
+function renderSimulator(){ document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">🎰 摇奖模拟 · ${getCfg().name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始</button></div>`; }
+function startSim(){ const cfg=getCfg(); rollNumbersSequentially('simBalls',genRandom(cfg).fronts,genRandom(cfg).backs,cfg); }
 
-// 开奖
-async function renderResults() {
-    const cfg = getCfg();
-    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📡 开奖大厅 · ${cfg.name}</div><div class="flex-row" style="gap:10px;"><button class="btn small" onclick="switchLottery('dlt');renderResults();">大乐透</button><button class="btn small" onclick="switchLottery('ssq');renderResults();">双色球</button></div><div id="liveResult" style="margin-top:10px;"></div></div>`;
-    const data = await fetchRealResults(STATE.lottery);
-    const container = document.getElementById('liveResult');
-    if(container) container.innerHTML = data.map(r => `<div class="ball-row" style="margin:4px 0;font-size:0.8em;"><span style="min-width:80px;">${r.issue}</span> ${r.fronts.map(n=>`<span class="ball front" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')} <span style="margin:0 4px;">+</span> ${r.backs.map(n=>`<span class="ball back" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+async function renderResults(){
+    const cfg=getCfg();
+    document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">📡 开奖大厅 · ${cfg.name}</div><div class="flex-row" style="gap:10px;"><button class="btn small" onclick="switchLottery('dlt');renderResults();">大乐透</button><button class="btn small" onclick="switchLottery('ssq');renderResults();">双色球</button></div><div id="liveResult" style="margin-top:10px;"></div></div>`;
+    const data=await fetchRealResults(STATE.lottery);
+    const container=document.getElementById('liveResult');
+    if(container)container.innerHTML=data.map(r=>`<div class="ball-row" style="margin:4px 0;font-size:0.8em;"><span style="min-width:80px;">${r.issue}</span> ${r.fronts.map(n=>`<span class="ball front" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')} <span style="margin:0 4px;">+</span> ${r.backs.map(n=>`<span class="ball back" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
 }
-async function fetchRealResults(type) {
-    const { data: apiKeyRow } = await sb.from('app_settings').select('value').eq('key','api_key').single();
-    const apiKey = apiKeyRow?.value;
-    if(apiKey) { try { const code = type==='dlt'?'dlt':'ssq'; const resp = await fetch(`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&start=0&num=20`); const data = await resp.json(); if(data.status==='0'&&data.result) return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,type==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(type==='dlt'?5:6).map(Number)})); } catch(e) {} }
+async function fetchRealResults(type){
+    const {data:apiKeyRow}=await sb.from('app_settings').select('value').eq('key','api_key').single();
+    const apiKey=apiKeyRow?.value;
+    if(apiKey){ try{ const code=type==='dlt'?'dlt':'ssq'; const resp=await fetch(`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&start=0&num=20`); const data=await resp.json(); if(data.status==='0'&&data.result)return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,type==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(type==='dlt'?5:6).map(Number)})); }catch(e){} }
     const results=[]; const now=new Date(); for(let i=0;i<20;i++){ const cfg=getCfg(); const nums=genRandom(cfg); const date=new Date(now.getTime()-i*2*86400000); results.push({issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,date:date.toISOString().slice(0,10),fronts:nums.fronts,backs:nums.backs}); } return results;
 }
 
-// 收藏/历史
-async function renderFavorites() {
-    if(!sb || !STATE.user) return;
-    const { data } = await sb.from('favorites').select('*').eq('user_id', STATE.user.id).order('created_at',{ascending:false});
-    let html = '<div class="panel"><div class="panel-title">⭐ 收藏库</div>';
-    if(data && data.length) {
-        data.forEach(f => { html += `<div class="result-row"><span>${f.nums_str.replace('|',' | ')} 评分:${f.score}</span><button class="btn small danger" onclick="removeFavorite('${f.id}')">删除</button></div>`; });
-    } else html += '<p>暂无收藏</p>';
-    html += '</div>'; document.getElementById('mainContent').innerHTML = html;
+async function renderFavorites(){
+    if(!sb||!STATE.user)return;
+    const {data}=await sb.from('favorites').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false});
+    let html='<div class="panel"><div class="panel-title">⭐ 收藏库</div>';
+    if(data&&data.length){ data.forEach(f=>{ html+=`<div class="result-row">${f.fronts.split(',').map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${f.backs.split(',').map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} (${f.score}分) <button class="btn small danger" onclick="removeFavorite('${f.id}')">删除</button></div>`; }); }else html+='<p>暂无收藏</p>';
+    html+='</div>'; document.getElementById('mainContent').innerHTML=html;
 }
-async function renderHistory() {
-    if(!sb || !STATE.user) return;
-    const { data } = await sb.from('predictions').select('*').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(30);
-    let html = '<div class="panel"><div class="panel-title">📋 历史轨迹</div>';
-    if(data && data.length) {
-        data.forEach(p => { html += `<div class="result-row"><span style="color:var(--green);">${p.score}分</span><span class="rating-badge rating-${(p.rating||'b').toLowerCase()}">${p.rating}</span>${p.fronts.split(',').map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${p.backs.split(',').map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`; });
-    } else html += '<p>暂无记录</p>';
-    html += '</div>'; document.getElementById('mainContent').innerHTML = html;
+async function saveFavorite(numsStr,score,rating){
+    if(!STATE.user)return;
+    const [fronts,backs]=numsStr.split('|').map(s=>s.split(',').map(Number));
+    await sb.from('favorites').insert({user_id:STATE.user.id,lottery:STATE.lottery,fronts:fronts.join(','),backs:backs.join(','),score,rating});
+    showToast('已收藏');
+}
+async function removeFavorite(id){ await sb.from('favorites').delete().eq('id',id); renderFavorites(); }
+
+async function renderHistory(){
+    if(!sb||!STATE.user)return;
+    const {data}=await sb.from('predictions').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(30);
+    let html='<div class="panel"><div class="panel-title">📋 历史轨迹</div>';
+    if(data&&data.length){ data.forEach(p=>{ html+=`<div class="result-row"><span style="color:var(--green);">${p.score}分</span> ${p.fronts.split(',').map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${p.backs.split(',').map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`; }); }else html+='<p>暂无记录</p>';
+    html+='</div>'; document.getElementById('mainContent').innerHTML=html;
 }
 
-// 个人中心
-function renderProfile() {
-    const user = STATE.user;
-    document.getElementById('mainContent').innerHTML = `
+function renderProfile(){
+    const user=STATE.user;
+    document.getElementById('mainContent').innerHTML=`
         <div class="panel"><div class="panel-title">👤 个人中心</div>
-        <div style="text-align:center;"><img src="${user.avatar_url || 'https://via.placeholder.com/80'}" class="avatar-img" id="avatarPreview" onclick="document.getElementById('avatarInput').click()"><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar()"><p style="font-size:0.7em;color:var(--cyan);">点击修改头像</p></div>
+        <div style="text-align:center;"><img src="${user.avatar_url||'https://via.placeholder.com/80'}" class="avatar-img" id="avatarPreview" onclick="document.getElementById('avatarInput').click()"><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar()"><p style="font-size:0.7em;color:var(--cyan);">点击修改头像</p></div>
         <div style="margin-top:15px;"><label>显示名称</label><input type="text" id="displayNameInput" value="${user.display_name||''}" style="width:100%;padding:8px;background:#000;color:#fff;border:1px solid var(--border);"></div>
-        <div style="margin-top:10px;display:flex;align-items:center;gap:10px;"><span>VIP 状态：</span><span style="color:${user.vip?'var(--gold)':'gray'};font-weight:bold;">${user.vip?'已开通':'未开通'}</span>${!user.vip ? '<button class="btn small vip" onclick="showVIPModal()">立即升级</button>' : ''}</div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:10px;"><span>VIP 状态：</span><span style="color:${user.vip?'var(--gold)':'gray'};font-weight:bold;">${user.vip?'已开通':'未开通'}</span>${!user.vip?'<button class="btn small vip" onclick="showVIPModal()">立即升级</button>':''}</div>
         <button class="btn primary" style="margin-top:15px;" onclick="saveProfile()">保存资料</button></div>`;
 }
-async function uploadAvatar() {
-    const file = document.getElementById('avatarInput').files[0]; if(!file) return;
-    const fileName = `avatars/${STATE.user.id}_${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await sb.storage.from('avatars').upload(fileName, file);
-    if(error) { showToast('上传失败','#FF4D6D'); return; }
-    const { data: { publicUrl } } = sb.storage.from('avatars').getPublicUrl(fileName);
-    STATE.user.avatar_url = publicUrl; document.getElementById('avatarPreview').src = publicUrl; showToast('头像已更新');
+async function uploadAvatar(){
+    const file=document.getElementById('avatarInput').files[0]; if(!file)return;
+    const fileName=`avatars/${STATE.user.id}_${Date.now()}.${file.name.split('.').pop()}`;
+    const {error}=await sb.storage.from('avatars').upload(fileName,file);
+    if(error){ showToast('上传失败','#FF4D6D'); return; }
+    const {data:{publicUrl}}=sb.storage.from('avatars').getPublicUrl(fileName);
+    STATE.user.avatar_url=publicUrl; document.getElementById('avatarPreview').src=publicUrl; showToast('头像已更新');
 }
-async function saveProfile() {
-    const displayName = document.getElementById('displayNameInput').value.trim();
-    if(!displayName) { showToast('名称不能为空','#FF4D6D'); return; }
-    await sb.from('profiles').update({ display_name: displayName, avatar_url: STATE.user.avatar_url }).eq('id', STATE.user.id);
-    STATE.user.display_name = displayName; updateVIPUI(); showToast('资料已保存');
+async function saveProfile(){
+    const displayName=document.getElementById('displayNameInput').value.trim();
+    if(!displayName){ showToast('名称不能为空','#FF4D6D'); return; }
+    await sb.from('profiles').update({display_name:displayName,avatar_url:STATE.user.avatar_url}).eq('id',STATE.user.id);
+    STATE.user.display_name=displayName; updateVIPUI(); showToast('资料已保存');
 }
 
-// 管理后台
-function renderAdmin() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">👑 管理后台</div></div>`; }
-
-// 管理员设置
-async function renderSettings() {
-    const { data } = await sb.from('app_settings').select('value').eq('key','api_key').single();
-    const currentKey = data?.value || '';
-    document.getElementById('mainContent').innerHTML = `
+function renderAdmin(){ document.getElementById('mainContent').innerHTML='<div class="panel"><div class="panel-title">👑 管理后台</div></div>'; }
+async function renderSettings(){
+    const {data}=await sb.from('app_settings').select('value').eq('key','api_key').single();
+    const currentKey=data?.value||'';
+    document.getElementById('mainContent').innerHTML=`
         <div class="panel"><div class="panel-title">⚙️ 管理员设置</div>
         <label>彩票 API Key</label><input type="text" id="apiKeyInput" value="${currentKey}" style="width:300px;padding:8px;background:#000;color:#fff;border:1px solid var(--border);margin-left:10px;"><button class="btn small" onclick="saveApiKey()">保存</button>
         <div style="margin-top:15px;"><input type="file" id="musicFileInput" accept="audio/*"><button class="btn" onclick="uploadMusic()">上传背景音乐</button></div></div>`;
 }
-async function saveApiKey() { const value = document.getElementById('apiKeyInput').value.trim(); await sb.from('app_settings').upsert({ key:'api_key', value }, { onConflict: 'key' }); showToast('API Key 已保存'); }
-async function uploadMusic() {
-    const file = document.getElementById('musicFileInput').files[0]; if(!file) return;
-    const fileName = `music/${STATE.user.id}_${Date.now()}.mp3`;
-    const { error } = await sb.storage.from('music').upload(fileName, file);
-    if(error) { showToast('上传失败','#FF4D6D'); return; }
-    const { data: { publicUrl } } = sb.storage.from('music').getPublicUrl(fileName);
-    STATE.customMusicUrl = publicUrl;
-    await sb.from('profiles').update({ custom_music_url: publicUrl }).eq('id', STATE.user.id);
-    if(bgMusic) { bgMusic.src = publicUrl; if(!bgMusic.paused) bgMusic.play(); }
+async function saveApiKey(){ const value=document.getElementById('apiKeyInput').value.trim(); await sb.from('app_settings').upsert({key:'api_key',value},{onConflict:'key'}); showToast('API Key 已保存'); }
+async function uploadMusic(){
+    const file=document.getElementById('musicFileInput').files[0]; if(!file)return;
+    const fileName=`music/${STATE.user.id}_${Date.now()}.mp3`;
+    const {error}=await sb.storage.from('music').upload(fileName,file);
+    if(error){ showToast('上传失败','#FF4D6D'); return; }
+    const {data:{publicUrl}}=sb.storage.from('music').getPublicUrl(fileName);
+    STATE.customMusicUrl=publicUrl;
+    await sb.from('profiles').update({custom_music_url:publicUrl}).eq('id',STATE.user.id);
+    if(bgMusic){ bgMusic.src=publicUrl; if(!bgMusic.paused)bgMusic.play(); }
     showToast('音乐已同步');
 }
 </script>
