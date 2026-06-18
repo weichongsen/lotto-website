@@ -133,18 +133,16 @@
 <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
 <script>
-// ========== 配置你的 Supabase ==========
+// 配置 Supabase
 const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
-// ====================================
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STATE = {
     lottery: 'dlt', currentTab: 'predict', user: null,
     favorites: [], predictions: [], history: [],
     settings: { sound: true, music: true, apiKey: '' },
-    freeSimCount: 10, isRolling: false,
-    customMusicUrl: null
+    freeSimCount: 10, isRolling: false, customMusicUrl: null
 };
 
 // 粒子背景
@@ -184,20 +182,54 @@ function rollNumbersSequentially(containerId,fronts,backs,cfg,callback){
 function isVIP(){ return STATE.user?.vip; }
 function isAdmin(){ return STATE.user?.role==='admin'; }
 function requireVIP(act){ if(!isVIP()){showToast('🔒 '+act+'需要VIP','#FFD700');showVIPModal();return false;}return true; }
-function showVIPModal(){ const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-content"><h3 style="color:var(--gold);">✨ 升级VIP</h3><p>无限次预测，解锁全部功能</p><button class="btn primary" onclick="processPayment()">支付 ¥9.9</button><button class="btn small" onclick="this.closest('.modal').remove()">关闭</button></div>`;document.body.appendChild(m); }
-async function processPayment(){
-    showToast('处理中...','#FFD700');
-    const { error } = await sb.from('payments').insert({user_id:STATE.user.id,amount:9.9,status:'success'});
+
+// 支付弹窗 - 两步验证
+function showVIPModal(){
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" id="vipModalContent">
+            <h3 style="color:var(--gold);">✨ 升级VIP</h3>
+            <p>无限次预测 · 全部高级功能</p>
+            <p style="color:var(--cyan); font-size:1.3em;">¥9.9 / 月</p>
+            <button class="btn primary" id="btnPay">💳 去支付</button>
+            <button class="btn" id="btnVerify" style="display:none;" onclick="verifyPayment(this)">✅ 我已完成支付，验证</button>
+            <button class="btn small" onclick="this.closest('.modal').remove()">取消</button>
+            <p id="payHint" style="font-size:0.8em; color:var(--text); margin-top:10px;"></p>
+        </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('btnPay').addEventListener('click', function() {
+        // 模拟跳转支付
+        showToast('请完成支付（模拟中...）', '#FFD700');
+        document.getElementById('payHint').textContent = '支付完成后请点击下方验证按钮';
+        document.getElementById('btnPay').style.display = 'none';
+        document.getElementById('btnVerify').style.display = 'inline-block';
+    });
+}
+
+async function verifyPayment(btn) {
+    btn.disabled = true;
+    btn.textContent = '验证中...';
+    // 实际支付验证（模拟）
+    const { error } = await sb.from('payments').insert({
+        user_id: STATE.user.id,
+        amount: 9.9,
+        status: 'success'
+    });
     if (error) {
-        showToast('支付失败，请重试','#FF4D6D');
+        showToast('验证失败，请重试', '#FF4D6D');
+        btn.disabled = false;
+        btn.textContent = '✅ 我已完成支付，验证';
         return;
     }
-    await sb.from('profiles').update({vip:true}).eq('id',STATE.user.id);
+    // 升级VIP
+    await sb.from('profiles').update({ vip: true }).eq('id', STATE.user.id);
     STATE.user.vip = true;
     updateVIPUI();
     document.querySelector('.modal')?.remove();
-    showToast('VIP已激活','#FFD700');
+    showToast('🎉 支付验证成功！VIP已激活', '#FFD700');
 }
+
 function updateVIPUI(){ document.getElementById('vipBadge').style.display=isVIP()?'inline':'none';document.querySelectorAll('.vip-lock').forEach(l=>l.style.display=isVIP()?'none':'inline');document.getElementById('userDisplay').textContent=STATE.user?.email||'';document.getElementById('logoutBtn').style.display=STATE.user?'inline-block':'none';if(isAdmin())document.getElementById('adminTab').style.display='inline-block'; }
 
 // 认证（增加onConflict）
