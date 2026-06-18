@@ -283,7 +283,7 @@ async function renderPredict(){
     const left=isVIP()?'∞':Math.max(0,3-used);
     document.getElementById('mainContent').innerHTML=`
         <div class="panel" style="text-align:center;">
-            <div class="panel-title">🤖 AI预测中心 - ${getCfg().name} (剩余 <span id="freeCountDisplay">${left}</span> 次免费1组)</div>
+            <div class="panel-title">🤖 AI预测中心 - ${getCfg().name} (剩余 <span id="freeCountDisplay">${left}</span> 次)</div>
             <div id="predictResult"></div>
             <div class="flex-row" style="justify-content:center;margin-top:15px;">
                 <button class="btn primary" onclick="doPredict(1)">预测1组</button>
