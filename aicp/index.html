@@ -73,6 +73,8 @@
         .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
         .chart-box { width:100%; height:350px; }
         .result-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .btn.vip-only { position: relative; }
+        .btn.vip-only::after { content: "🔒"; margin-left: 5px; font-size: 0.8em; }
     </style>
 </head>
 <body>
@@ -133,16 +135,18 @@
 <div class="music-btn" id="musicToggle" onclick="toggleMusic()">🎵</div>
 
 <script>
-// 配置 Supabase
+// ========== 配置你的 Supabase ==========
 const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
+// ====================================
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STATE = {
     lottery: 'dlt', currentTab: 'predict', user: null,
     favorites: [], predictions: [], history: [],
     settings: { sound: true, music: true, apiKey: '' },
-    freeSimCount: 10, isRolling: false, customMusicUrl: null
+    freeSimCount: 10, isRolling: false,
+    customMusicUrl: null
 };
 
 // 粒子背景
@@ -182,8 +186,6 @@ function rollNumbersSequentially(containerId,fronts,backs,cfg,callback){
 function isVIP(){ return STATE.user?.vip; }
 function isAdmin(){ return STATE.user?.role==='admin'; }
 function requireVIP(act){ if(!isVIP()){showToast('🔒 '+act+'需要VIP','#FFD700');showVIPModal();return false;}return true; }
-
-// 支付弹窗 - 两步验证
 function showVIPModal(){
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -199,18 +201,15 @@ function showVIPModal(){
         </div>`;
     document.body.appendChild(modal);
     document.getElementById('btnPay').addEventListener('click', function() {
-        // 模拟跳转支付
         showToast('请完成支付（模拟中...）', '#FFD700');
         document.getElementById('payHint').textContent = '支付完成后请点击下方验证按钮';
         document.getElementById('btnPay').style.display = 'none';
         document.getElementById('btnVerify').style.display = 'inline-block';
     });
 }
-
 async function verifyPayment(btn) {
     btn.disabled = true;
     btn.textContent = '验证中...';
-    // 实际支付验证（模拟）
     const { error } = await sb.from('payments').insert({
         user_id: STATE.user.id,
         amount: 9.9,
@@ -222,17 +221,15 @@ async function verifyPayment(btn) {
         btn.textContent = '✅ 我已完成支付，验证';
         return;
     }
-    // 升级VIP
     await sb.from('profiles').update({ vip: true }).eq('id', STATE.user.id);
     STATE.user.vip = true;
     updateVIPUI();
     document.querySelector('.modal')?.remove();
     showToast('🎉 支付验证成功！VIP已激活', '#FFD700');
 }
-
 function updateVIPUI(){ document.getElementById('vipBadge').style.display=isVIP()?'inline':'none';document.querySelectorAll('.vip-lock').forEach(l=>l.style.display=isVIP()?'none':'inline');document.getElementById('userDisplay').textContent=STATE.user?.email||'';document.getElementById('logoutBtn').style.display=STATE.user?'inline-block':'none';if(isAdmin())document.getElementById('adminTab').style.display='inline-block'; }
 
-// 认证（增加onConflict）
+// 认证
 async function handleRegister(){
     const email=document.getElementById('regEmail').value.trim();
     const password=document.getElementById('regPass').value.trim();
@@ -286,14 +283,15 @@ async function renderPredict(){
     const left=isVIP()?'∞':Math.max(0,3-used);
     document.getElementById('mainContent').innerHTML=`
         <div class="panel" style="text-align:center;">
-            <div class="panel-title">🤖 AI预测中心 - ${getCfg().name} (剩余 <span id="freeCountDisplay">${left}</span> 次${!isVIP()?'/3':''})</div>
+            <div class="panel-title">🤖 AI预测中心 - ${getCfg().name} (剩余 <span id="freeCountDisplay">${left}</span> 次免费1组)</div>
             <div id="predictResult"></div>
             <div class="flex-row" style="justify-content:center;margin-top:15px;">
                 <button class="btn primary" onclick="doPredict(1)">预测1组</button>
-                <button class="btn" onclick="doPredict(5)">5组</button>
-                <button class="btn" onclick="doPredict(10)">10组</button>
+                <button class="btn vip-only" onclick="doPredict(5)">5组</button>
+                <button class="btn vip-only" onclick="doPredict(10)">10组</button>
                 <button class="btn" onclick="randomPick()">随机</button>
             </div>
+            <p style="font-size:0.7em; color:var(--gold); margin-top:10px;">🔒 5组/10组需要VIP会员</p>
         </div>
         <div class="panel" id="aiDashboardPanel">
             <div class="panel-title">📡 AI数据大屏</div>
@@ -303,8 +301,16 @@ async function renderPredict(){
 function buildDashboardHTML(){ const all=STATE.history;const total=all.length;const avg=total>0?(all.reduce((s,h)=>s+h.score,0)/total).toFixed(1):'-';return`<div class="dashboard-grid"><div class="dashboard-card"><div class="dashboard-value">${total}</div><div class="dashboard-label">总预测</div></div><div class="dashboard-card"><div class="dashboard-value">${avg}</div><div class="dashboard-label">平均分</div></div></div>`; }
 
 async function doPredict(count){
-    if(!await checkPredictionLimit()) return;
-    await incrementUsage();
+    // VIP判断：5组/10组必须VIP
+    if (count > 1 && !isVIP()) {
+        showVIPModal();
+        return;
+    }
+    // 1组检查免费次数
+    if (count === 1 && !isVIP()) {
+        if (!await checkPredictionLimit()) return;
+        await incrementUsage();
+    }
     const cfg=getCfg();const container=document.getElementById('predictResult');container.innerHTML='';
     const preds=[];for(let i=0;i<count;i++){const p=aiPredict();preds.push(p);STATE.predictions.unshift(p);STATE.history.unshift({...p,id:Date.now()});if(sb&&STATE.user){sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then();}}
     const perRow=count===10?5:count;let idx=0;
@@ -346,7 +352,6 @@ function renderAdmin(){ document.getElementById('mainContent').innerHTML='<div c
 function renderSettings(){ document.getElementById('mainContent').innerHTML=`<div class="panel"><div class="panel-title">⚙️ 设置</div><button class="btn small" onclick="STATE.settings.sound=!STATE.settings.sound;this.textContent='音效 '+(STATE.settings.sound?'开':'关');">音效 ${STATE.settings.sound?'开':'关'}</button><button class="btn small" onclick="toggleMusic()">音乐 ${STATE.settings.music?'开':'关'}</button><div style="margin-top:10px;"><input type="file" id="musicFileInput" accept="audio/*"><button class="btn small" onclick="uploadMusic()">上传音乐</button></div></div>`; }
 function updateDashboard(){ const p=document.getElementById('aiDashboardPanel');if(p)p.innerHTML=`<div class="panel-title">📡 AI数据大屏</div>${buildDashboardHTML()}`; }
 
-// 修复音乐上传
 async function uploadMusic(){
     const file=document.getElementById('musicFileInput').files[0];
     if(!file) return;
