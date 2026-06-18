@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI彩票预测专家 Pro Max | 数据大屏升级版</title>
+    <title>AI彩票预测专家 Pro Max | 跑马灯数据大屏版</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -65,10 +65,28 @@
         .pred-col { display:flex; flex-direction:column; gap:12px; align-items:center; }
         .flex-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
         .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
-        .chart-box { width:100%; height:320px; }
         .result-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
         .hidden { display:none !important; }
         .avatar-img { width:80px; height:80px; border-radius:50%; border:2px solid var(--cyan); object-fit:cover; cursor:pointer; }
+
+        /* 跑马灯样式 */
+        .marquee-box {
+            width:100%; height:100%; overflow:hidden; position:relative;
+            background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:12px;
+            display:flex; align-items:center;
+        }
+        .marquee-content {
+            display:flex; gap:30px; white-space:nowrap;
+            animation: marqueeScroll 20s linear infinite;
+            padding:0 20px; align-items:center; height:100%;
+        }
+        .marquee-content:hover { animation-play-state:paused; }
+        @keyframes marqueeScroll {
+            0% { transform:translateX(100%); }
+            100% { transform:translateX(-100%); }
+        }
+        .marquee-item { display:flex; align-items:center; gap:10px; font-size:0.9em; }
+        .marquee-item .ball { width:36px; height:36px; font-size:0.8em; }
     </style>
 </head>
 <body>
@@ -85,7 +103,6 @@
         <p style="text-align:center;margin-top:15px;"><a href="#" onclick="showRegister()" style="color:var(--cyan);">注册新账号</a></p>
     </div>
 </div>
-<!-- 注册 -->
 <div id="registerOverlay" class="overlay hidden">
     <div class="login-title">注册账号</div>
     <div class="login-box">
@@ -288,44 +305,35 @@ function switchTab(tab) {
 document.getElementById('navTabs').addEventListener('click', e => { const tab = e.target.closest('.nav-tab'); if(tab) switchTab(tab.dataset.tab); });
 function switchLottery(type) { STATE.lottery = type; document.getElementById('btnDLT').classList.toggle('active', type==='dlt'); document.getElementById('btnSSQ').classList.toggle('active', type==='ssq'); switchTab(STATE.currentTab); }
 
-// ========== 数据大屏 ==========
-let dashboardChart = null;
-async function initChinaMap() {
-    const mapDom = document.getElementById('chinaMap'); if(!mapDom) return;
-    try {
-        const geoJson = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json').then(r => r.json());
-        echarts.registerMap('china', geoJson);
-    } catch(e) {
-        mapDom.innerHTML = '<p style="color:var(--red);">地图加载失败</p>'; return;
-    }
-    if(dashboardChart) dashboardChart.dispose();
-    dashboardChart = echarts.init(mapDom);
-    dashboardChart.setOption({
-        backgroundColor: 'transparent', tooltip: { trigger: 'item' },
-        visualMap: { min:0, max:100, left:'left', bottom:'10%', text:['热门','冷门'], inRange:{color:['#0B1020','#00F5FF','#FFD700']}, textStyle:{color:'#c8d6e5'} },
-        series:[{ type:'map', map:'china', roam:true, label:{show:false}, itemStyle:{borderColor:'#00F5FF',borderWidth:1}, emphasis:{label:{color:'#fff'},itemStyle:{areaColor:'#6E00FF'}}, data:Array.from({length:34},(_,i)=>({name:`示例${i}`,value:Math.floor(Math.random()*100)})) }]
-    });
-}
-function updateDashboardData() {
-    if(!sb || !STATE.user) return;
-    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(50).then(({data})=>{
-        if(!data) return;
-        const total = data.length, scores = data.map(d=>d.score);
-        const avg = total>0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
-        const max = total>0 ? Math.max(...scores).toFixed(1) : '-';
-        document.getElementById('statTotal').textContent = total;
-        document.getElementById('statAvg').textContent = avg;
-        document.getElementById('statMax').textContent = max;
-        const freq = {}; data.forEach(d=>{ d.fronts.split(',').forEach(n=>freq[n]=(freq[n]||0)+1); });
-        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
-        document.getElementById('hotNumbers').innerHTML = hot.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
+// 跑马灯更新（替代地图）
+function updateMarquee() {
+    const marqueeContent = document.getElementById('marqueeContent');
+    if(!marqueeContent) return;
+    // 获取最新预测数据构建跑马灯项
+    sb.from('predictions').select('*').order('created_at',{ascending:false}).limit(10).then(({data}) => {
+        if(!data || !data.length) {
+            marqueeContent.innerHTML = '<span style="color:var(--text);">暂无数据，开始预测吧</span>';
+            return;
+        }
+        let items = '';
+        data.forEach(p => {
+            items += `<div class="marquee-item">
+                <span style="color:var(--green);">${p.score}分</span>
+                <span class="rating-badge rating-${(p.rating||'b').toLowerCase()}">${p.rating}</span>
+                ${p.fronts.split(',').map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}
+                <span style="margin:0 4px;">+</span>
+                ${p.backs.split(',').map(n=>`<span class="ball back">${String(n).padStart(2,'0')}</span>`).join('')}
+                <span style="color:var(--text);font-size:0.7em;">${new Date(p.created_at).toLocaleDateString()}</span>
+            </div>`;
+        });
+        marqueeContent.innerHTML = items;
     });
 }
 
-// 预测
+// 预测页面（跑马灯替代地图）
 async function renderPredict() {
-    const used = isVIP()?0:await getTodayUsage();
-    const left = isVIP()?'∞':Math.max(0,3-used);
+    const used = isVIP() ? 0 : await getTodayUsage();
+    const left = isVIP() ? '∞' : Math.max(0, 3 - used);
     document.getElementById('mainContent').innerHTML = `
         <div class="panel"><div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
         <div id="predictResult"></div>
@@ -347,10 +355,29 @@ async function renderPredict() {
                     </div>
                     <div style="margin-top:10px;">🔥 热号前区：<span id="hotNumbers"></span></div>
                 </div>
-                <div class="chart-box" id="chinaMap"></div>
+                <div class="marquee-box" style="height:200px;">
+                    <div class="marquee-content" id="marqueeContent"></div>
+                </div>
             </div>
         </div>`;
-    initChinaMap(); updateDashboardData();
+    updateDashboardData();
+    updateMarquee();
+}
+
+function updateDashboardData() {
+    if(!sb || !STATE.user) return;
+    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(50).then(({data})=>{
+        if(!data) return;
+        const total = data.length, scores = data.map(d=>d.score);
+        const avg = total>0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
+        const max = total>0 ? Math.max(...scores).toFixed(1) : '-';
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statAvg').textContent = avg;
+        document.getElementById('statMax').textContent = max;
+        const freq = {}; data.forEach(d=>{ d.fronts.split(',').forEach(n=>freq[n]=(freq[n]||0)+1); });
+        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
+        document.getElementById('hotNumbers').innerHTML = hot.map(n=>`<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
+    });
 }
 
 async function doPredict(count) {
@@ -377,7 +404,7 @@ async function doPredict(count) {
         if(idx >= preds.length) {
             document.querySelectorAll('#btnPred1,#btnPred5,#btnPred10').forEach(b=>b.disabled=false);
             getTodayUsage().then(used=>{ const left=isVIP()?'∞':Math.max(0,3-used); const el=document.getElementById('freeCount'); if(el) el.textContent=left; });
-            updateDashboardData(); return;
+            updateDashboardData(); updateMarquee(); return;
         }
         const p = preds[idx];
         const frontId=`front${idx}`, backId=`back${idx}`;
