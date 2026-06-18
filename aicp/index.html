@@ -208,7 +208,7 @@ function rollNumbersSequentially(containerId,fronts,backs,cfg,callback){
 function isVIP(){ return STATE.user&&STATE.user.vip; }
 function isAdmin(){ return STATE.user&&STATE.user.role==='admin'; }
 function requireVIP(act){ if(!isVIP()){showToast('🔒 '+act+'需要VIP','#FFD700');showVIPModal();return false;}return true; }
-function showVIPModal(){ const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-content"><h3 style="color:var(--gold);">✨ 升级VIP</h3><p>解锁全部高级功能</p><button class="btn primary" onclick="processPayment()">💳 支付 ¥9.9</button><button class="btn small" onclick="this.closest('.modal').remove()">关闭</button></div>`;document.body.appendChild(m); }
+function showVIPModal(){ const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-content"><h3 style="color:var(--gold);">✨ 升级VIP会员</h3><p>解锁全部高级功能，无限次预测</p><p style="color:var(--green);font-size:1.2em;">月费 ¥9.9</p><button class="btn primary" onclick="processPayment()">💳 立即支付</button><button class="btn small" onclick="this.closest('.modal').remove()">关闭</button></div>`;document.body.appendChild(m); }
 async function processPayment(){ showToast('处理中...','#FFD700');if(sb&&STATE.user){await sb.from('payments').insert({user_id:STATE.user.id,amount:9.9,status:'success'});await sb.from('profiles').update({vip:true}).eq('id',STATE.user.id);} STATE.user.vip=true;saveState();updateVIPUI();document.querySelector('.modal')?.remove();showToast('VIP已激活','#FFD700');await logAction('purchase_vip',{amount:9.9}); }
 function updateVIPUI(){ document.getElementById('vipBadge').style.display=isVIP()?'inline':'none';document.querySelectorAll('.vip-lock').forEach(l=>l.style.display=isVIP()?'none':'inline');document.getElementById('userDisplay').textContent=STATE.user?.email||'';document.getElementById('logoutBtn').style.display=STATE.user?'inline-block':'none';if(isAdmin())document.getElementById('adminTab').style.display='inline-block'; }
 
@@ -223,8 +223,34 @@ async function checkSession(){ if(!sb)return;const{data:{session}}=await sb.auth
 if(STATE.user&&STATE.user.id){if(sb)checkSession();else enterApp();}else{if(sb)checkSession();}
 
 async function logAction(action,details={}){ if(sb&&STATE.user)await sb.from('user_logs').insert({user_id:STATE.user.id,action,details:JSON.stringify(details)}).then(()=>{}).catch(()=>{}); }
-async function checkPredictionLimit(){ if(isVIP())return true;const today=new Date().toISOString().slice(0,10);if(sb&&STATE.user){const{data}=await sb.from('daily_usage').select('count').eq('user_id',STATE.user.id).eq('date',today).single();if(data&&data.count>=3){showToast('今日免费次数已用完','#FFD700');showVIPModal();return false;}}else{if(STATE.freePredictCount<=0){showToast('免费次数已用完','#FFD700');showVIPModal();return false;}}return true; }
-async function incrementUsage(){ if(isVIP())return;const today=new Date().toISOString().slice(0,10);if(sb&&STATE.user){await sb.from('daily_usage').upsert({user_id:STATE.user.id,date:today,count:1},{onConflict:'user_id,date'}).then(()=>{}).catch(()=>{});}else{STATE.freePredictCount--;saveState();} }
+// 核心：免费次数用完直接弹窗，不预测
+async function checkPredictionLimit(){
+    if (isVIP()) return true;
+    const today = new Date().toISOString().slice(0,10);
+    if (sb && STATE.user) {
+        const { data } = await sb.from('daily_usage').select('count').eq('user_id', STATE.user.id).eq('date', today).single();
+        if (data && data.count >= 3) {
+            showVIPModal();
+            return false;
+        }
+    } else {
+        if (STATE.freePredictCount <= 0) {
+            showVIPModal();
+            return false;
+        }
+    }
+    return true;
+}
+async function incrementUsage(){
+    if (isVIP()) return;
+    const today = new Date().toISOString().slice(0,10);
+    if (sb && STATE.user) {
+        await sb.from('daily_usage').upsert({user_id:STATE.user.id,date:today,count:1},{onConflict:'user_id,date'}).then(()=>{}).catch(()=>{});
+    } else {
+        STATE.freePredictCount--;
+        saveState();
+    }
+}
 
 function switchTab(tab){ STATE.currentTab=tab;document.querySelectorAll('#navTabs .nav-tab').forEach(t=>t.classList.remove('active'));const el=document.querySelector(`#navTabs .nav-tab[data-tab="${tab}"]`);if(el)el.classList.add('active');switch(tab){case'predict':renderPredict();break;case'analysis':if(!requireVIP('分析中心'))return;renderAnalysis();break;case'lab':if(!requireVIP('实验室'))return;renderLab();break;case'charts':if(!requireVIP('图表中心'))return;renderCharts();break;case'simulator':renderSimulator();break;case'results':renderResults();break;case'favorites':if(!requireVIP('收藏中心'))return;renderFavorites();break;case'history':if(!requireVIP('预测历史'))return;renderHistory();break;case'admin':if(!isAdmin()){showToast('权限不足','#FF4D6D');return;}renderAdmin();break;case'settings':renderSettings();break;} }
 document.getElementById('navTabs').addEventListener('click',e=>{const tab=e.target.closest('.nav-tab');if(tab)switchTab(tab.dataset.tab);});
@@ -241,16 +267,15 @@ function renderPredict(){
 function updateDashboard(){ const p=document.getElementById('aiDashboardPanel');if(p)p.innerHTML=`<div class="panel-title">📡 AI数据大屏</div>${buildDashboardHTML()}`; }
 
 async function doPredict(count){
-    if(!await checkPredictionLimit())return;
-    await incrementUsage();await logAction('predict',{count});
+    if (!await checkPredictionLimit()) return;
+    await incrementUsage();
+    await logAction('predict',{count});
     const cfg=getCfg();const container=document.getElementById('predictResult');container.innerHTML='';
     const preds=[];for(let i=0;i<count;i++){const p=aiPredict();preds.push(p);STATE.predictions.unshift(p);STATE.history.unshift({...p,id:Date.now()+i});if(sb&&STATE.user&&STATE.user.id!=='guest'){sb.from('predictions').insert({user_id:STATE.user.id,lottery:p.lottery,fronts:p.numbers.fronts.join(','),backs:p.numbers.backs.join(','),score:p.score,rating:p.rating}).then(()=>{}).catch(()=>{});}}
     saveState();
 
-    // 根据count分组：10组分2排(每排5组)，5组1排，1组1排
     const perRow = count===10 ? 5 : count;
     const rows = Math.ceil(count/perRow);
-
     let idx=0;
     function showNext(){
         if(idx>=preds.length){updateDashboard();return;}
@@ -261,7 +286,6 @@ async function doPredict(count){
         const item=document.createElement('div');item.className='pred-item';
         item.innerHTML=`<span style="color:var(--green);font-weight:bold;min-width:40px;">${p.score}分</span><span class="rating-badge rating-${p.rating.toLowerCase()}" style="font-size:0.7em;padding:3px 8px;">${p.rating}</span><span class="ball-row" id="ballArea${idx}"></span>`;
         rowEl.appendChild(item);
-        // 号码球在同一行：前区红球 + 后区蓝球
         const ballArea=document.getElementById(`ballArea${idx}`);
         const allBalls=[...p.numbers.fronts.map(n=>({num:n,type:'front'})),...p.numbers.backs.map(n=>({num:n,type:'back'}))];
         allBalls.forEach((b,i)=>{
@@ -278,17 +302,14 @@ function randomPick(){ const cfg=getCfg();const nums=genRandom(cfg);const score=
 function saveFavorite(numsStr,score,rating){ if(!requireVIP('收藏'))return;const exists=STATE.favorites.find(f=>f.numsStr===numsStr&&f.lottery===STATE.lottery);if(exists){showToast('已收藏');return;}STATE.favorites.push({numsStr,score,rating,lottery:STATE.lottery,time:new Date().toISOString()});saveState();showToast('⭐已收藏'); }
 
 function renderAnalysis(){ const cfg=getCfg();const hot=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);const cold=Array.from({length:10},()=>rInt(1,cfg.fMax)).sort((a,b)=>a-b);document.getElementById('mainContent').innerHTML=`<div class="grid-2"><div class="panel"><div class="panel-title">🔥 热号TOP10 - ${cfg.fName}</div><div class="ball-container">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div><div class="panel"><div class="panel-title">❄️ 冷号TOP10 - ${cfg.fName}</div><div class="ball-container">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div><div class="panel"><div class="panel-title">📉 遗漏分析</div><table><tr><th>号码</th><th>当前遗漏</th><th>平均遗漏</th></tr>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div><div class="panel"><div class="panel-title">📐 和值走势</div><div class="chart-box" id="chartSum"></div></div></div>`;setTimeout(()=>{const el=document.getElementById('chartSum');if(el){const c=echarts.init(el);c.setOption({xAxis:{data:['1','2','3']},yAxis:{},series:[{data:[50,80,60],type:'line'}]});}},300); }
-
 function renderLab(){ document.getElementById('mainContent').innerHTML=`<div class="grid-2"><div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div><button class="btn small" onclick="runMonteCarlo(1000)">1000次</button><button class="btn small" onclick="runMonteCarlo(10000)">10000次</button><div id="monteResult" class="ball-container" style="margin-top:10px;"></div></div><div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div><button class="btn small primary" onclick="runMarkov()">生成推荐号码</button><div id="markovResult" class="ball-container" style="margin-top:10px;"></div></div><div class="panel"><div class="panel-title">📐 综合评分权重</div><table>${['热号','冷号','遗漏','马尔可夫链','蒙特卡洛','贝叶斯'].map((name,i)=>{const k=['hot','cold','miss','markov','monte','bayes'][i];return`<tr><td>${name}</td><td id="w${k}">${STATE.settings.weights[k]}%</td><td><input type="range" min="0" max="40" value="${STATE.settings.weights[k]}" oninput="updateWeight('${k}',this.value)"></td></tr>`;}).join('')}</table></div></div>`; }
 function runMonteCarlo(times){ const cfg=getCfg();const ff={},bf={};for(let i=1;i<=cfg.fMax;i++)ff[i]=0;for(let i=1;i<=cfg.bMax;i++)bf[i]=0;for(let i=0;i<times;i++){const n=genRandom(cfg);n.fronts.forEach(x=>ff[x]++);n.backs.forEach(x=>bf[x]++);}const fronts=Object.entries(ff).sort((a,b)=>b[1]-a[1]).slice(0,cfg.fCnt).map(([n])=>+n).sort((a,b)=>a-b);const backs=Object.entries(bf).sort((a,b)=>b[1]-a[1]).slice(0,cfg.bCnt).map(([n])=>+n).sort((a,b)=>a-b);rollNumbersSequentially('monteResult',fronts,backs,cfg); }
 function runMarkov(){ const cfg=getCfg();const bm=(max)=>{const m={};for(let i=1;i<=max;i++)m[i]={};for(let i=1;i<=max;i++){let t=0;for(let j=1;j<=max;j++)if(i!==j){m[i][j]=Math.random();t+=m[i][j];}for(let j=1;j<=max;j++)if(i!==j)m[i][j]/=t;}return m;};const fm=bm(cfg.fMax),bm2=bm(cfg.bMax);const g=(mx,max,cnt)=>{const s=new Set();let c=rInt(1,max);s.add(c);while(s.size<cnt){let b=null,p=0;for(let j=1;j<=max;j++)if(!s.has(j)){const pr=mx[c]?.[j]||0;if(pr>p){p=pr;b=j;}}if(!b)do{b=rInt(1,max);}while(s.has(b));s.add(b);c=b;}return[...s].sort((a,b)=>a-b);};const fronts=g(fm,cfg.fMax,cfg.fCnt),backs=g(bm2,cfg.bMax,cfg.bCnt);rollNumbersSequentially('markovResult',fronts,backs,cfg); }
 function updateWeight(key,val){ STATE.settings.weights[key]=parseInt(val);saveState();renderLab(); }
-
 function renderCharts(){ document.getElementById('mainContent').innerHTML='<div class="panel"><div class="panel-title">📈 图表中心</div><div class="chart-box" id="mainChart"></div></div>';setTimeout(()=>{const el=document.getElementById('mainChart');if(el){const c=echarts.init(el);c.setOption({xAxis:{data:['A','B']},yAxis:{},series:[{data:[1,2],type:'line'}]});}},300); }
 function renderSimulator(){ const cfg=getCfg();const left=isVIP()?'∞':STATE.freeSimCount;document.getElementById('mainContent').innerHTML=`<div class="panel" style="text-align:center;"><div class="panel-title">🎰 ${cfg.name}摇奖模拟 (剩余${left}次)</div><div class="ball-container" id="simBalls"></div><button class="btn primary" onclick="startSim()">🎲 开始摇奖</button></div>`; }
-function startSim(){ if(!isVIP()&&STATE.freeSimCount<=0){showToast('次数已用完','#FFD700');return;}if(!isVIP())STATE.freeSimCount--;saveState();const cfg=getCfg();rollNumbersSequentially('simBalls',genRandom(cfg).fronts,genRandom(cfg).backs,cfg); }
+function startSim(){ if(!isVIP()&&STATE.freeSimCount<=0){showVIPModal();return;}if(!isVIP())STATE.freeSimCount--;saveState();const cfg=getCfg();rollNumbersSequentially('simBalls',genRandom(cfg).fronts,genRandom(cfg).backs,cfg); }
 
-// 实时开奖 - 模拟近20期数据(可接入真实API)
 async function fetchRealResults(lotteryType){
     const apiKey=STATE.settings.apiKey;
     if(apiKey){try{const code=lotteryType==='dlt'?'dlt':'ssq';const url=`https://api.jisuapi.com/caipiao/history?appkey=${apiKey}&caipiaoid=${code}&issueno=&start=0&num=20`;const resp=await fetch(url);const data=await resp.json();if(data.status==='0'&&data.result&&data.result.list){return data.result.list.map(item=>({issue:item.issueno,date:item.opendate,fronts:item.number.split(' ').slice(0,lotteryType==='dlt'?5:6).map(Number),backs:item.number.split(' ').slice(lotteryType==='dlt'?5:6).map(Number)}));}}catch(e){}}
