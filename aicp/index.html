@@ -553,9 +553,12 @@
                         <div class="ball-row" id="backRow${idx}"></div>
                     </div>`;
                 container.appendChild(row);
+                // 先滚动前区（红色球）
                 rollNumbersSequentially(`frontRow${idx}`, p.numbers.fronts, [], cfg, () => {
+                    // 再滚动后区（蓝色球）
                     rollNumbersSequentially(`backRow${idx}`, p.numbers.backs, [], cfg, () => {
-                        idx++; setTimeout(showNext, 300);
+                        idx++;
+                        setTimeout(showNext, 300);
                     });
                 });
             }
