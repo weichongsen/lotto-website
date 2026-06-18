@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI彩票预测专家 Pro Max | Cyberpunk Ultimate Edition</title>
+    <title>AI彩票预测专家 Pro Max | 数据大屏版</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -28,9 +28,9 @@
         .panel-title { font-size:1.1em; font-weight:bold; color:var(--cyan); letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; text-transform:uppercase; }
         .panel-title::before { content:'◆'; font-size:0.6em; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        .ball { width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1em; color:#fff; vertical-align:middle; margin:2px; }
-        .ball.front { background:radial-gradient(circle at 35% 30%,#ff6b8a,#c0392b 90%); box-shadow:0 0 25px rgba(255,77,109,0.6); }
-        .ball.back { background:radial-gradient(circle at 35% 30%,#5dade2,#1a5276 90%); box-shadow:0 0 25px rgba(0,180,255,0.6); }
+        .ball { width:46px; height:46px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1em; color:#fff; margin:2px; }
+        .ball.front { background:radial-gradient(circle at 35% 30%,#ff6b8a,#c0392b 90%); box-shadow:0 0 20px rgba(255,77,109,0.6); }
+        .ball.back { background:radial-gradient(circle at 35% 30%,#5dade2,#1a5276 90%); box-shadow:0 0 20px rgba(0,180,255,0.6); }
         .ball.rolling { animation:ballRoll 0.08s infinite; }
         @keyframes ballRoll { 0%{transform:translateY(-3px);} 50%{transform:translateY(3px);} 100%{transform:translateY(-3px);} }
         .ball.stopped { animation:ballStop 0.5s ease-out; }
@@ -42,11 +42,8 @@
         .btn.danger { border-color:var(--red); color:var(--red); }
         .btn.small { padding:5px 12px; font-size:0.7em; border-radius:15px; }
         .btn.vip { border-color:var(--gold); color:var(--gold); background:rgba(255,215,0,0.1); }
-        .rating-badge { display:inline-block; padding:6px 16px; border-radius:20px; font-weight:900; font-size:1em; letter-spacing:2px; border:2px solid; }
-        .rating-sss { border-color:#FFD700; color:#FFD700; box-shadow:0 0 30px rgba(255,215,0,0.7); animation:glowGold 1.5s infinite; }
-        @keyframes glowGold { 0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.5);} 50%{box-shadow:0 0 45px rgba(255,215,0,1);} }
-        .rating-ss { border-color:#ff6b9d; color:#ff6b9d; } .rating-s { border-color:#ff9f43; color:#ff9f43; }
-        .rating-a { border-color:#54a0ff; color:#54a0ff; } .rating-b { border-color:#5f27cd; color:#5f27cd; }
+        .rating-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-weight:900; font-size:0.8em; border:2px solid; }
+        .rating-sss { border-color:#FFD700; color:#FFD700; box-shadow:0 0 12px rgba(255,215,0,0.4); } .rating-ss { border-color:#ff6b9d; color:#ff6b9d; } .rating-s { border-color:#ff9f43; color:#ff9f43; } .rating-a { border-color:#54a0ff; color:#54a0ff; } .rating-b { border-color:#5f27cd; color:#5f27cd; }
         .overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,20,0.95); display:flex; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(10px); }
         .overlay .login-title { font-size:2.8em; font-weight:900; background:linear-gradient(135deg,#FFD700,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:16px; filter:drop-shadow(0 0 20px var(--cyan)); }
         .overlay .login-box { background:var(--panel); border:1px solid var(--border); border-radius:20px; padding:30px; width:90%; max-width:420px; }
@@ -58,17 +55,17 @@
         @keyframes toastIn { from{opacity:0;transform:translateX(60px);} to{opacity:1;transform:translateX(0);} }
         .music-btn { position:fixed; bottom:20px; right:20px; z-index:1000; width:50px; height:50px; border-radius:50%; background:var(--panel); border:1px solid var(--border); color:var(--cyan); font-size:1.4em; display:flex; align-items:center; justify-content:center; cursor:pointer; }
         .pred-item { display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); border-radius:12px; padding:8px 14px; }
-        .ball-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+        .ball-row { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; align-items:center; }
         .vip-lock { color:var(--gold); font-size:0.8em; margin-left:4px; }
         .dashboard-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
         .dashboard-card { background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:12px; padding:15px; text-align:center; }
         .dashboard-value { font-size:1.6em; font-weight:bold; color:var(--cyan); }
         .dashboard-label { font-size:0.7em; color:var(--text); margin-top:4px; }
         .pred-grid { display:grid; gap:12px; justify-content:center; }
-        .pred-col { display:flex; flex-direction:column; gap:12px; }
+        .pred-col { display:flex; flex-direction:column; gap:12px; align-items:center; }
         .flex-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
         .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
-        .chart-box { width:100%; height:300px; }
+        .chart-box { width:100%; height:320px; }
         .result-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
         .hidden { display:none !important; }
         .avatar-img { width:80px; height:80px; border-radius:50%; border:2px solid var(--cyan); object-fit:cover; cursor:pointer; }
@@ -110,7 +107,6 @@
             <span class="nav-tab active" data-tab="predict">🎯 预测</span>
             <span class="nav-tab" data-tab="analysis">📊 分析 <span class="vip-lock">🔒</span></span>
             <span class="nav-tab" data-tab="lab">🧪 实验室 <span class="vip-lock">🔒</span></span>
-            <span class="nav-tab" data-tab="charts">📈 图表 <span class="vip-lock">🔒</span></span>
             <span class="nav-tab" data-tab="simulator">🎰 摇奖</span>
             <span class="nav-tab" data-tab="results">📡 开奖</span>
             <span class="nav-tab" data-tab="favorites">⭐ 收藏 <span class="vip-lock">🔒</span></span>
@@ -134,7 +130,7 @@
 
 <script>
 // ========== Supabase 配置（请替换为你的真实凭证） ==========
-  const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
+const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -198,7 +194,14 @@ function rollNumbersSequentially(containerId, fronts, backs, cfg, callback) {
 // VIP 与权限
 function isVIP() { return STATE.user?.vip; }
 function isAdmin() { return STATE.user?.role === 'admin'; }
-function requireVIP(act) { if(!isVIP()) { showToast('🔒 '+act+'需要VIP','#FFD700'); showVIPModal(); return false; } return true; }
+function updateVIPUI() {
+    document.getElementById('vipBadge').style.display = isVIP() ? 'inline' : 'none';
+    document.querySelectorAll('.vip-lock').forEach(l => l.style.display = isVIP() ? 'none' : 'inline');
+    document.getElementById('userDisplay').textContent = STATE.user?.display_name || STATE.user?.email || '';
+    document.getElementById('logoutBtn').style.display = STATE.user ? 'inline-block' : 'none';
+    document.getElementById('adminTab').style.display = isAdmin() ? 'inline-block' : 'none';
+    document.getElementById('settingsTab').style.display = isAdmin() ? 'inline-block' : 'none';
+}
 function showVIPModal() {
     const m = document.createElement('div'); m.className = 'modal';
     m.innerHTML = `<div class="modal-content"><h3 style="color:var(--gold);">Pro 会员</h3><p style="color:var(--cyan);">¥9.9/月</p><button class="btn primary" id="btnPay">去支付</button><button class="btn" id="btnVerify" style="display:none;" onclick="verifyPayment(this)">验证支付</button><button class="btn small" onclick="this.closest('.modal').remove()">取消</button><p id="payHint"></p></div>`;
@@ -207,7 +210,6 @@ function showVIPModal() {
         showToast('模拟支付中...','#FFD700');
         document.getElementById('btnPay').style.display = 'none';
         document.getElementById('btnVerify').style.display = 'inline-block';
-        document.getElementById('payHint').textContent = '支付后点击验证';
     };
 }
 async function verifyPayment(btn) {
@@ -216,14 +218,6 @@ async function verifyPayment(btn) {
     if(error) { showToast('验证失败','#FF4D6D'); btn.disabled = false; btn.textContent = '验证支付'; return; }
     await sb.from('profiles').update({ vip: true }).eq('id', STATE.user.id);
     STATE.user.vip = true; updateVIPUI(); document.querySelector('.modal')?.remove(); showToast('VIP已激活','#FFD700');
-}
-function updateVIPUI() {
-    document.getElementById('vipBadge').style.display = isVIP() ? 'inline' : 'none';
-    document.querySelectorAll('.vip-lock').forEach(l => l.style.display = isVIP() ? 'none' : 'inline');
-    document.getElementById('userDisplay').textContent = STATE.user?.display_name || STATE.user?.email || '';
-    document.getElementById('logoutBtn').style.display = STATE.user ? 'inline-block' : 'none';
-    document.getElementById('adminTab').style.display = isAdmin() ? 'inline-block' : 'none';
-    document.getElementById('settingsTab').style.display = isAdmin() ? 'inline-block' : 'none';
 }
 
 // 认证
@@ -270,7 +264,6 @@ function switchTab(tab) {
         case 'predict': renderPredict(); break;
         case 'analysis': if(!requireVIP('分析中心')) return; renderAnalysis(); break;
         case 'lab': if(!requireVIP('实验室')) return; renderLab(); break;
-        case 'charts': if(!requireVIP('图表中心')) return; renderCharts(); break;
         case 'simulator': renderSimulator(); break;
         case 'results': renderResults(); break;
         case 'favorites': if(!requireVIP('收藏中心')) return; renderFavorites(); break;
@@ -283,20 +276,94 @@ function switchTab(tab) {
 document.getElementById('navTabs').addEventListener('click', e => { const tab = e.target.closest('.nav-tab'); if(tab) switchTab(tab.dataset.tab); });
 function switchLottery(type) { STATE.lottery = type; document.getElementById('btnDLT').classList.toggle('active', type==='dlt'); document.getElementById('btnSSQ').classList.toggle('active', type==='ssq'); switchTab(STATE.currentTab); }
 
-// ========== 页面渲染 ==========
+// ========== 预测 + 数据大屏 ==========
+let dashboardChart = null;
+
 async function renderPredict() {
-    const used = isVIP()?0:await getTodayUsage();
-    const left = isVIP()?'∞':Math.max(0,3-used);
+    const used = isVIP() ? 0 : await getTodayUsage();
+    const left = isVIP() ? '∞' : Math.max(0, 3 - used);
     document.getElementById('mainContent').innerHTML = `
-        <div class="panel"><div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
-        <div id="predictResult"></div>
-        <div class="flex-row" style="justify-content:center;">
-            <button class="btn primary" id="btnPred1" onclick="doPredict(1)">1组</button>
-            <button class="btn vip-only" id="btnPred5" onclick="doPredict(5)">5组</button>
-            <button class="btn vip-only" id="btnPred10" onclick="doPredict(10)">10组</button>
-            <button class="btn" onclick="randomPick()">随机</button>
-        </div><p style="text-align:center;font-size:0.7em;color:var(--gold);">🔒 5组/10组需VIP</p></div>`;
+        <div class="panel">
+            <div class="panel-title">预测中心 · ${getCfg().name} (剩余 <span id="freeCount">${left}</span> 次)</div>
+            <div id="predictResult"></div>
+            <div class="flex-row" style="justify-content:center;margin-top:15px;">
+                <button class="btn primary" id="btnPred1" onclick="doPredict(1)">1组</button>
+                <button class="btn" id="btnPred5" onclick="doPredict(5)">5组</button>
+                <button class="btn" id="btnPred10" onclick="doPredict(10)">10组</button>
+                <button class="btn" onclick="randomPick()">随机</button>
+            </div>
+            <p style="text-align:center;font-size:0.7em;color:var(--gold);">🔒 5组/10组需VIP</p>
+        </div>
+        <div class="panel" id="dashboardPanel">
+            <div class="panel-title">📡 实时数据大屏</div>
+            <div class="grid-2">
+                <div>
+                    <div class="dashboard-grid" id="dashboardStats">
+                        <div class="dashboard-card"><div class="dashboard-value" id="statTotal">0</div><div class="dashboard-label">总预测次数</div></div>
+                        <div class="dashboard-card"><div class="dashboard-value" id="statAvg">-</div><div class="dashboard-label">平均评分</div></div>
+                        <div class="dashboard-card"><div class="dashboard-value" id="statMax">-</div><div class="dashboard-label">最高评分</div></div>
+                    </div>
+                    <div style="margin-top:15px;font-size:0.8em;">🔥 热号前区：<span id="hotNumbers"></span></div>
+                </div>
+                <div class="chart-box" id="chinaMap"></div>
+            </div>
+        </div>`;
+    initChinaMap();
+    updateDashboardData();
 }
+
+async function initChinaMap() {
+    const mapDom = document.getElementById('chinaMap');
+    if (!mapDom) return;
+    try {
+        const geoJson = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json').then(r => r.json());
+        echarts.registerMap('china', geoJson);
+        if (dashboardChart) dashboardChart.dispose();
+        dashboardChart = echarts.init(mapDom);
+        dashboardChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'item' },
+            visualMap: {
+                min: 0, max: 100,
+                left: 'left', bottom: '10%',
+                text: ['热门', '冷门'],
+                inRange: { color: ['#0B1020', '#00F5FF', '#FFD700'] },
+                textStyle: { color: '#c8d6e5' }
+            },
+            series: [{
+                type: 'map', map: 'china',
+                roam: true, label: { show: false },
+                itemStyle: { borderColor: '#00F5FF', borderWidth: 1 },
+                emphasis: { label: { color: '#fff' }, itemStyle: { areaColor: '#6E00FF' } },
+                data: []
+            }]
+        });
+    } catch (e) { console.warn('地图加载失败'); }
+}
+
+function updateDashboardData() {
+    if (!sb || !STATE.user) return;
+    sb.from('predictions').select('score,rating,fronts').eq('user_id', STATE.user.id).order('created_at', { ascending: false }).limit(50).then(({ data }) => {
+        if (!data) return;
+        const total = data.length;
+        const scores = data.map(d => d.score);
+        const avg = total > 0 ? (scores.reduce((a,b)=>a+b,0)/total).toFixed(1) : '-';
+        const max = total > 0 ? Math.max(...scores).toFixed(1) : '-';
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statAvg').textContent = avg;
+        document.getElementById('statMax').textContent = max;
+        const freq = {};
+        data.forEach(d => { d.fronts.split(',').forEach(n => freq[n] = (freq[n]||0)+1); });
+        const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n])=>n);
+        document.getElementById('hotNumbers').innerHTML = hot.map(n => `<span class="ball front" style="width:32px;height:32px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join(' ');
+        if (dashboardChart) {
+            const mapData = [];
+            for (let i = 1; i <= 34; i++) mapData.push({ name: `示例${i}`, value: Math.floor(Math.random()*100) });
+            dashboardChart.setOption({ series: [{ data: mapData }] });
+        }
+    });
+}
+
 async function doPredict(count) {
     if (STATE.isRolling) return;
     if (count > 1 && !isVIP()) { showVIPModal(); return; }
@@ -304,7 +371,8 @@ async function doPredict(count) {
     document.querySelectorAll('#btnPred1, #btnPred5, #btnPred10').forEach(b => b.disabled = true);
     const cfg = getCfg(); const container = document.getElementById('predictResult'); container.innerHTML = '';
     const preds = []; for(let i=0;i<count;i++) { const p = aiPredict(); preds.push(p); if(sb && STATE.user) sb.from('predictions').insert({ user_id:STATE.user.id, lottery:p.lottery, fronts:p.numbers.fronts.join(','), backs:p.numbers.backs.join(','), score:p.score, rating:p.rating }).then(); }
-    const cols = count===10?2:1; const grid = document.createElement('div'); grid.className = 'pred-grid'; grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    const cols = count===10 ? 2 : 1;
+    const grid = document.createElement('div'); grid.className = 'pred-grid'; grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
     for(let c=0; c<cols; c++) {
         const colDiv = document.createElement('div'); colDiv.className = 'pred-col';
         for(let i=c*5; i<Math.min((c+1)*5, preds.length); i++) {
@@ -320,6 +388,7 @@ async function doPredict(count) {
         if(idx >= preds.length) {
             document.querySelectorAll('#btnPred1, #btnPred5, #btnPred10').forEach(b => b.disabled = false);
             getTodayUsage().then(used => { const left = isVIP()?'∞':Math.max(0,3-used); const el = document.getElementById('freeCount'); if(el) el.textContent = left; });
+            updateDashboardData();
             return;
         }
         const p = preds[idx]; const ballArea = document.getElementById(`balls${idx}`);
@@ -337,47 +406,63 @@ function randomPick() {
     document.getElementById('predictResult').innerHTML = `<div class="pred-item"><span style="color:var(--green);">${score}分</span><span class="rating-badge rating-${rating.toLowerCase()}">${rating}</span><span class="ball-row">${nums.fronts.map(n=>`<span class="ball front" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}${nums.backs.map(n=>`<span class="ball back" style="width:38px;height:38px;font-size:0.85em;">${String(n).padStart(2,'0')}</span>`).join('')}</span></div>`;
 }
 
+// ========== 分析中心 ==========
 function renderAnalysis() {
-    const cfg = getCfg(); const hot = Array.from({length:10}, () => rInt(1,cfg.fMax)).sort((a,b)=>a-b); const cold = Array.from({length:10}, () => rInt(1,cfg.fMax)).sort((a,b)=>a-b);
+    const cfg = getCfg();
+    const hot = Array.from({length:10}, () => rInt(1, cfg.fMax)).sort((a,b) => a-b);
+    const cold = Array.from({length:10}, () => rInt(1, cfg.fMax)).sort((a,b) => a-b);
     document.getElementById('mainContent').innerHTML = `
         <div class="grid-2">
-            <div class="panel"><div class="panel-title">🔥 热号 TOP10</div><div class="ball-row">${hot.map(n=>`<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-            <div class="panel"><div class="panel-title">❄️ 冷号 TOP10</div><div class="ball-row">${cold.map(n=>`<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
-            <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10},(_,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
+            <div class="panel"><div class="panel-title">🔥 热号 TOP10 · ${cfg.name}前区</div><div class="ball-row">${hot.map(n => `<span class="ball front">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+            <div class="panel"><div class="panel-title">❄️ 冷号 TOP10</div><div class="ball-row">${cold.map(n => `<span class="ball front" style="opacity:0.5;">${String(n).padStart(2,'0')}</span>`).join('')}</div></div>
+            <div class="panel"><div class="panel-title">📉 遗漏分析</div><table>${Array.from({length:10}, (_, i) => `<tr><td>${String(i+1).padStart(2,'0')}</td><td style="color:var(--red);">${rInt(0,30)}期</td><td>${rInt(3,15)}期</td></tr>`).join('')}</table></div>
         </div>`;
 }
+
+// ========== 智能实验室 ==========
 function renderLab() {
     document.getElementById('mainContent').innerHTML = `
         <div class="grid-2">
-            <div class="panel"><div class="panel-title">🧪 蒙特卡洛</div><button class="btn" onclick="runMonteCarlo(1000)">1000次</button><div id="monteResult"></div></div>
-            <div class="panel"><div class="panel-title">🔗 马尔可夫</div><button class="btn" onclick="runMarkov()">5组推荐</button><div id="markovResult"></div></div>
+            <div class="panel"><div class="panel-title">🧪 蒙特卡洛模拟</div><button class="btn" onclick="runMonteCarlo(1000)">1000次</button><button class="btn" onclick="runMonteCarlo(10000)">10000次</button><div id="monteResult" style="margin-top:10px;"></div></div>
+            <div class="panel"><div class="panel-title">🔗 马尔可夫链推荐</div><button class="btn" onclick="runMarkov()">生成5组推荐</button><div id="markovResult" style="margin-top:10px;"></div></div>
         </div>`;
 }
 function runMonteCarlo(times) {
-    const cfg = getCfg(); const ff={}, bf={}; for(let i=1;i<=cfg.fMax;i++)ff[i]=0; for(let i=1;i<=cfg.bMax;i++)bf[i]=0;
-    for(let i=0;i<times;i++){ const n=genRandom(cfg); n.fronts.forEach(x=>ff[x]++); n.backs.forEach(x=>bf[x]++); }
-    const sf=Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n), sb2=Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n);
-    const groups=[]; for(let i=0;i<5;i++){ const fs=sf.slice(i*cfg.fCnt,i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b); const bs=sb2.slice(i*cfg.bCnt,i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b); if(fs.length===cfg.fCnt&&bs.length===cfg.bCnt) groups.push({fronts:fs,backs:bs}); }
-    const c=document.getElementById('monteResult'); if(c) c.innerHTML=groups.map((g,i)=>`<div class="result-row"><span>组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    const cfg = getCfg(); const ff={}, bf={};
+    for(let i=1;i<=cfg.fMax;i++) ff[i]=0; for(let i=1;i<=cfg.bMax;i++) bf[i]=0;
+    for(let i=0;i<times;i++) { const n = genRandom(cfg); n.fronts.forEach(x => ff[x]++); n.backs.forEach(x => bf[x]++); }
+    const sf = Object.entries(ff).sort((a,b)=>b[1]-a[1]).map(([n])=>+n), sb2 = Object.entries(bf).sort((a,b)=>b[1]-a[1]).map(([n])=>+n);
+    const groups = [];
+    for(let i=0;i<5;i++) {
+        const fs = sf.slice(i*cfg.fCnt, i*cfg.fCnt+cfg.fCnt).sort((a,b)=>a-b);
+        const bs = sb2.slice(i*cfg.bCnt, i*cfg.bCnt+cfg.bCnt).sort((a,b)=>a-b);
+        if(fs.length===cfg.fCnt && bs.length===cfg.bCnt) groups.push({fronts:fs, backs:bs});
+    }
+    const c = document.getElementById('monteResult');
+    if(c) c.innerHTML = groups.map((g,i) => `<div class="result-row"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
 }
 function runMarkov() {
-    const cfg = getCfg(); const bm=(max)=>{ const m={}; for(let i=1;i<=max;i++)m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++) if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; } return m; };
-    const fm=bm(cfg.fMax), bm2=bm(cfg.bMax); const g=(mx,max,cnt)=>{ const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++) if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){ p=pr; b=j; } } if(!b) do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
-    const groups=[]; for(let i=0;i<5;i++) groups.push({ fronts:g(fm,cfg.fMax,cfg.fCnt), backs:g(bm2,cfg.bMax,cfg.bCnt) });
-    const c=document.getElementById('markovResult'); if(c) c.innerHTML=groups.map((g,i)=>`<div class="result-row"><span>组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
+    const cfg = getCfg();
+    const bm = (max) => { const m={}; for(let i=1;i<=max;i++) m[i]={}; for(let i=1;i<=max;i++){ let t=0; for(let j=1;j<=max;j++) if(i!==j){ m[i][j]=Math.random(); t+=m[i][j]; } for(let j=1;j<=max;j++) if(i!==j) m[i][j]/=t; } return m; };
+    const fm = bm(cfg.fMax), bm2 = bm(cfg.bMax);
+    const g = (mx,max,cnt) => { const s=new Set(); let c=rInt(1,max); s.add(c); while(s.size<cnt){ let b=null,p=0; for(let j=1;j<=max;j++) if(!s.has(j)){ const pr=mx[c]?.[j]||0; if(pr>p){p=pr; b=j;} } if(!b) do{b=rInt(1,max);}while(s.has(b)); s.add(b); c=b; } return [...s].sort((a,b)=>a-b); };
+    const groups = [];
+    for(let i=0;i<5;i++) groups.push({ fronts: g(fm,cfg.fMax,cfg.fCnt), backs: g(bm2,cfg.bMax,cfg.bCnt) });
+    const c = document.getElementById('markovResult');
+    if(c) c.innerHTML = groups.map((g,i) => `<div class="result-row"><span style="color:var(--cyan);">组${i+1}</span> ${g.fronts.map(n=>`<span class="ball front" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')} + ${g.backs.map(n=>`<span class="ball back" style="width:36px;height:36px;font-size:0.8em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
 }
-function renderCharts() {
-    document.getElementById('mainContent').innerHTML = '<div class="panel"><div class="chart-box" id="mainChart"></div></div>';
-    setTimeout(() => { const el = document.getElementById('mainChart'); if(el) { const c = echarts.init(el); c.setOption({ xAxis:{ data:['A','B'] }, yAxis:{}, series:[{ data:[1,2], type:'line' }] }); } }, 300);
-}
+
+// 摇奖模拟
 function renderSimulator() {
-    const left = isVIP()?'∞':STATE.freeSimCount;
-    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">摇奖模拟 · ${getCfg().name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始</button></div>`;
+    const cfg = getCfg();
+    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">🎰 摇奖模拟 · ${cfg.name}</div><div id="simBalls" class="ball-row" style="justify-content:center;"></div><button class="btn primary" onclick="startSim()">开始摇奖</button></div>`;
 }
-function startSim() { if(!isVIP()&&STATE.freeSimCount<=0) { showVIPModal(); return; } if(!isVIP()) STATE.freeSimCount--; const cfg=getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
+function startSim() { const cfg=getCfg(); rollNumbersSequentially('simBalls', genRandom(cfg).fronts, genRandom(cfg).backs, cfg); }
+
+// 开奖大厅
 async function renderResults() {
     const cfg = getCfg();
-    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">开奖大厅 · ${cfg.name}</div><div class="flex-row" style="gap:10px;"><button class="btn small" onclick="switchLottery('dlt');renderResults();">大乐透</button><button class="btn small" onclick="switchLottery('ssq');renderResults();">双色球</button></div><div id="liveResult" style="margin-top:10px;"></div></div>`;
+    document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📡 开奖大厅 · ${cfg.name}</div><div class="flex-row" style="gap:10px;"><button class="btn small" onclick="switchLottery('dlt');renderResults();">大乐透</button><button class="btn small" onclick="switchLottery('ssq');renderResults();">双色球</button></div><div id="liveResult" style="margin-top:10px;"></div></div>`;
     const data = await fetchRealResults(STATE.lottery);
     const container = document.getElementById('liveResult');
     if(container) container.innerHTML = data.map(r => `<div class="ball-row" style="margin:4px 0;font-size:0.8em;"><span style="min-width:80px;">${r.issue}</span> ${r.fronts.map(n=>`<span class="ball front" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')} <span style="margin:0 4px;">+</span> ${r.backs.map(n=>`<span class="ball back" style="width:28px;height:28px;font-size:0.7em;">${String(n).padStart(2,'0')}</span>`).join('')}</div>`).join('');
@@ -393,36 +478,22 @@ async function fetchRealResults(type) {
             if(data.status==='0'&&data.result) return data.result.list.map(item => ({ issue:item.issueno, date:item.opendate, fronts:item.number.split(' ').slice(0,type==='dlt'?5:6).map(Number), backs:item.number.split(' ').slice(type==='dlt'?5:6).map(Number) }));
         } catch(e) {}
     }
-    const results=[]; const now=new Date(); for(let i=0;i<20;i++){ const cfg=getCfg(); const nums=genRandom(cfg); const date=new Date(now.getTime()-i*2*86400000); results.push({ issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`, date:date.toISOString().slice(0,10), fronts:nums.fronts, backs:nums.backs }); }
+    const results=[]; const now=new Date();
+    for(let i=0;i<20;i++){ const cfg=getCfg(); const nums=genRandom(cfg); const date=new Date(now.getTime()-i*2*86400000); results.push({ issue:`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`, date:date.toISOString().slice(0,10), fronts:nums.fronts, backs:nums.backs }); }
     return results;
 }
 
-// 收藏/历史（基于Supabase，此处保留基础结构）
-function renderFavorites() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">收藏库</div><p>暂无收藏</p></div>`; }
-function renderHistory() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">历史轨迹</div><p>暂无记录</p></div>`; }
-function renderAdmin() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">管理后台</div></div>`; }
-
-// 个人中心
+// 收藏/历史/个人/管理/设置
+function renderFavorites() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">⭐ 收藏库</div><p>暂无收藏</p></div>`; }
+function renderHistory() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">📋 历史轨迹</div><p>暂无记录</p></div>`; }
 function renderProfile() {
     const user = STATE.user;
     document.getElementById('mainContent').innerHTML = `
-        <div class="panel"><div class="panel-title">个人中心</div>
-        <div style="text-align:center;">
-            <img src="${user.avatar_url || 'https://via.placeholder.com/80'}" class="avatar-img" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
-            <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar()">
-            <p style="font-size:0.7em;color:var(--cyan);">点击修改头像</p>
-        </div>
-        <div style="margin-top:15px;">
-            <label>显示名称</label>
-            <input type="text" id="displayNameInput" value="${user.display_name||''}" style="width:100%;padding:8px;background:#000;color:#fff;border:1px solid var(--border);">
-        </div>
-        <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
-            <span>VIP 状态：</span>
-            <span style="color:${user.vip?'var(--gold)':'gray'};font-weight:bold;">${user.vip?'已开通':'未开通'}</span>
-            ${!user.vip ? '<button class="btn small vip" onclick="showVIPModal()">立即升级</button>' : ''}
-        </div>
-        <button class="btn primary" style="margin-top:15px;" onclick="saveProfile()">保存资料</button>
-        </div>`;
+        <div class="panel"><div class="panel-title">👤 个人中心</div>
+        <div style="text-align:center;"><img src="${user.avatar_url || 'https://via.placeholder.com/80'}" class="avatar-img" id="avatarPreview" onclick="document.getElementById('avatarInput').click()"><input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar()"><p style="font-size:0.7em;color:var(--cyan);">点击修改头像</p></div>
+        <div style="margin-top:15px;"><label>显示名称</label><input type="text" id="displayNameInput" value="${user.display_name||''}" style="width:100%;padding:8px;background:#000;color:#fff;border:1px solid var(--border);"></div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:10px;"><span>VIP 状态：</span><span style="color:${user.vip?'var(--gold)':'gray'};font-weight:bold;">${user.vip?'已开通':'未开通'}</span>${!user.vip ? '<button class="btn small vip" onclick="showVIPModal()">立即升级</button>' : ''}</div>
+        <button class="btn primary" style="margin-top:15px;" onclick="saveProfile()">保存资料</button></div>`;
 }
 async function uploadAvatar() {
     const file = document.getElementById('avatarInput').files[0]; if(!file) return;
@@ -430,37 +501,24 @@ async function uploadAvatar() {
     const { error } = await sb.storage.from('avatars').upload(fileName, file);
     if(error) { showToast('上传失败','#FF4D6D'); return; }
     const { data: { publicUrl } } = sb.storage.from('avatars').getPublicUrl(fileName);
-    STATE.user.avatar_url = publicUrl;
-    document.getElementById('avatarPreview').src = publicUrl;
-    showToast('头像已更新');
+    STATE.user.avatar_url = publicUrl; document.getElementById('avatarPreview').src = publicUrl; showToast('头像已更新');
 }
 async function saveProfile() {
     const displayName = document.getElementById('displayNameInput').value.trim();
     if(!displayName) { showToast('名称不能为空','#FF4D6D'); return; }
     await sb.from('profiles').update({ display_name: displayName, avatar_url: STATE.user.avatar_url }).eq('id', STATE.user.id);
-    STATE.user.display_name = displayName;
-    updateVIPUI(); showToast('资料已保存');
+    STATE.user.display_name = displayName; updateVIPUI(); showToast('资料已保存');
 }
-
-// 管理员设置
+function renderAdmin() { document.getElementById('mainContent').innerHTML = `<div class="panel"><div class="panel-title">👑 管理后台</div></div>`; }
 async function renderSettings() {
     const { data } = await sb.from('app_settings').select('value').eq('key','api_key').single();
     const currentKey = data?.value || '';
     document.getElementById('mainContent').innerHTML = `
         <div class="panel"><div class="panel-title">⚙️ 管理员设置</div>
-        <label>彩票 API Key</label>
-        <input type="text" id="apiKeyInput" value="${currentKey}" style="width:300px;padding:8px;background:#000;color:#fff;border:1px solid var(--border);margin-left:10px;">
-        <button class="btn small" onclick="saveApiKey()">保存</button>
-        <div style="margin-top:15px;">
-            <input type="file" id="musicFileInput" accept="audio/*">
-            <button class="btn" onclick="uploadMusic()">上传背景音乐</button>
-        </div></div>`;
+        <label>彩票 API Key</label><input type="text" id="apiKeyInput" value="${currentKey}" style="width:300px;padding:8px;background:#000;color:#fff;border:1px solid var(--border);margin-left:10px;"><button class="btn small" onclick="saveApiKey()">保存</button>
+        <div style="margin-top:15px;"><input type="file" id="musicFileInput" accept="audio/*"><button class="btn" onclick="uploadMusic()">上传背景音乐</button></div></div>`;
 }
-async function saveApiKey() {
-    const value = document.getElementById('apiKeyInput').value.trim();
-    await sb.from('app_settings').upsert({ key:'api_key', value }, { onConflict: 'key' });
-    showToast('API Key 已保存');
-}
+async function saveApiKey() { const value = document.getElementById('apiKeyInput').value.trim(); await sb.from('app_settings').upsert({ key:'api_key', value }, { onConflict: 'key' }); showToast('API Key 已保存'); }
 async function uploadMusic() {
     const file = document.getElementById('musicFileInput').files[0]; if(!file) return;
     const fileName = `music/${STATE.user.id}_${Date.now()}.mp3`;
