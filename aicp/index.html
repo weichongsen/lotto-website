@@ -1401,8 +1401,8 @@
         //  CONFIG
         // =============================================================
         // 🔑 请替换为你的 Supabase 配置
-        const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
+       const SUPABASE_URL = 'https://qwvrojfdripeswuocgpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
 
         let supabase = null;
         let currentUser = null;
@@ -1424,7 +1424,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
         };
 
         // =============================================================
-        //  初始化 Supabase
+        //  初始化 Supabase （提前调用，确保后续可用）
         // =============================================================
         function initSupabase() {
             if (typeof supabaseJs !== 'undefined') {
@@ -1432,7 +1432,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
                 console.log('✅ Supabase 初始化成功');
             } else {
                 console.warn('⚠️ Supabase SDK 未加载，使用模拟模式');
-                // 模拟模式
+                // 模拟模式 - 提供完整的方法模拟
                 supabase = {
                     auth: {
                         signUp: async ({ email, password }) => {
@@ -1450,25 +1450,29 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
                             }
                             return { data: null, error: { message: '账号或密码错误' } };
                         },
-                        signOut: async () => ({ error: null })
+                        signOut: async () => ({ error: null }),
+                        getSession: async () => ({ data: { session: null }, error: null })
                     },
                     from: (table) => ({
-                        select: () => ({
-                            eq: () => ({
-                                order: () => ({
-                                    limit: () => ({ data: [], error: null }),
+                        select: (cols) => ({
+                            eq: (col, val) => ({
+                                order: (col, opts) => ({
+                                    limit: (n) => ({ data: [], error: null }),
                                     data: [],
                                     error: null
                                 }),
+                                maybeSingle: () => ({ data: null, error: null }),
                                 data: [],
                                 error: null
                             }),
+                            maybeSingle: () => ({ data: null, error: null }),
                             data: [],
                             error: null
                         }),
-                        insert: () => ({ data: [], error: null }),
+                        insert: (obj) => ({ data: obj, error: null }),
+                        upsert: (obj) => ({ data: obj, error: null }),
                         delete: () => ({ data: [], error: null }),
-                        update: () => ({ data: [], error: null })
+                        update: (obj) => ({ data: obj, error: null })
                     })
                 };
                 console.log('⚠️ 使用模拟 Supabase 模式');
@@ -1546,6 +1550,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
         // =============================================================
         //  🔐 认证系统 - 完全重写，修复注册无反应问题
         // =============================================================
+        // 先初始化 Supabase，确保事件绑定前可用
+        initSupabase();
+
         const authPage = document.getElementById('auth-page');
         const appContainer = document.getElementById('app');
         const authForm = document.getElementById('auth-form');
@@ -1620,6 +1627,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
                     if (result.data?.user) {
                         // 尝试将用户资料写入 public.users 表
                         try {
+                            // 使用 upsert 避免重复插入，模拟模式下 insert 也支持
                             const { error: upsertError } = await supabase.from('users').upsert({
                                 id: result.data.user.id,
                                 email: email,
@@ -2863,10 +2871,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_5c2rAccL-qR_QX7iAiQXiw_IdCVF_a4';
             document.getElementById('dash-trend').textContent = ['📈 上升', '📉 下降', '➡️ 震荡'][Math.floor(Math.random() * 3)];
         }
 
-        // ---------- 初始化 ----------
-        initSupabase();
-
-        // 检查session恢复登录
+        // ---------- 检查session恢复登录 ----------
         (async function checkSession() {
             if (supabase && supabase.auth) {
                 const { data } = await supabase.auth.getSession();
